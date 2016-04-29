@@ -1,0 +1,277 @@
+﻿@model Invest.ViewModel.Models.ProductModel
+@using Invest.Web.Utility
+
+@Html.AntiForgeryToken()
+
+<style>
+    .pie-legend {
+        list-style: none;
+        position: absolute;
+        right: 100px;
+        top: 50px;
+    }
+
+        .pie-legend li {
+            display: block;
+            padding-left: 30px;
+            position: relative;
+            margin-bottom: 4px;
+            border-radius: 5px;
+            padding: 2px 8px 2px 28px;
+            font-size: 14px;
+            cursor: default;
+            -webkit-transition: background-color 200ms ease-in-out;
+            -moz-transition: background-color 200ms ease-in-out;
+            -o-transition: background-color 200ms ease-in-out;
+            transition: background-color 200ms ease-in-out;
+        }
+
+            .pie-legend li:hover {
+                background-color: #fafafa;
+            }
+
+            .pie-legend li span {
+                display: block;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 20px;
+                height: 100%;
+                border-radius: 5px;
+            }
+</style>
+
+<div class="form-horizontal">
+
+
+    <div class="modal-body col-sm-12">
+        @Html.ValidationSummary(true)
+
+        <div class="col-md-9" style="border-right: 1px solid #9ABFD8;">
+            <table class="table">
+                <tr>
+                    <td colspan="2"><label>@Model.Name</label></td>
+
+                </tr>
+                <tr>
+                    @*<td class="col-md-2"><img alt="image" style="width:65px;height:65px" class="img-container" src="@String.Format("data:image/gif;base64,{0}", @Model.ModelImage.Length > 0 ? Convert.ToBase64String(@Model.ModelImage): Convert.ToBase64String(CommonFunction.GetDefaultImage()))"></td>*@
+                    <td>@Model.Code</td>
+                </tr>
+            </table>
+            <table class="table">
+                <thead style="border-top: 1px solid #9ABFD8;"><tr><th style="border-right: 1px solid #9ABFD8; text-align: center;">Index</th><th style="border-right: 1px solid #9ABFD8; text-align: center;">1 YR RETURN</th><th style="border-right: 1px solid #9ABFD8; text-align: center;">VOLATILITY</th></tr></thead>
+                <tbody style="text-align: center;">
+                    <tr>
+                        <td style="border-right: 1px solid #9ABFD8;">
+                            @if (Model.Index.HasValue)
+                            {
+                                <label class="fa-1x">@System.Math.Round(Model.Index.Value, 2)</label>
+                            }
+                            else
+                            {
+                                <label class="fa-1x"></label>
+                            }
+                        </td>
+                        <td style="border-right: 1px solid #9ABFD8;">
+                            @{
+                                if (@Model.YearReturn == null)
+                                {
+                                    <span style="color:orange">(no data)</span>
+                                }
+                                else if (@Model.YearReturn.Value >= 0)
+                                {
+
+                                    <span style="color:green">(<i class="fa fa-arrow-up fa-1x" style="color:green;"></i> @String.Format("{0:0.00}%", @Model.YearReturn))</span>
+                                }
+                                else
+                                {
+                                    <span style="color:red">(<i class="fa fa-arrow-down fa-1x" style="color:red;"></i> @String.Format("{0:0.00}%", @Model.YearReturn))</span>
+
+                                }
+                            }
+
+                        </td>
+
+                        @if (@Model.Statistic != null && @Model.Statistic.Volatility.HasValue)
+                        {
+                            if (Model.Statistic.Volatility < 5)
+                            {
+                                <td align="center" style=" vertical-align: middle;">Very Low</td>
+                            }
+                            else if (Model.Statistic.Volatility >= 5 && Model.Statistic.Volatility < 10)
+                            {
+                                <td align="center" style=" vertical-align: middle;">Low</td>
+                            }
+                            else if (Model.Statistic.Volatility >= 10 && Model.Statistic.Volatility < 15)
+                            {
+                                <td align="center" style=" vertical-align: middle;">Medium</td>
+                            }
+                            else if (Model.Statistic.Volatility >= 15 && Model.Statistic.Volatility < 20)
+                            {
+                                <td align="center" style=" vertical-align: middle;">High</td>
+                            }
+                            else if (Model.Statistic.Volatility >= 20)
+                            {
+                                <td align="center" style=" vertical-align: middle;">Very High</td>
+                            }
+                        }
+
+                        else
+                        {
+                            <td style="border-right: 1px solid #9ABFD8;">--</td>
+                        }
+
+
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+        <div class="col-md-3">
+            <div class=" ">
+                <p><button type="button" class="btn btn-w-m btn-primary detailsModel1" productid="@Model.ProductID" productversionid="@Model.VersionDetail.ProductVersionID" productcode="@Model.Code">See full Details</button></p>
+                @*
+                    <p><button type="button" class="btn btn-w-m btn-success">Buy Model</button></p>
+                    <p><a href="#">Customize Model</a></p>
+                *@
+            </div>
+        </div>
+
+        <div class="col-md-12" style="border-bottom: 1px solid #9ABFD8;"></div>
+        <hr />
+        <div class="col-md-9" style="width:106%">
+            <br />
+            <label>TOP STOCKS BY WEIGHT</label>
+            <div class="labeled-chart-container">
+                <div class="canvas-holder">
+                    <canvas id="modular-doughnut" width="200" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+
+
+    </div>
+
+</div>
+
+@section Styles {
+
+}
+
+<script src="~/Scripts/plugins/charts/Chartjs/Chart.js"></script>
+
+<script type="text/javascript">
+
+    // Modular doughnut
+    $(function () {
+        var moduleData = [];
+
+        function addBarItem(value, color, highlight, label) {
+            moduleData.push({
+                value: value,
+                color: color,
+                highlight: highlight,
+                label: label
+            });
+        }
+
+        // Colour variables
+        var red = "#bf616a",
+            blue = "#5B90BF",
+            orange = "#d08770",
+            yellow = "#ebcb8b",
+            green = "#a3be8c",
+            teal = "#96b5b4",
+            pale_blue = "#8fa1b3",
+            purple = "#b48ead",
+            brown = "#ab7967";
+
+        var canvas = $('#modular-doughnut'),
+            colours = {
+                "Color1": blue,
+                "Color2": orange,
+                "Color3": teal,
+                "Color4": purple,
+                "Color5": brown,
+                "Color6": green
+            };
+
+        var colorId = 0;
+        @foreach (var @secur in @ViewBag.TopAllocations)
+        {
+            @:colorId++;
+                            @:addBarItem(parseFloat('@secur.allocation'), colours["Color" + colorId], Colour(colours["Color" + colorId], 10), '@secur.name' + ' (' + '@secur.allocation' + '%)')
+                        }
+
+        @if (@ViewBag.HasOtherSecurities)
+        {
+            @:colorId++;
+                            @:addBarItem(parseFloat('@ViewBag.OtherAllocation'), colours["Color" + colorId], Colour(colours["Color" + colorId], 10), 'Others' + ' (' + '@ViewBag.OtherAllocation' + '%)')
+                }
+
+        //
+        var ctx = document.getElementById("modular-doughnut").getContext("2d");
+        //    var moduleDoughnut = new Chart(ctx).Pie(pieData);
+
+        var moduleDoughnut = new Chart(ctx).Pie(moduleData, { tooltipTemplate: "<%if (label){%><%=label%>: <%}%><%= value %>%", animation: false });
+        //
+        var legendHolder = document.createElement('div');
+        legendHolder.innerHTML = moduleDoughnut.generateLegend();
+        // Include a html legend template after the module doughnut itself
+        Chart.helpers.each(legendHolder.firstChild.childNodes, function (legendNode, index) {
+            Chart.helpers.addEvent(legendNode, 'mouseover', function () {
+                var activeSegment = moduleDoughnut.segments[index];
+                activeSegment.save();
+                activeSegment.fillColor = activeSegment.highlightColor;
+                moduleDoughnut.showTooltip([activeSegment]);
+                activeSegment.restore();
+            });
+        });
+        Chart.helpers.addEvent(legendHolder.firstChild, 'mouseout', function () {
+            moduleDoughnut.draw();
+        });
+        document.getElementById("modular-doughnut").parentNode.parentNode.appendChild(legendHolder.firstChild);
+
+    });
+
+    function Colour(col, amt) {
+
+        var usePound = false;
+
+        if (col[0] == "#") {
+            col = col.slice(1);
+            usePound = true;
+        }
+
+        var num = parseInt(col, 16);
+
+        var r = (num >> 16) + amt;
+
+        if (r > 255) r = 255;
+        else if (r < 0) r = 0;
+
+        var b = ((num >> 8) & 0x00FF) + amt;
+
+        if (b > 255) b = 255;
+        else if (b < 0) b = 0;
+
+        var g = (num & 0x0000FF) + amt;
+
+        if (g > 255) g = 255;
+        else if (g < 0) g = 0;
+
+        return (usePound ? "#" : "") + (g | (b << 8) | (r << 16)).toString(16);
+
+    }
+    $(".detailsModel1").click(function (event) {
+
+        event.stopPropagation();
+        //alert("Details Clicked.");
+        var pVerId = $(this).attr('productversionid');
+        var pCode = $(this).attr('productcode');
+        var url = encodeURI('@Url.Content("~/Investment/AnalyticHome")' + '?code=' + pCode + '&type=Product&verid=' + pVerId);
+        window.location = url;
+    });
+</script>

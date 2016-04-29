@@ -1,0 +1,267 @@
+﻿@*@model IEnumerable<Invest.ViewModel.Models.DistributionDividendDetailModel>*@
+@model Invest.ViewModel.Models.SecurityModel
+
+    <div class="ibox-content none-background">
+    <div class="securitiesTable addBorders" >
+        <div>
+            <div class="col-sm-4">
+                @Html.DropDownListFor(m => m.DashboardFilter, (IEnumerable<SelectListItem>)@ViewBag.InsulinResistance, new { @class = "chosen-select-deselect", id = "filterTypeId", onchange = "getFilter(this);" })
+            </div>
+            <div class="col-sm-5">
+                @*<input type="text" name="daterange" id="TxtDateRange" class="form-control" placeholder="DD/MM/YYYY - DD/MM/YYYY" />*@
+                @Html.DropDownListFor(_ => _.Region, (IEnumerable<SelectListItem>)ViewData["regionList"], new { @class = "chosen-select-deselect", id = "ddlRegionId"})
+                @Html.DropDownListFor(m => m.AssetClass, (IEnumerable<SelectListItem>)ViewData["assetClassList"], new { @class = "chosen-select-deselect", id = "ddlAssetClass", style = "display: none;" })
+                @Html.DropDownListFor(m => m.Market, (IEnumerable<SelectListItem>)ViewData["marketlist"], new { @class = "chosen-select-deselect", id = "ddlMarket", style = "display: none;" })
+                @Html.DropDownListFor(m => m.SubAssetClass, (IEnumerable<SelectListItem>)ViewData["subAssetClassList"], new { @class = "chosen-select-deselect", id = "ddlSubAssetClass", style = "display: none;" })
+
+                @Html.DropDownListFor(m => m.GICS, (IEnumerable<SelectListItem>)ViewData["gicsList"], new { @class = "chosen-select-deselect", id = "ddlGicsList", style = "display: none;" })
+                @Html.DropDownListFor(m => m.GICSType, (IEnumerable<SelectListItem>)ViewData["gicsTypeList"], new { @class = "chosen-select-deselect", id = "ddlGicsTypeList", style = "display: none;" })
+                @*@Html.DropDownListFor(m => m.Id, new List<SelectListItem>(), new { @class = "chosen-select-deselect", id = "select1_Security", @style = "width:100% !important; display: none;", onchange = "getDevidendsChart(this);" })*@
+            </div>
+            <div class="col-sm-2">
+                <button class="btn btn-primary btn-sm" onclick="GetIncomeDetailByFilter();">Search</button>
+            </div>
+        </div>
+        <div class="well-sm"></div>
+        <div class="clearfix"></div>
+        <hr />
+        <table id="example" class="table table-striped table-bordered table-hover dashboardTable" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Code)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Name)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.SecurityCategory)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Market)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.TotalReturnYear)
+                    </th>
+                </tr>
+                <tr id="headerFilter" class="input-sm">
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+        <div class="supplementaryBox">
+            <div class="topholdingsArea addBorders table-responsive">
+                <h2>Top Holdings</h2>
+                @Html.DropDownListFor(m => m.DashboardFilter, (IEnumerable<SelectListItem>)@ViewBag.TopHoldingsCount, new { @class = "chosen-select-deselect", id = "topHoldingsCount", onchange = "setTopHoldingsCount(this);" })
+                
+                <table id="topHoldings" class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Summary(AUD)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr role="row" class="odd showTop5">
+                            <td><a href=""></a></td>
+                            <td><a href=""></a></td>
+                            <td></td>
+                        </tr>
+
+                        <tr role="row" class="even showTop5">
+                            <td><a href=""></a></td>
+                            <td><a href=""></a></td>
+                            <td></td>
+                        </tr>
+
+                        <tr role="row" class="odd showTop5">
+                            <td><a href=""></a></td>
+                            <td><a href=""></a></td>
+                            <td></td>
+                        </tr>
+                        <tr role="row" class="even showTop5">
+                            <td><a href=""></a></td>
+                            <td><a href=""></a></td>
+                            <td></td>
+                        </tr>
+                        <tr role="row" class="odd showTop5">
+                            <td><a href=""></a></td>
+                            <td><a href=""></a></td>
+                            <td></td>
+                        </tr>
+                        @*+5*@
+                        <tr role="row" class="odd showTop10" style="display:none">
+                            <td><a href=""></a></td>
+                            <td><a href=""></a></td>
+                            <td></td>
+                        </tr>
+
+                        <tr role="row" class="even showTop10" style="display:none">
+                            <td><a href=""></a></td>
+                            <td><a href=""></a></td>
+                            <td></td>
+                        </tr>
+
+                        <tr role="row" class="odd showTop10" style="display:none">
+                            <td><a href=""></a></td>
+                            <td><a href=""></a></td>
+                            <td></td>
+                        </tr>
+                        <tr role="row" class="even showTop10" style="display:none">
+                            <td><a href=""></a></td>
+                            <td><a href=""></a></td>
+                            <td></td>
+                        </tr>
+                        <tr role="row" class="odd showTop10" style="display:none">
+                            <td><a href=""></a></td>
+                            <td><a href=""></a></td>
+                            <td></td>
+                        </tr>
+
+                        @*+10*@
+                        <tr role="row" class="odd showTop20" style="display:none">
+                            <td><a href=""></a></td>
+                            <td><a href=""></a></td>
+                            <td></td>
+                        </tr>
+
+                        <tr role="row" class="even showTop20" style="display:none">
+                            <td><a href=""></a></td>
+                            <td><a href=""></a></td>
+                            <td></td>
+                        </tr>
+
+                        <tr role="row" class="odd  showTop20"  style="display:none">
+                            <td><a href=""></a></td>
+                            <td><a href=""></a></td>
+                            <td></td>
+                        </tr>
+                        <tr role="row" class="even showTop20" style="display:none">
+                            <td><a href=""></a></td>
+                            <td><a href=""></a></td>
+                            <td></td>
+                        </tr>
+                        <tr role="row" class="odd showTop20" style="display:none">
+                            <td><a href=""></a></td>
+                            <td><a href=""></a></td>
+                            <td></td>
+                        </tr>
+                        <tr role="row" class="odd showTop20" style="display:none">
+                            <td><a href=""></a></td>
+                            <td><a href=""></a></td>
+                            <td></td>
+                        </tr>
+
+                        <tr role="row" class="even showTop20" style="display:none">
+                            <td><a href=""></a></td>
+                            <td><a href=""></a></td>
+                            <td></td>
+                        </tr>
+
+                        <tr role="row" class="odd showTop20" style="display:none">
+                            <td><a href=""></a></td>
+                            <td><a href=""></a></td>
+                            <td></td>
+                        </tr>
+                        <tr role="row" class="even showTop20"style="display:none">
+                            <td><a href=""></a></td>
+                            <td><a href=""></a></td>
+                            <td></td>
+                        </tr>
+                        <tr role="row" class="odd showTop20" style="display:none">
+                            <td><a href=""></a></td>
+                            <td><a href=""></a></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                
+
+                <div style="margin:0 auto">
+                    <canvas id="pieHoldings" width="315" height="210" style="display: inline-block"></canvas>
+                    <div class="legendHolder">
+                        <ul>
+                            <li><div class="legendMarker" style="background: #5B90BF"></div><p></p></li>
+                            <li><div class="legendMarker" style="background: #d08770"></div><p></p></li>
+                            <li><div class="legendMarker" style="background: #96b5b4"></div><p></p></li>
+                            <li><div class="legendMarker" style="background: #b48ead"></div><p></p></li>
+                            <li><div class="legendMarker" style="background: #ab7967"></div><p></p></li>
+                            <li><div class="legendMarker" style="background: #a3be8c; "></div><p>Others</p></li>
+                        </ul>
+                    </div>
+                    <div style="clear:both"></div>
+                </div>
+
+            </div>
+
+            <div class="devidends addBorders">
+                @*<h2 class="incomeCurrencyCaption">Income Search by security</h2>*@
+                <h2 class="incomeCurrencyCaption">Dividend History</h2>
+
+                <div>
+                    @Html.DropDownListFor(model => model.Id, new List<SelectListItem>(), new { @class = "select2-ajax", id = "select2_Security", @style = "width:100% !important", onchange = "getDevidendsChart(this);" })
+                </div>
+
+                <div class="bar" style="float:inherit">
+                    <div>
+                        <input type="radio" class="oneYear" name="devids">Year Dividends Graph</input>
+                        <input type="radio" class="fiveYears" name="devids" checked>Five Years Dividends Graph</input>
+                    </div>
+                    <canvas id="canvas"></canvas>
+                    <div id="legend"></div>
+                </div>
+            </div>
+
+         </div>
+        
+        <div class="clearfix"></div>
+       
+</div>
+
+<div class="popup">
+    <div class="popupArrow"></div>
+    <div class="popupHeader">
+        <!--<div class="arrowLeft"></div> -->
+        <!--<div class="securityCaption"> -->
+        Southern Copper Corp - <b>SCCO</b>
+
+    </div>
+    <div class="popupContent">
+        <div style="border: 1px solid #2f4050">
+            <div class="popupContentBlock">
+                <h4>Price</h4>
+                <p class="dayOfLastPrice"></p>
+                <p class="currentPrice">$27.13</p>
+                <p class="dayPriceChange">(0.00%)</p>
+                <h3>Return MTD</h3>
+                <p class="mtd"></p>
+            </div>
+            <div class="popupContentBlock">
+                <h4 class="weekCount">52 Week Range</h4>
+                <canvas id="niceChart" width="100" height="65"></canvas>
+                <span class="rangeLeft">$23.41</span><span class="rangeRight">$33.31</span>
+                <div class="popupSlider"></div>
+                <!--<input class="popupSlider" type="text" data-slider="true">  -->
+            </div>
+            <div class="popupContentBlock">
+                <h4>Returns</h4>
+                <p class="endOfPreMonth"></p>
+                <table>
+                    <tr><td class="MO">1MO</td><td><div class="arrowUp">&#x27A8;</div><span>5.55%</span></td></tr>
+                    <tr><td class="MO6">3MO</td><td><div class="arrowUp">&#x27A8;</div><span>4.20%</span></td></tr>
+                    <tr><td class="YR">1YR</td><td><div class="arrowUp">&#x27A8;</div><span>11.73%</span></td></tr>
+                </table>
+            </div>
+            <div style="clear: both"></div>
+        </div>
+        <p>SCC owns and operate mines, and produces copper molybdenum and precious metals</p>
+        <a href="@Url.Content("~/Investment/AnalyticHome")">See more details</a>
+    </div>
+</div>  

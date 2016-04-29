@@ -1,0 +1,914 @@
+﻿@model Invest.ViewModel.Models.ProductModel
+<style>
+    #TblMer > tbody > tr > td,
+    #TblMer > tbody > tr > th,
+    #TblMer > tfoot > tr > td,
+    #TblMer > tfoot > tr > th,
+    #TblMer > thead > tr > td,
+    #TblMer > thead > tr > th {
+        border: none !important;
+    }
+
+    .chosen-container-single .chosen-drop, .chosen-container .chosen-drop {
+        z-index: 99999 !important;
+    }
+
+    #dvSecurities {
+        margin-top: 10px;
+    }
+</style>
+@using (Ajax.BeginForm("EditProduct", new { controller = "Investment" }, new AjaxOptions { HttpMethod = "Post", OnSuccess = "onSuccess", OnFailure = "onFailure" }, new { id = "ProductEditForm", @class = "form-horizontal" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="form-horizontal">
+        <div class="modal-body col-sm-12">
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.ProductID)
+            @Html.HiddenFor(model => model.BaseProductVersionID)
+            @Html.HiddenFor(model => model.VersionDetail.ProductVersionStatus)
+            <div class="col-md-6">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Code, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(model => model.Code, new { @class = "form-control", placeholder = "Code", id = "txtCode", @readonly = "readonly" })
+                        @Html.ValidationMessageFor(model => model.Code)
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Name, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(model => model.Name, new { @class = "form-control", placeholder = "Name", id = "txtName" })
+                        @*@Html.ValidationMessageFor(model => model.IsActive)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.ProductTypeId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.ProductTypeId, (IEnumerable<SelectListItem>)ViewData["productTypelist"], new { @class = "chosen-select-deselect DdlProductType", id = "DdlProductType" })
+                        @Html.ValidationMessageFor(model => model.ProductTypeId)
+                    </div>
+                </div>
+                <div class="form-group" id="DivIndexType" style="display: none">
+                    @Html.LabelFor(model => model.IndexTypeId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.IndexTypeId, (IEnumerable<SelectListItem>)ViewData["indexTypelist"], new { @class = "chosen-select-deselect DdlIndexType", id = "DdlIndexType" })
+                        @*@Html.ValidationMessageFor(model => model.Password)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.InstitutionId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.InstitutionId, (IEnumerable<SelectListItem>)ViewData["institutionlist"], new { @class = "chosen-select-deselect", id = "ddlInstitutionId" })
+                        @*@Html.ValidationMessageFor(model => model.Password)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.MarketId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.MarketId, (IEnumerable<SelectListItem>)ViewData["marketlist"], new { @class = "chosen-select-deselect", id = "ddlMarketId" })
+                        @*@Html.ValidationMessageFor(model => model.Password)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.AssetClassId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.AssetClassId, (IEnumerable<SelectListItem>)ViewData["assetClassList"], new { @class = "chosen-select-deselect AssetClassId", id = "AssetClassId" })
+                        @Html.ValidationMessageFor(model => model.AssetClassId)
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.SubAssetClassId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.SubAssetClassId, (IEnumerable<SelectListItem>)ViewData["subAssetClassList"], new { @class = "chosen-select-deselect ddlSubAssetClassId" })
+                        @*@Html.ValidationMessageFor(model => model.Password)*@
+                    </div>
+                </div>
+                <div class="form-group" style="display:none;">
+                    <label class="control-label col-sm-5">Start Date</label>
+                    <div class="col-sm-7">
+                        <div class="input-group date">
+                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                            @Html.TextBoxFor(model => model.VersionDetail.StartDate, "{0:dd/MM/yyyy}", new { @class = "form-control", placeholder = "DD/MM/YYYY", id = "TxtStatusDate" })
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.VersionDetail.TargetReturnRate, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(model => model.VersionDetail.TargetReturnRate, new { @class = "form-control", placeholder = "Target Return Rate", id = "Txttargetrate", max = "100" })
+                        @Html.ValidationMessageFor(model => model.VersionDetail.TargetReturnRate)
+                    </div>
+                </div>
+                <div class="form-group" id="DivPrimaryBenchmark" style="display: none">
+                    @Html.LabelFor(model => model.VersionDetail.PrimaryBenchmarkProductID, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.VersionDetail.PrimaryBenchmarkProductID, (IEnumerable<SelectListItem>)ViewData["primaryBenchmarkList"], new { @class = "chosen-select-deselect", id = "ddlPrimaryBenchmark" })
+                        @*@Html.ValidationMessageFor(model => model.VersionDetail.PrimaryBenchmarkProductID)*@
+                    </div>
+                </div>
+                <div class="form-group" id="DivPrimaryPriceType" style="display: none">
+                    @Html.LabelFor(model => model.VersionDetail.PrimaryPriceTypeId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.VersionDetail.PrimaryPriceTypeId, (IEnumerable<SelectListItem>)ViewData["priceTypeList"], new { @class = "chosen-select-deselect", id = "ddlPrimaryPriceType" })
+                        @Html.ValidationMessageFor(model => model.VersionDetail.PrimaryPriceTypeId)
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.VersionDetail.IsPriced, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @*@Html.DisplayNameFor(model => model.IsPriced)*@
+                        @Html.CheckBoxFor(model => model.VersionDetail.IsPriced, new { id = "chkIsPrice" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label col-sm-5">Inception Date</label>
+                    <div class="col-sm-7">
+                        <div class="input-group date">
+                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                            @Html.TextBoxFor(model => model.InceptionDate, "{0:dd/MM/yyyy}", new { @class = "form-control", placeholder = "DD/MM/YYYY", id = "TxtInceptionDate" })
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.ProductAPIR, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(model => model.ProductAPIR, new { @class = "form-control", id = "ProductAPIR", placeholder = "AAA9999AA", maxlength = 9 })
+                        @Html.ValidationMessageFor(model => model.ProductAPIR)
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.ProductISIN, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(model => model.ProductISIN, new { @class = "form-control", maxlength = 12, id = "txtProductISIN" })
+                        @Html.ValidationMessageFor(model => model.ProductISIN)
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.CurrencyId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.CurrencyId, (IEnumerable<SelectListItem>)ViewData["currencyList"], new { @class = "chosen-select", id = "CurrencyId" })
+                        @*<button type="button" id="btnAddAssetClass" class="btn btn-primary">Add</button>*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.RegionId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.RegionId, (IEnumerable<SelectListItem>)ViewData["regionList"], new { @class = "chosen-select-deselect", id = "ddlRegionId" })
+                        @*@Html.ValidationMessageFor(model => model.Password)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.StatusId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.StatusId, (IEnumerable<SelectListItem>)ViewData["securityStatusList"], new { @class = "chosen-select-deselect ddlStatusId" })
+                        @*@Html.ValidationMessageFor(model => model.Password)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.VersionDetail.PricingSourceId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.VersionDetail.PricingSourceId, (IEnumerable<SelectListItem>)ViewData["pricingSourceList"], new { @class = "chosen-select-deselect ddlPricingSource" })
+                        @*@Html.ValidationMessageFor(model => model.Password)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.ProductBrokerIds, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.ProductBrokerIds, (IEnumerable<SelectListItem>)ViewData["productBrokerList"], new { @class = "chosen-select", id = "ProductBrokerId", multiple = "multiple" })
+                        @*<button type="button" id="btnAddAssetClass" class="btn btn-primary">Add</button>*@
+                    </div>
+                </div>
+                <div class="form-group" id="DivSecondaryBenchmark" style="display: none">
+                    @Html.LabelFor(model => model.VersionDetail.SecondaryBenchmarkProductID, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.VersionDetail.SecondaryBenchmarkProductID, (IEnumerable<SelectListItem>)ViewData["secondaryBenchmarkList"], new { @class = "chosen-select-deselect", id = "ddlSecondaryBenchmark" })
+                        @*@Html.ValidationMessageFor(model => model.VersionDetail.SecondaryBenchmarkProductID)*@
+                    </div>
+                </div>
+                <div class="form-group" id="DivSecondaryPriceType" style="display: none">
+                    @Html.LabelFor(model => model.VersionDetail.SecondaryPriceTypeId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.VersionDetail.SecondaryPriceTypeId, (IEnumerable<SelectListItem>)ViewData["priceTypeList"], new { @class = "chosen-select-deselect", id = "ddlSecondaryPriceType" })
+                        @Html.ValidationMessageFor(model => model.VersionDetail.SecondaryPriceTypeId)
+                    </div>
+                </div>
+               
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <div class="col-md-12">
+                        @Html.LabelFor(model => model.Description, new { @class = "control-label" })
+                    </div>
+                    <div class="col-md-12">
+                        @Html.TextAreaFor(model => model.Description, new { @class = "form-control", placeholder = "Description", id = "txtDescription", @style = "resize: none;" })
+                        @Html.ValidationMessageFor(model => model.Description)
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="alert alert-warning" id="warningSecurityListAndSecurity" style="display: none">
+                </div>
+                <div class="alert alert-warning" id="warningTotalAllocation" style="display: none">
+                </div>
+                <div class="alert alert-warning" id="errorAssetClass" style="display: none">
+                </div>
+                <div class="alert alert-danger" id="errorSecSelected" style="display: none">
+                </div>
+                <div class="panel panel-default" id="dvSecurities">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Security Association</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="selectSecurities" id="optionsRadios1" class="radioOption1" value="Security" checked>
+                                        Associate Security
+                                    </label>&nbsp; &nbsp;
+                                    <label>
+                                        <input type="radio" name="selectSecurities" id="optionsRadios1" class="radioOption1" value="SecurityList">
+                                        Associate Security List
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <div class="col-md-4" id="divsecurityid" style=" padding-left: 0px;">
+                                    @Html.DropDownListFor(m => m.SecurityAssociation.FirstOrDefault().SecurityId, new List<SelectListItem>(), new { @class = "select2-ajax", id = "ddlSecurityId", @style = "width:100% !important" })
+                                </div>
+                                <div class="col-md-4" id="DivSecurityListId" style="display: none; padding-left: 0px; ">
+                                    @Html.DropDownListFor(m => m.SecurityListId, (IEnumerable<SelectListItem>)ViewData["productSecurityList"], new { @class = "chosen-select-deselect", id = "ddlSecurityListId" })
+                                </div>
+                                <div class="col-md-3" id="DivAllocation">
+                                    @Html.TextBoxFor(model => model.Allocation, new { @class = "form-control", placeholder = "Percentage", id = "txtAllocation" })
+                                </div>
+                                <button type="button" id="btnSecuritiesAllocation" style="font-weight: bold; display:none;" class="cancel btn btn-sm btn-white ">Add +</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <table id="myDataTable" class="table table-striped table-bordered table-hover" style="width: 100%">
+                        <thead>
+                            <tr>
+                                <th class="hidden"></th>
+                                <th class="hidden"></th>
+                                <th>Security/Security List</th>
+                                <th>Allocation%</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="myDataTabletbody"></tbody>
+                        <tfoot>
+                            <tr class="input-sm">
+                                <th class="hidden"></th>
+                                <th class="hidden"></th>
+                                <th></th>
+                                <th id="txtPortfolioWeight" style="text-align: right;"></th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <table id="TblMer" class="table table-striped" style="width: 100%">
+                        <tr>
+                            <td>@Html.LabelFor(model => model.VersionDetail.SecurityMER, new { @class = "control-label" })</td>
+                            <td>@Html.LabelFor(model => model.VersionDetail.ProductMER, new { @class = "control-label" })</td>
+                            <td>@Html.LabelFor(model => model.VersionDetail.ProductReimbursable, new { @class = "control-label" })</td>
+                            <td></td>
+                            <td>@Html.LabelFor(model => model.VersionDetail.ProductICR, new { @class = "control-label" })</td>
+                        </tr>
+                        <tr>
+                            <td>@Html.TextBoxFor(model => model.VersionDetail.SecurityMER, "{0:N2}", new { @class = "form-control", id = "TxtSecurityMER", placeholder = "Basis Points" })</td>
+                            <td>@Html.TextBoxFor(model => model.VersionDetail.ProductMER, "{0:N2}", new { @class = "form-control", id = "TxtProductMER", placeholder = "Basis Points" })</td>
+                            <td>@Html.TextBoxFor(model => model.VersionDetail.ProductReimbursable, "{0:N2}", new { @class = "form-control", id = "TxtProductReimbursable", placeholder = "Basis Points" })</td>
+                            <td><label class="control-label">=</label></td>
+                            <td>@Html.TextBoxFor(model => model.VersionDetail.ProductICR, "{0:N2}", new { @class = "form-control", @readonly = "readonly", id = "TxtProductICR", placeholder = "Basis Points" })</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer col-sm-12">
+            <button id="btnClose" type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+            <button type="submit" id="btnUpdate" class="btn btn-primary">Update</button>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-12">
+                <div class="alert alert-success alert-dismissable">
+                    <strong>Success! </strong><span class="has-success"></span>
+                </div>
+                <div id="error" class="alert alert-danger alert-dismissable" style="display: none;">
+                    <strong>Error! </strong><span class="has-error"></span>
+                </div>
+                <div class="busy">
+                    <img id="imgLoader" src="~/Images/Processing.gif" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    var securityMER;
+    var productMER;
+    var productReimbursable;
+    var productICR;
+    var testme = false;
+    var isSecListId = false;
+    var securityTable;
+   
+    function isExist(strd) {
+        testme = false;
+        $('#myDataTable > tbody > tr').each(function () {
+            if ($('td:nth(0)', $(this)).html() === strd) {
+                if (strd != "") {
+                    testme = true;
+                }
+
+            }
+        });
+        return testme;
+    }
+    function isExistSecListId(slId) {
+        isSecListId = false;
+        $('#myDataTable > tbody > tr').each(function () {
+            if ($('td:nth(1)', $(this)).html() === slId) {
+                if (slId != "") {
+                    isSecListId = true;
+                }
+            }
+        });
+        return isSecListId;
+    }
+    $(function () {
+     
+        $('#ProductAPIR').inputmask({
+            mask: 'aaa9999aa'
+        });
+        var config = {
+            '.chosen-select': {},
+            '.chosen-select-deselect': { allow_single_deselect: true, search_contains: true },
+            '.chosen-select-no-single': { disable_search_threshold: 10 },
+            '.chosen-select-no-results': { no_results_text: 'Oops, nothing found!' },
+            '.chosen-select-width': { width: "95%" }
+        };
+        for (var selector in config) {
+            $(selector).chosen(config[selector]);
+        }
+
+        onProductType();
+        onBenchMark();
+
+        securityTable = $('#myDataTable').dataTable({
+
+            "bLengthChange": false,
+            dom:"f",
+            iDisplayLength: -1,
+            columnDefs: [
+                {
+                    targets: [0],
+                    "sClass": "hidden"
+                    //"bVisible": false
+                },
+                {
+                    targets: [1],
+                    "sClass": "hidden"
+                },
+                {
+                    targets: [2],
+                    sortable: false
+                },
+                {
+                    targets: [3],
+                    sortable: false
+                },
+                {
+                    targets: [4],
+                    sortable: false
+                }
+            ],
+            "fnDrawCallback": function (nRow, aasData, iStart, iEnd, aiDisplay) {
+                $('#myDataTable > tbody > tr > td > input').keydown(function (event) {
+                    if (event.shiftKey == true) {
+                        event.preventDefault();
+                    }
+
+                    if ((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105) || event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 37 || event.keyCode == 39 || event.keyCode == 46 || event.keyCode == 190 || event.keyCode == 110) {
+
+                    } else {
+                        event.preventDefault();
+                    }
+
+                    if ($(this).val().indexOf('.') !== -1 && (event.keyCode == 190 || event.keyCode == 110))
+                        event.preventDefault();
+                });
+                $('#myDataTable tbody').on('keyup', 'tr', 'input', function () {
+                    // Calculate Allocation here
+                    CalculateAllocation();
+                });
+                // Calculate Allocation here
+                CalculateAllocation();
+            },
+
+        });
+
+        loadSecuritiesTable();
+
+        $('input[type=radio][name=selectSecurities]').change(function () {
+            $("#txtAllocation").val('');
+            $("#ddlSecurityId").select2("val", "");
+            $('#ddlSecurityId :selected').text("");
+            $('#ddlSecurityListId').val('');
+            $('#ddlSecurityListId option:selected').html("");
+            $('#ddlSecurityListId').trigger("chosen:updated");
+
+            if (this.value == 'Security') {
+                console.log("security");
+                $('#DivSecurityListId').hide();
+                $('#divsecurityid').show();
+                $('#DivAllocation').show();
+                $('#btnSecuritiesAllocation').show();
+            }
+            else if (this.value == 'SecurityList') {
+                console.log("securityList");
+                $('#divsecurityid').hide();
+                $('#DivSecurityListId').show();
+                $('#DivAllocation').show();
+                $('#btnSecuritiesAllocation').show();
+            }
+        });
+
+        //Security and security list Add in datatable.net
+        $("#btnSecuritiesAllocation").click(function () {
+            if ($("#txtAllocation").val() != "" && ($("#ddlSecurityId").val() > 0 || $("#ddlSecurityListId").val() > 0)) {
+                var result = isExist($("#ddlSecurityId").val());
+                var resultSecList = isExistSecListId($("#ddlSecurityListId").val());
+                if (result == true) {
+                    $('#errorSecSelected').text("Security already associated");
+                    $('#errorSecSelected').fadeIn();
+                    $("#ddlSecurityId").select2("val", "");
+                    $("#txtAllocation").val('');
+                }
+                else if (resultSecList == true) {
+                    $('#errorSecSelected').text("Security List already associated");
+                    $('#errorSecSelected').fadeIn();
+                    $('#ddlSecurityListId').val('');
+                    $('#ddlSecurityListId').trigger("chosen:updated");
+                    $("#txtAllocation").val('');
+                }
+                else {
+                    $('#errorSecSelected').text("");
+                    $('#errorSecSelected').fadeOut();
+                    var assetClassId = $("#AssetClassId").val();
+                    GetAssetClassSecurities(assetClassId, "SecurityListAndSecurity");
+
+                    //delete row from table
+                    $('#myDataTable tbody').on('click', '.fa-trash', function () {
+                        $("#txtPortfolioWeight").text("");
+                        securityTable.api().row($(this).parents('tr')).remove().draw();
+                        GetAssetClassSecurities(assetClassId, "deleteorChange");
+                    });
+
+                }
+
+            }
+            else {
+                $('#errorSecSelected').text("Please select Security/Security List and enter Allocation");
+                $('#errorSecSelected').fadeIn();
+            }
+
+        });
+
+        $("#DdlProductType").change(function () {
+            onProductType();
+        });
+
+        $("#ddlPrimaryBenchmark").change(function () {
+            onBenchMark();
+        });
+
+        $("#ddlSecondaryBenchmark").change(function () {
+            onBenchMark();
+        });
+
+        //Numbers Only
+        $("#TxtSecurityMER, #Txttargetrate, #txtAllocation, #TxtProductMER, #TxtProductReimbursable").keydown(function (event) {
+            if (event.shiftKey == true) {
+                event.preventDefault();
+            }
+
+            if ((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105) || event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 37 || event.keyCode == 39 || event.keyCode == 46 || event.keyCode == 190 || event.keyCode == 110) {
+
+            } else {
+                event.preventDefault();
+            }
+
+            if ($(this).val().indexOf('.') !== -1 && (event.keyCode == 190 || event.keyCode == 110))
+                event.preventDefault();
+        });
+
+        $(this).bind('click change keypress keyup', function () {
+            if ($("#TxtSecurityMER").val() == "" && $("#TxtProductMER").val() == "" && $("#TxtProductReimbursable").val() == "") {
+                $("#TxtProductICR").val("");
+            }
+
+            if (isNaN(parseFloat($("#TxtSecurityMER").val()))) {
+                securityMER = 0;
+
+            }
+            else {
+                securityMER = parseFloat($("#TxtSecurityMER").val());
+            }
+
+
+            if (isNaN(parseFloat($("#TxtProductMER").val()))) {
+                productMER = 0;
+            }
+            else {
+                productMER = parseFloat($("#TxtProductMER").val());
+            }
+
+
+            if (isNaN(parseFloat($("#TxtProductReimbursable").val()))) {
+                productReimbursable = 0;
+            }
+            else {
+                productReimbursable = parseFloat($("#TxtProductReimbursable").val());
+            }
+
+            if (securityMER > 0 && productMER > 0 && productReimbursable > 0) {
+
+                productICR = (securityMER + productMER + productReimbursable);
+                $("#TxtProductICR").val(productICR.toFixed(2));
+            }
+            else {
+
+                if (securityMER > 0 || productMER > 0 || productReimbursable > 0) {
+
+                    //
+                    if (securityMER > 0 && productMER > 0) {
+
+                        productICR = (securityMER + productMER);
+                        $("#TxtProductICR").val(productICR.toFixed(2));
+                    }
+
+                    if (securityMER > 0 && productReimbursable > 0) {
+
+                        productICR = (securityMER + productReimbursable);
+                        $("#TxtProductICR").val(productICR.toFixed(2));
+                    }
+
+                    if (productMER > 0 && productReimbursable > 0) {
+
+                        productICR = (productMER + productReimbursable);
+                        $("#TxtProductICR").val(productICR.toFixed(2));
+                    }
+
+                    //
+                    if (securityMER > 0 && productMER == 0 && productReimbursable == 0) {
+
+                        productICR = securityMER;
+                        $("#TxtProductICR").val(productICR.toFixed(2));
+                    }
+
+                    if (productMER > 0 && securityMER == 0 && productReimbursable == 0) {
+
+                        productICR = productMER;
+                        $("#TxtProductICR").val(productICR.toFixed(2));
+                    }
+
+                    if (productReimbursable > 0 && productMER == 0 && securityMER == 0) {
+
+                        productICR = productReimbursable;
+                        $("#TxtProductICR").val(productICR.toFixed(2));
+                    }
+                }
+            }
+
+        });
+
+        $("#ddlSecurityId").change(function () {
+            if ($("#AssetClassId").val() == "") {
+                $(this).val("");
+            }
+            else {
+                $("#errorAssetClass").text("");
+                $("#errorAssetClass").fadeOut(500);
+            }
+        });
+
+        //SecurityList change function
+        $("#ddlSecurityListId").change(function () {
+            if ($("#AssetClassId").val() == "") {
+                $(this).val("");
+                $(this).trigger("chosen:updated");
+            }
+            else {
+                $("#errorAssetClass").text("");
+                $("#errorAssetClass").fadeOut(500);
+            }
+        });
+
+        //AssetClass change function
+        $("#AssetClassId").change(function () {
+            $("#errorAssetClass").text("");
+            $("#errorAssetClass").fadeOut(500);
+            if ($("#AssetClassId").val() != "" && $("#AssetClassId").val() != null) {
+                var assetClassId = $("#AssetClassId").val();
+                GetAssetClassSecurities(assetClassId, "deleteorChange");
+            }
+        });
+
+        //set data in brokers drop down
+        $('#ProductBrokerId').val(@Html.Raw(Json.Encode(ViewData["productBrokerIds"])));
+        $('#ProductBrokerId').trigger("chosen:updated");
+        $('.input-group.date').datepicker({
+            todayBtn: "linked",
+            keyboardNavigation: false,
+            forceParse: false,
+            calendarWeeks: true,
+            autoclose: true,
+            format: "dd/mm/yyyy",
+            todayHighlight: true
+        });
+
+        var isOnlyVersion = @Html.Raw(Json.Encode(@Model.VersionDetail.IsOnlyVersion));
+        var isPending = @Html.Raw(Json.Encode(@Model.VersionDetail.ProductVersionStatus));
+
+        // 7/Jan/2016
+        //if(isOnlyVersion && isPending.toLocaleLowerCase() == 'pending'){
+        //    // To Disabled Product Related Fields
+        //    DisableEnabledControls(false, 'edit', false);
+        //}
+        //else if(isPending.toLocaleLowerCase() == 'active' || isPending.toLocaleLowerCase() == 'inactive'){
+        //    DisableEnabledControls(true, 'edit', true);
+        //}
+        //else{
+        //    DisableEnabledControls(true, 'edit', false);
+        //}
+
+        if(isPending.toLocaleLowerCase() == 'inactive' || isPending.toLocaleLowerCase() == 'archived'){
+            DisableEnabledControls(true, 'edit', true);
+            var interval = setInterval(function () {
+                $('.total').attr('disabled', true);
+                $('.fa-trash').click(function () { return false; });
+                clearInterval(interval);
+            }, 1000);
+        }
+    });
+
+    function GetAssetClassSecurities(assetClassId, type) {
+        var qtd = 0;
+        var secIdCheck = "";
+        var listIdCheck = "";
+        var secIds = "";
+        var secListIds = "";
+        var rows = $("#myDataTable").dataTable().fnGetData();
+        var selecedSecId = $("#ddlSecurityId").val();
+        var selecedSecListId = $("#ddlSecurityListId").val();
+
+        //get all security and securityList ids from datatable
+        for (var i = 0; i < rows.length; i++) {
+            if (qtd == 0) {
+                secIdCheck = $(rows)[i][0];
+                listIdCheck = $(rows)[i][1];
+                if (secIdCheck != "" && secIdCheck != null) {
+                    secIds = secIdCheck;
+                }
+
+                if (listIdCheck != "" && listIdCheck != null) {
+                    secListIds = listIdCheck;
+                }
+                qtd += 1;
+            }
+            else {
+                secIdCheck = $(rows)[i][0];
+                listIdCheck = $(rows)[i][1];
+                if (secIdCheck != "" && secIdCheck != null) {
+                    secIds += "," + secIdCheck;
+                }
+
+                if (listIdCheck != "" && listIdCheck != null) {
+                    secListIds += "," + listIdCheck;
+                }
+                qtd += 1;
+            }
+        }
+
+        //get selected security and securityList id in case of add button click
+        if (type != "deleteorChange") {
+            if (selecedSecId != null) {
+                if (secIds != "") {
+                    secIds += "," + selecedSecId;
+                }
+                else {
+                    secIds = selecedSecId;
+                }
+            }
+
+            if (selecedSecListId != null) {
+                if (secListIds != "") {
+                    secListIds += "," + selecedSecListId;
+                }
+                else {
+                    secListIds = selecedSecListId;
+                }
+            }
+        }
+
+
+
+        if (assetClassId != null && assetClassId != "") {
+            $.ajax({
+                url: '@Url.Content("~/Investment/GetAssetClassSecuritiesByIdsOnAssetClassChange")' + '?assetClassId=' + assetClassId + '&securityIds=' + secListIds + '&secIds=' + secIds,
+                type: "GET",
+                cache: false,
+                error: function (error) {
+                    window.location.href = '@Url.Content("~/Error/Index")';
+                },
+                success: function(data) {
+                    if (data.data.length != 0) {
+
+                        var secName = "";
+                        $.map(data.data, function(item) {
+                            secName += item.SecName + "," + " ";
+                        });
+                        secName = secName.replace(/,\s*$/, ".");
+
+                        //Warnings
+                        $("#warningSecurityListAndSecurity").text("SECURITY LIST WARNING: " + "Asset class for this product does not match asset classes for securities " + secName);
+                        $("#warningSecurityListAndSecurity").fadeIn(500);
+
+                    } else {
+                        $("#warningSecurityListAndSecurity").text("");
+                        $("#warningSecurityListAndSecurity").fadeOut(500);
+                    }
+
+                    //add row in datatable with security detail
+                    if ($("#ddlSecurityId").val() > 0) {
+                        securityTable.api().row.add([
+                            $("#ddlSecurityId").val(),
+                            $("#ddlSecurityListId").val(),
+                            $('#ddlSecurityId :selected').text(),
+                            "<input type='text' class='form-control total' name='total' value='" + $("#txtAllocation").val() + "'/>",
+                            "<div class='text-center'><a><i title='Delete' class='fa fa-trash'></i></a></div>"
+                        ]).draw(false);
+                    }
+
+                    //add row in datatable with securityList detail
+                    if ($("#ddlSecurityListId").val() > 0) {
+                        securityTable.api().row.add([
+                            $("#ddlSecurityId").val(),
+                            $("#ddlSecurityListId").val(),
+                            $('#ddlSecurityListId option:selected').html(),
+                            "<input type='text' class='form-control total' name='total' value='" + $("#txtAllocation").val() + "'/>",
+                            "<div class='text-center'><a><i title='Delete' class='fa fa-trash'></i></a></div>"
+                        ]).draw(false);
+                    }
+
+                    // clear fields
+                    $("#txtAllocation").val('');
+                    $("#ddlSecurityId").select2("val", "");
+                    $('#ddlSecurityId :selected').text("");
+
+                    $('#ddlSecurityListId').val('');
+                    $('#ddlSecurityListId option:selected').html(""),
+                    $('#ddlSecurityListId').trigger("chosen:updated");
+                }
+            });
+        }
+        return;
+    }
+
+    function onProductType() {
+        if ($("#DdlProductType").val() != "3") {
+            $("#DivPrimaryBenchmark").show();
+            $("#DivSecondaryBenchmark").show();
+        } else {
+            $("#DivPrimaryBenchmark").hide();
+            $("#DivSecondaryBenchmark").hide();
+            $("#DivPrimaryPriceType").hide();
+            $("#DivSecondaryPriceType").hide();
+
+            $('#ddlPrimaryBenchmark').val('');
+            $('#ddlPrimaryBenchmark').trigger("chosen:updated");
+            $('#ddlSecondaryBenchmark').val('');
+            $('#ddlSecondaryBenchmark').trigger("chosen:updated");
+
+            $('#ddlPrimaryPriceType').val('');
+            $('#ddlPrimaryPriceType').trigger("chosen:updated");
+            $('#ddlPrimaryPriceType').attr("disabled", true);
+            $("#ddlPrimaryPriceType").trigger("chosen:updated");
+
+            $('#ddlSecondaryPriceType').val('');
+            $('#ddlSecondaryPriceType').trigger("chosen:updated");
+            $('#ddlSecondaryPriceType').attr("disabled", true);
+            $("#ddlSecondaryPriceType").trigger("chosen:updated");
+        }
+
+        if ($("#DdlProductType").val() == "3") {
+            $('#dvSecurities').show();
+            $("#DivSecurityId").show();
+            $("#DivAllocation").show();
+            $('#btnSecuritiesAllocation').show();
+            $("#DivIndexType").show();
+
+            if ($("#AssetClassId").val() == "") {
+                $("#errorAssetClass").text("Please select the Asset Class");
+                $("#errorAssetClass").fadeIn(500);
+            } else {
+                $("#errorAssetClass").text("");
+                $("#errorAssetClass").fadeOut(500);
+            }
+        } else if ($("#DdlProductType").val() == "2") {
+
+            if ($("#AssetClassId").val() == "") {
+                $("#errorAssetClass").text("Please select the Asset Class");
+                $("#errorAssetClass").fadeIn(500);
+            } else {
+                $("#errorAssetClass").text("");
+                $("#errorAssetClass").fadeOut(500);
+            }
+            $('#dvSecurities').show();
+            $("#DivSecurityId").show();
+            $("#DivAllocation").show();
+            $('#btnSecuritiesAllocation').show();
+            $("#DivIndexType").hide();
+            $('#DdlIndexType').val('');
+            $('#DdlIndexType').trigger("chosen:updated");
+
+        } else if ($("#DdlProductType").val() == "1") {
+            if ($("#AssetClassId").val() == "") {
+                $("#errorAssetClass").text("Please select the Asset Class");
+                $("#errorAssetClass").fadeIn(500);
+            } else {
+                $("#errorAssetClass").text("");
+                $("#errorAssetClass").fadeOut(500);
+            }
+            $('#dvSecurities').show();
+            $("#DivSecurityId").show();
+            $("#DivAllocation").show();
+            $("#DivIndexType").hide();
+            $('#DdlIndexType').val('');
+            $('#DdlIndexType').trigger("chosen:updated");
+            $('#btnSecuritiesAllocation').show();
+        } else {
+
+            if ($.fn.DataTable.isDataTable('#myDataTable')) {
+                securityTable.api().clear().draw();
+
+                // clear textboxes
+                $("#ddlSecurityId").select2("val", "");
+                $('#ddlSecurityId :selected').text("");
+            }
+
+            $('#dvSecurities').hide();
+            $("#DivIndexType").hide();
+            $('#DdlIndexType').val('');
+            $('#DdlIndexType').trigger("chosen:updated");
+            $("#DivSecurityListId").hide();
+            $("#errorAssetClass").text("");
+            $("#errorAssetClass").fadeOut(500);
+
+            // clear textboxes
+            $("#txtAllocation").val('');
+            $('#ddlSecurityListId').val('');
+            $('#ddlSecurityListId option:selected').html(""),
+            $('#ddlSecurityListId').trigger("chosen:updated");
+            $("#txtPortfolioWeight").text("");
+        }
+    }
+
+    function onBenchMark() {
+        if ($("#ddlPrimaryBenchmark").val() > 0) {
+            $("#DivPrimaryPriceType").show();
+            $('#ddlPrimaryPriceType').attr("disabled", false);
+            $("#ddlPrimaryPriceType").trigger("chosen:updated");
+        }
+        else {
+            $("#DivPrimaryPriceType").hide();
+            $('#ddlPrimaryPriceType').val('');
+            $('#ddlPrimaryPriceType').trigger("chosen:updated");
+            $('#ddlPrimaryPriceType').attr("disabled", true);
+            $("#ddlPrimaryPriceType").trigger("chosen:updated");
+        }
+
+        if ($("#ddlSecondaryBenchmark").val() > 0) {
+            $("#DivSecondaryPriceType").show();
+            $('#ddlSecondaryPriceType').attr("disabled", false);
+            $("#ddlSecondaryPriceType").trigger("chosen:updated");
+        }
+        else {
+            $("#DivSecondaryPriceType").hide();
+            $('#ddlSecondaryPriceType').val('');
+            $('#ddlSecondaryPriceType').trigger("chosen:updated");
+            $('#ddlSecondaryPriceType').attr("disabled", true);
+            $("#ddlSecondaryPriceType").trigger("chosen:updated");
+        }
+    }
+
+</script>

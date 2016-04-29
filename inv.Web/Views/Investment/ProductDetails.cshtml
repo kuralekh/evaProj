@@ -1,0 +1,761 @@
+﻿@model IEnumerable<Invest.ViewModel.Models.ProductModel>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Details";
+}
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-9">
+        <h2>@ViewBag.Title</h2>
+        <ol class="breadcrumb">
+            <li>Investment</li>
+            <li>Products</li>
+            <li class="active">
+                <strong>@ViewBag.Title</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins" id="dvProductDetails">
+                <div class="ibox-title">
+                    <button class="btn btn-primary btn-sm" onclick="Create();">
+                        Create Product
+                    </button>
+                    <div class="col-lg-2 pull-right">
+                        @Html.DropDownList("DisplayStatus", (IEnumerable<SelectListItem>)ViewData["StatusList"], new { @class = "chosen-select-deselect", id = "DdlDisplayStatus" })
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <table id="example" class="table table-striped table-bordered table-hover" style="width: 100%">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Product Type</th>
+                                <th>Version</th>
+                                <th>Status</th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                            <tr id="headerFilter" class="input-sm">
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th class="editSearch"></th>
+                                <th class="editSearch"></th>
+                                <th class="editSearch"></th>
+                                <th class="editSearch"></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Edit Modal -->
+<div class="modal inmodal fade" id="ProductModal">
+    <div class="modal-dialog modal-lg" style="width: 950px" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Product</h4>
+            </div>
+            <div id="dvProduct">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/plugins/dateRangeStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/Content/plugins/chosen/chosenStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/Content/plugins/select2/select2Styles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+}
+
+<!--Load these page level functions-->
+@section Scripts {
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/dateRange")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/chosen")
+    @Scripts.Render("~/plugins/select2")
+    @Scripts.Render("~/plugins/sweetAlert")
+    <script type="text/javascript">
+        var productTable;
+        var status = 1;
+        $(function() {
+            //When Model hides
+            $('#ProductModal').on('hidden.bs.modal', function() {
+                productTable.fnDraw();
+            });
+
+            GetProductDetail();
+
+            //to set focus on select2 Search input in case of modal cuts on screen on Firefox.
+            if (typeof InstallTrigger !== 'undefined') {
+                $.fn.modal.Constructor.prototype.enforceFocus = function() {};
+            }
+
+            $("#DdlDisplayStatus").on("change", function() {
+                GetProductDetail();
+            });
+            var config = {
+                '.chosen-select': {},
+                '.chosen-select-deselect': { allow_single_deselect: true },
+                '.chosen-select-no-single': { disable_search_threshold: 10 },
+                '.chosen-select-no-results': { no_results_text: 'Oops, nothing found!' },
+                '.chosen-select-width': { width: "95%" }
+            };
+
+            for (var selector in config) {
+
+                $(selector).chosen(config[selector]);
+
+            }
+        });
+        //
+        $.fn.dataTable.TableTools.buttons.download = $.extend(true, {}, $.fn.dataTable.TableTools.buttonBase,
+        {
+            "sButtonText": "Download",
+            "sUrl": "",
+            "sType": "Get",
+            "fnData": false,
+            "fnClick": function(button, config) {
+                var dt = new $.fn.dataTable.Api(this.s.dt);
+                var data = dt.ajax.params() || {};
+
+                // Optional static additional parameters
+                // data.customParameter = ...;
+                if ($("#DdlDisplayStatus").val() != null) {
+                    status = $("#DdlDisplayStatus").val();
+                }
+                data.Id_1 = status;
+                if (config.fnData) {
+                    config.fnData(data);
+                }
+
+                var iframe = $('<iframe/>', {
+                        id: "RemotingIFrame"
+                    }).css({
+                        border: 'none',
+                        width: 0,
+                        height: 0
+                    })
+                    .appendTo('body');
+
+                var contentWindow = iframe[0].contentWindow;
+                contentWindow.document.open();
+                contentWindow.document.close();
+
+                var form = contentWindow.document.createElement('form');
+                form.setAttribute('method', config.sType);
+                form.setAttribute('action', config.sUrl);
+
+                var input = contentWindow.document.createElement('input');
+                input.name = 'json';
+                //  input.value = JSON.stringify(data);
+                input.value = JSON.stringify(data);
+
+                form.appendChild(input);
+                contentWindow.document.body.appendChild(form);
+                form.submit();
+            }
+        });
+
+        //
+        function GetProductDetail() {
+            if ($("#DdlDisplayStatus").val() != null) {
+                status = $("#DdlDisplayStatus").val();
+            }
+            var productCode = "";
+            productTable = $('#example').dataTable({
+                initComplete: function() {
+                    // Setup - add a text input to each header cell - Apply the filter
+                    $('#example thead tr#headerFilter th').each(function() {
+                        if (!($(this).hasClass("editSearch"))) {
+                            $('<input type="text" placeholder="Search" />').appendTo($(this).empty())
+                                .on('keyup', function() {
+                                    productTable.api().columns($(this).parent().index() + ':visible').search(this.value).draw();
+                                });
+                        }
+                    });
+                },
+                "orderCellsTop": true,
+                "destroy": true,
+                "bServerSide": true,
+                "sAjaxSource": '@Url.Content("~/Investment/GetProductPageData")' + '?DisplayStatus=' + status,
+                "bProcessing": true,
+                "columns": [
+                    {
+                        "data": "Code",
+                        "render": function(oObj, type, row) {
+                            productCode = oObj;
+                            return '<a href=' + encodeURI('@Url.Content("~/Investment/AnalyticHome?code=")' + oObj + '&type=Product&verid=' + row.VersionDetail.ProductVersionID) + '>' + oObj + '</a>';
+                        }
+                    },
+                    {
+                        "data": "Name",
+                        "render": function(oObj, type, row) {
+                            return '<a href=' + encodeURI('@Url.Content("~/Investment/AnalyticHome?code=")' + productCode + '&type=Product&verid=' + row.VersionDetail.ProductVersionID) + '>' + oObj + '</a>';
+                        }
+                    },
+                    { "data": "ProductType" },
+                    { "data": "VersionDetail.CombineVersion" },
+                    {
+                        "data": "VersionDetail.ProductVersionStatus",
+                        "render": function(oObj, obj2, obj3, obj4) {
+
+                            if (oObj != null) {
+                                var color = oObj.toLocaleLowerCase() == "active" ? "label label-primary" : oObj.toLocaleLowerCase() == "inactive" ? "label label-danger" : oObj.toLocaleLowerCase() == "pending" ? "label label-warning" : oObj.toLocaleLowerCase() == "archived" ? "label label-sucess" : "label label-primary";
+                                if (oObj.toLocaleLowerCase() == "pending") {
+                                    return '<div class="text-center"><span class="' + color + '" title="Make it Active" style="cursor: pointer;" onclick="MakeItActive(' + obj3.ProductID + ',' + obj3.VersionDetail.ProductVersionID + ')">' + oObj + '</button></div>';
+                                }
+                                else if (oObj.toLocaleLowerCase() == "inactive") {
+                                    return '<div class="text-center"><span class="' + color + '" title="Make it Archived" style="cursor: pointer;" onclick="MakeItArchived(' + obj3.ProductID + ',' + obj3.VersionDetail.ProductVersionID + ')">' + oObj + '</button></div>';
+                                }
+                                else if (oObj.toLocaleLowerCase() == "archived") {
+                                    return '<div class="text-center"><span class="' + color + '" title="Make it InActive" style="cursor: pointer;" onclick="MakeItInActive(' + obj3.ProductID + ',' + obj3.VersionDetail.ProductVersionID + ')">' + oObj + '</button></div>';
+                                }
+                                else {
+                                    return '<div class="text-center"><span class="' + color + '" style="cursor: pointer;">' + oObj + '</span></div>';
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "targets": 'no-sort',
+                        "orderable": false,
+                        "render": function(data, type, row) {
+                            if (row.IsWarning == true) {
+                                return '<div class="text-center"><span class="label label-danger" style="cursor: pointer;" onclick="GetProductlist(' + row.VersionDetail.ProductVersionID + ')">Warnings</span></div>';
+                            } else {
+                                return '<div class="text-center"><span class="label label-primary" style="cursor: pointer;" onclick="GetProductlist(' + row.VersionDetail.ProductVersionID + ')">No Warnings</span></div>';
+                            }
+                        }
+                    },
+                    {
+                        "data": "ProductID",
+                        "targets": 'no-sort',
+                        "orderable": false,
+                        "render": function(oObj, obj2, obj3, obj4) {
+                            return '<div class="text-center"><button class="btn-white btn btn-xs" onclick="GetProductSecDetails(' + +obj3.ProductID + "," + obj3.VersionDetail.ProductVersionID + ')">Detail</button></div>';
+                        }
+                    },
+                    {
+                        "data": "ProductID",
+                        "targets": 'no-sort',
+                        "orderable": false,
+                        "render": function(oObj, obj2, obj3, obj4) {
+                            return '<div class="text-center"><button class="btn-white btn btn-xs" onclick="GetProductlist(' + obj3.VersionDetail.ProductVersionID + ')">Edit</button></div>';
+                        }
+                    },
+                    {
+                        "data": "VersionDetail.ProductVersionID",
+                        "targets": 'no-sort',
+                        "orderable": false,
+                        "render": function(oObj, obj2, obj3) {
+                            if (obj3.VersionDetail.ProductVersionStatus.toLocaleLowerCase() == 'pending') {
+                                return '<div class="text-center"><button class="btn-white btn btn-xs" onclick="DeleteProductVersion(' + oObj + ')">Delete</button></div>';
+                            } else {
+                                return '<div class="text-center"><button class="btn-white btn btn-xs" disabled="disabled">Delete</button></div>';
+                            }
+                        }
+                    }
+                ],
+                "dom": 'T<"clear">lfrtip',
+                "tableTools": {
+                    "sSwfPath": "../scripts/plugins/dataTables/swf/copy_csv_xls_pdf.swf",
+                    "aButtons": [{ "sExtends": "download", "sButtonText": "CSV", "sUrl": '@Url.Content("~/Investment/DownloadProductCsv")', "sToolTip": "Save as CSV" }]
+                },
+            });
+
+        }
+
+        function Create() {
+            $.ajax({
+                url: '@Url.Content("~/Investment/CreateProduct")',
+                data: {},
+                type: "GET",
+                cache: false,
+                error: function(error) {
+
+                    window.location.href = '@Url.Content("~/Error/Index")';
+                },
+                success: function(data) {
+                    $('#dvProduct').html(data);
+                    FillFilteredSecurities("ddlSecurityId");
+                    $("#ProductModal").modal('show');
+                    $("#myModalLabel").html("Create Product");
+                    jQuery.validator.unobtrusive.parse("#ProductCreateForm");
+                    $('.modal-footer').show();
+                    //on button click
+                    $('.btn-primary').click(function() {
+                        if ($('#ProductCreateForm').valid()) {
+                            $('#error').hide();
+                            $('.busy').show();
+                            $(".modal-footer").hide();
+                            var listName = "SecurityAssociation";
+                            var qtd = 0;
+                            var dtCurRows = $("#myDataTable").dataTable().fnGetNodes();
+                            //get all security and securityList ids from datatable
+                            for (var i = 0; i < dtCurRows.length; i++) {
+                                var secIds = $("#myDataTable tbody tr:eq(" + i + ")").find("td:eq(0)").html();
+                                var secListIds = $("#myDataTable tbody tr:eq(" + i + ")").find("td:eq(1)").html();
+                                var forallocation = $("#myDataTable tbody tr:eq(" + i + ")").find("td:eq(3)").html();
+                                var allocation = forallocation.substr(forallocation.indexOf("value=") + 7).split('"')[0];
+
+                                $("#ProductCreateForm").prepend("<input type='hidden' name='" + listName + "[" + qtd + "].SecurityId' value='" + secIds + "'>");
+                                $("#ProductCreateForm").prepend("<input type='hidden' name='" + listName + "[" + qtd + "].SecurityListId' value='" + secListIds + "'>");
+                                $("#ProductCreateForm").prepend("<input type='hidden' name='" + listName + "[" + qtd + "].Allocation' value='" + allocation + "'>");
+                                qtd += 1;
+                            }
+                        }
+                    });
+                    $('.busy').hide();
+                    $('.alert').hide();
+                }
+            });
+            return;
+        }
+
+        function GetProductlist(id) {
+
+
+            $.ajax({
+                url: '@Url.Content("~/Investment/GetProduct")',
+                data: { productVersionId: id },
+                type: "GET",
+                cache: false,
+                error: function(error) {
+                    window.location.href = '@Url.Content("~/Error/Index")';
+                },
+                success: function(data) {
+                    $('#dvProduct').html(data);
+                    FillFilteredSecurities("ddlSecurityId");
+                    $("#ProductModal").modal('show');
+                    $("#myModalLabel").html("Edit Product");
+                    jQuery.validator.unobtrusive.parse("#ProductEditForm");
+                    $('.modal-footer').show();
+                    //on button click
+
+                    $('.btn-primary').click(function(e) {
+
+                        e.preventDefault();
+                        if ($("#VersionDetail_ProductVersionStatus").val() == "Active") {
+
+                            swal({
+                                    title: "",
+                                    text: "Active version detail cannot be updated, so a new product version with the given changes will be created. <br/><br/> Are you sure you want to create new version of this product ?",
+                                    type: "info",
+                                    showCancelButton: true,
+                                    confirmButtonColor: "#18a689",
+                                    confirmButtonText: "Ok",
+                                    cancelButtonText: "Cancel",
+                                    closeOnConfirm: true,
+                                    closeOnCancel: true,
+                                    html: true
+                                },
+                                function(isConfirm) {
+                                    if (isConfirm) {
+                                        ProductEditSubmit();
+                                    }
+                                });
+
+                        } else {
+                            ProductEditSubmit();
+                        }
+                    });
+                    $('.busy').hide();
+                    $('.alert').hide();
+                    $("#BaseProductVersionID").val(id);
+                }
+            });
+            return;
+        }
+
+        function ProductEditSubmit() {
+            if ($('#ProductEditForm').valid()) {
+                $('#error').hide();
+                $('.busy').show();
+                $(".modal-footer").hide();
+                var listName = "SecurityAssociation";
+                var qtd = 0;
+                var dtCurRows = $("#myDataTable").dataTable().fnGetNodes();
+                //get all security and securityList ids from datatable
+                for (var i = 0; i < dtCurRows.length; i++) {
+                    var secIds = $("#myDataTable tbody tr:eq(" + i + ")").find("td:eq(0)").html();
+                    var secListIds = $("#myDataTable tbody tr:eq(" + i + ")").find("td:eq(1)").html();
+                    var forallocation = $("#myDataTable tbody tr:eq(" + i + ")").find("td:eq(3)").html();
+                    var allocation = forallocation.substr(forallocation.indexOf("value=") + 7).split('"')[0];
+
+                    $("#ProductEditForm").prepend("<input type='hidden' name='" + listName + "[" + qtd + "].SecurityId' value='" + secIds + "'>");
+                    $("#ProductEditForm").prepend("<input type='hidden' name='" + listName + "[" + qtd + "].SecurityListId' value='" + secListIds + "'>");
+                    $("#ProductEditForm").prepend("<input type='hidden' name='" + listName + "[" + qtd + "].Allocation' value='" + allocation + "'>");
+                    qtd += 1;
+                }
+                $('#ProductEditForm').submit();
+            }
+        }
+
+        function DeleteProduct(id) {
+            bootbox.confirm("Are you sure you want to delete?", function(result) {
+                if (result) {
+                    $.ajax({
+                        url: '@Url.Content("~/Investment/DeleteProduct")',
+                        data: { ProductID: id },
+                        type: "POST",
+                        cache: false,
+                        error: function(error) {
+                            window.location.href = '@Url.Content("~/Error/Index")';
+                        },
+                        success: function(data) {
+                            productTable.fnDraw();
+                            bootbox.alert("Record has deleted successfully!");
+                        }
+                    });
+                }
+            });
+        }
+
+
+        function DeleteProductVersion(id) {
+            bootbox.confirm("Are you sure you want to delete?", function(result) {
+                if (result) {
+                    $.ajax({
+                        url: '@Url.Content("~/Investment/DeleteProductVersion")',
+                        data: { BaseProductVersionID: id },
+                        type: "POST",
+                        cache: false,
+                        error: function(error) {
+                            window.location.href = '@Url.Content("~/Error/Index")';
+                        },
+                        success: function(data) {
+                            productTable.fnDraw();
+                            bootbox.alert("Record has deleted successfully!");
+                        }
+                    });
+                }
+            });
+        }
+
+        function loadSecuritiesTable() {
+            var pId = $("#ProductID").val();
+            var pvId = $("#BaseProductVersionID").val();
+            $.ajax({
+                url: '@Url.Content("~/Investment/GetAssociatedSecData")',
+                type: "POST",
+                cache: false,
+                data: { productId: pId, productVersionID: pvId },
+                error: function(error) {
+                    window.location.href = '@Url.Content("~/Error/Index")';
+                },
+                success: function(data) {
+                    if (data) {
+                        $.map(data.data, function(item) {
+                            for (var i = 0; i < item.SecurityAssociation.length; i++) {
+                                //Isinnitialized = false;
+                                securityTable.api().row.add([
+                                    item.SecurityAssociation[i].SecurityId,
+                                    item.SecurityAssociation[i].SecurityListId,
+                                    item.SecurityAssociation[i].SecurityName,
+                                    "<input type='text' class='form-control total' name='total' value='" + item.SecurityAssociation[i].Allocation + "'/>",
+                                    "<div class='text-center'><a><i title='Delete' class='fa fa-trash'></i></a></div>"
+                                ]).draw(false);
+                            }
+                        });
+                    }
+
+                    var assetClassId = $("#AssetClassId").val();
+                    GetAssetClassSecurities(assetClassId, "deleteorChange");
+                    $("#myDataTable tr td div a").click(function() {
+                        //Isinnitialized = false;
+                        //productWeightTotal = 0;
+                        $("#txtPortfolioWeight").text("");
+                        securityTable.api().row($(this).parent().parent().parent()).remove().draw();
+                        var assetClassId = $("#AssetClassId").val();
+                        GetAssetClassSecurities(assetClassId, "deleteorChange");
+                        return false;
+                    });
+                }
+            });
+        }
+
+        function ResetModalControls() {
+            $('#txtCode').val('');
+            $('#txtName').val('');
+            $('#txtAllocation').val('');
+
+            $('#DdlProduct').val('');
+            $('#DdlProduct').trigger("chosen:updated");
+            $('#DdlProductType').val('');
+            $('#DdlProductType').trigger("chosen:updated");
+            $('#DdlIndexType').val('');
+            $('#DdlIndexType').trigger("chosen:updated");
+            $('#ddlInstitutionId').val('');
+            $('#ddlInstitutionId').trigger("chosen:updated");
+            $('#ddlMarketId').val('');
+            $('#ddlMarketId').trigger("chosen:updated");
+            $('#AssetClassId').val('');
+            $('#AssetClassId').trigger("chosen:updated");
+            $('#ddlSubAssetClassId').val('');
+            $('#ddlSubAssetClassId').trigger("chosen:updated");
+            $("#ddlSecurityId").select2("val", "");
+            $('#ddlRegionId').val('');
+            $('#ddlRegionId').trigger("chosen:updated");
+            $('#ddlStatusId').val('');
+            $('#ddlStatusId').trigger("chosen:updated");
+            $('#ddlPricingSourceId').val('');
+            $('#ddlPricingSourceId').trigger("chosen:updated");
+            $('#ProductBrokerId').val('');
+            $('#ProductBrokerId').trigger("chosen:updated");
+            $('#ddlSecurityListId').val('');
+            $('#ddlSecurityListId').trigger("chosen:updated");
+
+            $('#ProductAPIR').val('');
+            $('#txtProductISIN').val('');
+            $('#Txttargetrate').val('');
+            $('#TxtSecurityMER').val('');
+            $('#TxtProductMER').val('');
+            $('#TxtProductReimbursable').val('');
+            $('#TxtProductICR').val('');
+            $('#txtPortfolioWeight').text('');
+            $('#CurrencyId').val('5');
+            $('#CurrencyId').trigger("chosen:updated");
+
+            $('#chkIsPriced').prop('checked', false);
+            $('#optionsRadios2').prop('checked', false);
+            $('#optionsRadios1').prop('checked', true);
+            $('#divsecurityid').show();
+            $('#DivAllocation').show();
+
+            $("#DivIndexType").hide();
+            $("#DivSecurityListId").hide();
+            $('#dvSecurities').hide();
+
+            $('#ddlPrimaryBenchmark').val('');
+            $('#ddlPrimaryBenchmark').trigger("chosen:updated");
+            $('#ddlSecondaryBenchmark').val('');
+            $('#ddlSecondaryBenchmark').trigger("chosen:updated");
+            $('#ddlPrimaryPriceType').val('');
+            $('#ddlPrimaryPriceType').trigger("chosen:updated");
+            $('#ddlSecondaryPriceType').val('');
+            $('#ddlSecondaryPriceType').trigger("chosen:updated");
+
+            $('#txtDescription').val('');
+
+            $("#DivPrimaryBenchmark").hide();
+            $("#DivSecondaryBenchmark").hide();
+            $("#DivPrimaryPriceType").hide();
+            $("#DivSecondaryPriceType").hide();
+
+            securityTable.api().clear().draw();
+            $("#warningSecurityListAndSecurity").text("");
+            $("#warningSecurityListAndSecurity").fadeOut(500);
+            $("#warningTotalAllocation").text("");
+            $("#warningTotalAllocation").fadeOut(500);
+
+        }
+
+        function DisableEnabledControls(value, mode, disableAll) {
+
+
+            if (mode == 'create') {
+                $('#txtCode').attr('disabled', value);
+            }
+            $('#ProductAPIR').attr('disabled', value);
+            $('#txtName').attr('disabled', value);
+            $('#txtProductISIN').attr('disabled', value);
+            $('.DdlProductType').attr('disabled', value).trigger("chosen:updated");
+            $('#CurrencyId').attr('disabled', value).trigger("chosen:updated");
+            $('#ddlInstitutionId').attr('disabled', value).trigger("chosen:updated");
+            $('#ddlRegionId').attr('disabled', value).trigger("chosen:updated");
+            $('#ddlMarketId').attr('disabled', value).trigger("chosen:updated");
+            $('.ddlStatusId').attr('disabled', value).trigger("chosen:updated");
+            $('.AssetClassId').attr('disabled', value).trigger("chosen:updated");
+            $('.ddlSubAssetClassId').attr('disabled', value).trigger("chosen:updated");
+            $('.DdlIndexType').attr('disabled', value).trigger("chosen:updated");
+            $('.DdlProduct').attr('disabled', !value).trigger("chosen:updated");
+            if (mode == 'edit') {
+                $('#btnUpdate').attr('disabled', disableAll);
+                $('.ddlPricingSource').attr('disabled', disableAll).trigger("chosen:updated");
+                $('#ProductBrokerId').attr('disabled', disableAll).trigger("chosen:updated");
+                $('#ddlPrimaryBenchmark').attr('disabled', disableAll).trigger("chosen:updated");
+                $('#ddlSecondaryBenchmark').attr('disabled', disableAll).trigger("chosen:updated");
+                $('#Txttargetrate').attr('disabled', disableAll);
+                $('#chkIsPrice').attr('disabled', disableAll);
+                $('#ddlSecurityId').attr('disabled', disableAll);
+                $('#ddlSecurityListId').attr('disabled', disableAll).trigger("chosen:updated");
+                $('#txtAllocation').attr('disabled', disableAll);
+                $('#TxtSecurityMER').attr('disabled', disableAll);
+                $('#TxtProductMER').attr('disabled', disableAll);
+                $('#TxtProductReimbursable').attr('disabled', disableAll);
+                $('#btnSecuritiesAllocation').attr('disabled', disableAll);
+                $('.radioOption1').attr('disabled', disableAll);
+
+                //setInterval(function () {
+                //    $('.total').attr('disabled', disableAll);
+                //    $('.fa-trash').click(function () { return false; });
+                //}, 1000);
+
+
+                //if (disableAll)
+                //    $('.fa-trash').onclick = function () {
+                //        return false;
+                //    };
+                if (disableAll) {
+                    $('#ddlPrimaryPriceType').attr('disabled', disableAll).trigger("chosen:updated");
+                    $('#ddlSecondaryPriceType').attr('disabled', disableAll).trigger("chosen:updated");
+                }
+            }
+        }
+
+        function FillFilteredSecurities(ctrlId) {
+            $("#" + ctrlId).select2({
+                allowClear: true,
+                placeholder: "Select Security",
+                minimumInputLength: 1,
+                ajax: {
+                    url: '@Url.Content("~/Investment/GetFilteredSecurities")',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            code: params.term
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: $.map(data.data, function(item) {
+                                return { results: item, id: item.Id, text: item.Code + ' - ' + item.Name };
+                            })
+                        };
+                    },
+                    cache: true
+                }
+            });
+        }
+
+        function MakeItActive(productid, productVersionid) {
+
+            bootbox.confirm("Are you sure you want to make it active? Previous active version will be inactive.", function(result) {
+                if (result) {
+                    $.ajax({
+                        url: '@Url.Content("~/Investment/MakeItActiveProductVersion")',
+                        data: { BaseProductVersionID: productVersionid, ProductID: productid, MakeItActive: true },
+                        type: "POST",
+                        cache: false,
+                        error: function(error) {
+                            window.location.href = '@Url.Content("~/Error/Index")';
+                        },
+                        success: function(data) {
+
+                            productTable.fnDraw();
+                            bootbox.alert(data.message);
+                        }
+                    });
+                }
+            });
+        }
+
+        function MakeItInActive(productid, productVersionid) {
+
+            bootbox.confirm("Are you sure you want to make it inactive ?", function (result) {
+                if (result) {
+                    $.ajax({
+                        url: '@Url.Content("~/Investment/MakeItActiveProductVersion")',
+                        data: { BaseProductVersionID: productVersionid, ProductID: productid, MakeItInActive: true },
+                        type: "POST",
+                        cache: false,
+                        error: function (error) {
+                            window.location.href = '@Url.Content("~/Error/Index")';
+                        },
+                        success: function (data) {
+
+                            productTable.fnDraw();
+                            bootbox.alert(data.message);
+                        }
+                    });
+                }
+            });
+        }
+
+        function MakeItArchived(productid, productVersionid) {
+
+            bootbox.confirm("Are you sure you want to make it archived ?", function (result) {
+                if (result) {
+                    $.ajax({
+                        url: '@Url.Content("~/Investment/MakeItActiveProductVersion")',
+                        data: { BaseProductVersionID: productVersionid, ProductID: productid, MakeItArchived: true },
+                        type: "POST",
+                        cache: false,
+                        error: function (error) {
+                            window.location.href = '@Url.Content("~/Error/Index")';
+                        },
+                        success: function (data) {
+
+                            productTable.fnDraw();
+                            bootbox.alert(data.message);
+                        }
+                    });
+                }
+            });
+        }
+
+        function CalculateAllocation() {
+            var result = 0;
+            $('#myDataTable > tbody > tr > td > input').each(function() {
+                var value = $(this).val() == "" ? 0 : parseInt($(this).val());
+                $(this).attr('value', value);
+                result = result + value;
+
+            });
+            if (result > 100) {
+                $("#warningTotalAllocation").text("WARNING: Total Allocation of selected securities are greater then 100%");
+                $("#warningTotalAllocation").fadeIn(500);
+            } else {
+                $("#warningTotalAllocation").text("");
+                $("#warningTotalAllocation").fadeOut(500);
+            }
+            $("#txtPortfolioWeight").text("Sum: " + result.toFixed(2) + "%");
+        }
+
+        function GetProductSecDetails(productId, productVersionId) {
+            var url = '@Url.Content("~/Investment/ProductSecuritiesDetail")' + '?productVersionId=' + productVersionId + "&productId=" + productId;
+            window.location.href = url;
+            return;
+        }
+
+        function onSuccess_Create_ProductCustom(context) {
+
+            if (context.status == "success") {
+                $('.has-success').html(context.message).show();
+                $('.alert-success').show();
+                ResetModalControls();
+            }
+            else {
+                $('.has-error').html(context.message).show();
+                $('#error').show();
+            }
+
+            $('.modal-footer').show();
+            $('.busy').hide();
+        }
+    </script>
+}

@@ -1,0 +1,2169 @@
+﻿@model Invest.ViewModel.Models.ProductModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Product Home";
+}
+
+<style>
+    .modelWrap table tbody td:nth-child(1) {
+        width: 10%;
+    }
+
+    .modelWrap table tbody td:nth-child(2) {
+        text-align: left;
+        width: 55%;
+    }
+
+    .modelWrap table tbody td:nth-child(3) {
+        width: 14%;
+        text-align: center;
+    }
+
+    .modelWrap table tbody td:nth-child(4) {
+        text-align: right;
+        width: 6%;
+    }
+    .modelWrap table tbody td:nth-child(5) {
+        width: 15%;
+    }
+
+    .modelWrap, .allocationTab {
+        padding: 0 !important;
+    }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-9">
+        <h2>@ViewBag.Title</h2>
+        <ol class="breadcrumb">
+            <li>Investment</li>
+            <li>Securities</li>
+            <li class="active">
+                <strong>@ViewBag.Title / @ViewBag.CodeName - @ViewBag.ProductName</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="securityHomePage">
+    <div class="securityHeader">
+        <div class="headerTabsMenu">
+            <div class="headerTab activeTab">
+                Summary
+            </div>
+            <div class="headerTab">
+                Price
+            </div>
+            <div class="headerTab">
+                Allocation
+            </div>
+            <div class="headerTab">
+                Performance
+            </div>
+            <div class="headerTab">
+                Risk & Analytics
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="contentWrap">
+        <div class="contentTab activeContent">
+            <div class="summaryChartWrap">
+                <div class="summaryElementCaption">
+                    <h1>52 weeks range</h1>
+                    <h4>First price at <span class="summaryFirst"></span></h4>
+                    <h4>Last price at <span class="summaryUpdated"></span></h4>
+                </div>
+                <div class="summaryCanvas">
+                    <div class="chartLegend">
+                        Currency
+                    </div>
+                    <canvas id="summaryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="summaryInfo">
+                <div class="summaryElementCaption">Price at <span class="priceAt"></span></div>
+                <div class="summaryPrice summaryPriceElement">
+
+                    <div class="summaryCurrentPrice"></div>
+                    <div class="summaryPriceDelta"></div>
+                </div>
+                <div class="summaryMTD summaryPriceElement">
+                    Return MTD
+                    <div class="summaryDeltaMTD"></div>
+                </div>
+            </div>
+
+            <div class="summaryInfo">
+                <div class="summaryElementCaption">Prices range</div>
+                <div class="priceSliderWrapper summarySliderWrapper">
+                    <span class="sliderMin">Min</span>
+                    <b><span class="sliderNow">Now</span></b>
+                    <span class="sliderMax">Max</span>
+                    <div class="summarySlider"></div>
+                    <span style="float:left; font-size: 10px; position: absolute; left: 35px; bottom: 7px">min</span>
+                    <span style="float: right; font-size: 10px; position: absolute; right: 35px; bottom: 7px; ">max</span>
+
+                </div>
+            </div>
+
+            <div class="summaryInfo">
+                <div class="summaryElementCaption">Returns at <span class="returnsAt"></span></div>
+                <div class="summaryRangeInfo">
+                    <div class="summaryTitle">One month</div>
+                    <div class="summaryInfoContent">
+                        <div class="arrowUp">&#x27A8;</div>
+                        <span></span>
+                    </div>
+                </div>
+                <div class="summaryRangeInfo">
+                    <div class="summaryTitle">Quarter</div>
+                    <div class="summaryInfoContent">
+                        <div class="arrowUp">&#x27A8;</div>
+                        <span></span>
+                    </div>
+                </div>
+                <div class="summaryRangeInfo">
+                    <div class="summaryTitle">One year</div>
+                    <div class="summaryInfoContent">
+                        <div class="arrowUp">&#x27A8;</div>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+
+            @*
+                <div class="summaryInfo summaryOverall">
+                    <div class="summaryElementCaption">Basic Details</div>
+                    <div class="summaryInfoContent">
+
+                        <div class="summaryBlock securityType">
+                            <div class="summaryTitle">Security type</div>
+                            <span>ST</span>
+                        </div>
+                        <div class="summaryBlock assetClass">
+                            <div class="summaryTitle">Asset class</div>
+                            <span>AC</span>
+                        </div>
+                        <div class="summaryBlock expenceRatio">
+                            <div class="summaryTitle">Expence ratio</div>
+                            <span>ER</span>
+                        </div>
+                        <div class="summaryBlock region">
+                            <div class="summaryTitle">Region</div>
+                            <span>Region</span>
+                        </div>
+                        <div class="summaryBlock gicsType">
+                            <div class="summaryTitle">GICS type</div>
+                            <span>GICST</span>
+                        </div>
+
+
+                        <!--<div class="summaryBlock">Security type: <span>ST</span></div>
+                        <div class="summaryBlock">Asset class<span>AC</span></div>
+                        <div class="summaryBlock">Region:<span>Region</span></div>
+                        <div class="summaryBlock">GICS type:<span>GICST</span></div>
+                        <div class="summaryBlock">Expense ratio:<span>ER</span></div>-->
+                    </div>
+                </div>
+            *@
+
+            <div class="clearfix"></div>
+            <div class="sorryBlock summaryInfo">
+                <div class="summaryElementCaption">Oops...</div>
+                <p>Sorry, no data to display</p>
+                <span>:(</span>
+            </div>
+        </div>
+        <div class="contentTab">
+            <!-- Second content - Price
+             <button class="getPrices" onclick="GetPrices()">Check Ajax</button> -->
+            <div class="priceContent">
+                <div class="summaryElementCaption">Price changes</div>
+                <div class="pricePeriodsContainer">
+
+                    <div class="priceSliderWrapper">
+                        <span class="sliderMin">Min</span>
+                        <span class="sliderNow">Now</span>
+                        <span class="sliderMax">Max</span>
+                        <div class="priceSlider"></div>
+                        <span style="float:left; font-size: 10px; position: absolute; left: 0; bottom: -25px">min</span>
+                        <span style="float: right; font-size: 10px; position: absolute; right: 0; bottom: -25px; ">max</span>
+
+                    </div>
+                    <div class="pricePeriods">
+                        <div class="pricePeriod">7 days</div>
+                        <div class="pricePeriod activePeriod">1 month</div>
+                        <div class="pricePeriod">3 months</div>
+
+
+                        <div class="pricePeriod">1 year</div>
+                        <div class="pricePeriod">2 years</div>
+                        <div class="pricePeriod">3 years</div>
+                    </div>
+                </div>
+                <div class="priceChartWrap">
+                    <h4 class="firstPrice">First price at <br><span class="priceFirst"></span></h4>
+                    <h4 class="lastPrice">Last price at <br><span class="priceUpdated"></span></h4>
+                    <div class="chartLegend priceLegend">Currency</div>
+                    <canvas id="priceChart"></canvas>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        
+        <div class="contentTab">
+            <div class="row ">
+                <div class="col-lg-12">
+                    <div class="ibox-title">
+                        <button class="btn btn-primary btn-sm" id="btnAddInv" onclick="Test('Sort by Asset Class')">
+                            Asset Class
+                        </button>
+                        <button class="btn btn-primary btn-sm" onclick="Test('Sort by Gics')">
+                            GICS
+                        </button>
+
+                        <div class="DTTT_container">
+                            <form method="post" action="@Url.Content("~/Investment/DownloadProductAllocationCsv")" style="display:none">
+                                <input type="hidden" class="downloadProductId" name="productId" value="" />
+                                <input type="submit" class="downloadProductAllocation" />
+                            </form>
+
+                            <a class="DTTT_button DTTT_button_text" id="ToolTables_example_0" title="Save as CSV" tabindex="0" aria-controls="example" onclick="DownloadProductAllocationCsv()">
+                                <span>CSV</span>
+                            </a>
+                        </div>
+
+                    </div>
+                    <div class="ibox-content">
+                        <div class="securityHomePage">
+                            <div class="contentTab activeContent allocationTab">
+                                <div class="table-responsive modelWrap">
+                                    <div class="modelHeading">
+                                        <div class="symbolHead" style="width: 10% !important">Code</div>
+                                        <div class="segmentHead" style="text-align: left; width: 55% !important;">&nbsp;&nbsp;Security Name<label id="sortby"> (Sorted By Asset Class)</label></div>
+                                        <div class="security-type-head" style="width: 14% !important;">Security Type&nbsp;&nbsp;</div>
+                                        <div class="weightHead" style="width: 6% !important; text-align: right">Weight&nbsp;&nbsp;</div>
+                                        <div class="switchHead" style="width: 15% !important; text-align: right"><span class="YRReturn activeReturn"> 1YR </span>/<span class="MOReturn"> 1MO </span> return&nbsp;&nbsp;</div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="contentTab">
+            <div class="performanceContentWrapper">
+                <button class="performanceShowTable" style="display:none">Devid</button>
+                <button class="performanceChart" style="display:none">Show</button>
+
+                <div class="performanceChartWrapper">
+                    <div class="summaryElementCaption perfomanceStartDate">Growth of $10,000 invested since a start date</div>
+
+                    <h4 class="firstPrice">First price at <br><span class="perfFirst"></span></h4>
+                    <h4 class="lastPrice">Last price at <br><span class="perfUpdated"></span></h4>
+                    <div class="performanceCanvas">
+                        <div class="chartLegend priceLegend">Currency</div>
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                    <div class="clearfix"></div>
+
+                    <div class="performanceLegend">
+                        <div class="performanceLine">
+                            <div class="lineColor"></div>
+                            <span class="firstLineName">First line</span>
+                        </div>
+                        <div class="performanceLine">
+                            <div class="lineColor"></div>
+                            <span class="secondLineName"></span>
+                        </div>
+                        <div class="performanceLine">
+                            <div class="lineColor"></div>
+                            <span class="thirdLineName"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <table class="performanceSummaryTable">
+                    <tr><td class="tableCaption" colspan="8"><b>Period Ending dd/mm/yyyy </b></td></tr>
+                    <tr><th></th><th>1 mth</th><th>3 mths</th><th>6 mths</th><th>1 year</th><th>2 years</th><th>3 years</th><th>5 years</th></tr>
+                    <tr class="performanceInfoRow"><td><b>Capital Return</b></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="performanceInfoRow"><td><b>Income Return</b></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="performanceInfoRow" style="font-weight: 900"><td><b>Total Return</b></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr class="performanceInfoRow"><td><b class="firstBenchmarkReturnName">First Benchmark</b></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    <tr class="performanceInfoRow"><td><b class="secondBenchmarkReturnName">Secondary Benchmark</b></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                </table>
+
+                <div class="performanceInfo">
+                    <div class="performanceInfoCaption">
+                        <p><b>Month to date:</b><i> Date</i></p>
+                    </div>
+                    <span class="mtdDelta" style="display:none">+5.17%</span>
+                    <p>Price Gain/Loss: <span class="mtdGain">5.17%</span></p>
+                    <p style="display:none">Dividend Yield: <span class="mtdDivid">0.0%</span></p>
+                </div>
+                <div class="clearfix"></div>
+
+            </div>
+        </div>
+        <div class="contentTab">
+
+            <div class="infoTooltip">
+                <div class="infoWrap">
+                    <div class="infoContent">
+                        Test Message
+                    </div>
+                </div>
+            </div>
+
+            <div class="riskWrap">
+                <div class="marketMeasures riskGeneralBlock">
+                    <div class="summaryElementCaption">Market measures<div class="bottomLine"></div></div>
+                    <div class="marketPies">
+                        <div class="marketPieElement">
+                            <div class="summaryElementCaption">Best month<div class="homeAbout bestMonthHelp">?</div></div>
+                            <div class="marketWrap">
+                                <p></p>
+                                <canvas id="bestMonth"></canvas>
+                            </div>
+                        </div>
+                        <div class="marketPieElement">
+                            <div class="summaryElementCaption">Worst month<div class="homeAbout worstMonthHelp">?</div></div>
+                            <div class="marketWrap">
+                                <p class="cherryPie"></p>
+                                <canvas id="worstMonth" class="cherryPie"></canvas>
+                            </div>
+                        </div>
+                        <div class="marketPieElement">
+                            <div class="summaryElementCaption">Average gain in up months<div class="homeAbout avarageGainUpHelp">?</div></div>
+                            <div class="marketWrap">
+                                <p></p>
+                                <canvas id="averageGain"></canvas>
+                            </div>
+                        </div>
+                        <div class="marketPieElement">
+                            <div class="summaryElementCaption">Average loss in down months<div class="homeAbout avarageGainDownHelp">?</div></div>
+                            <div class="marketWrap">
+                                <p class="cherryPie"></p>
+                                <canvas id="averageLost" class="cherryPie"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="marketPieElement">
+                            <div class="summaryElementCaption">% positive months<div class="homeAbout positiveMonthesHelp">?</div></div>
+                            <div class="marketWrap">
+                                <p></p>
+                                <canvas id="positiveMonths"></canvas>
+                            </div>
+                        </div>
+                        <div class="marketPieElement">
+                            <div class="summaryElementCaption">% outperforming months<div class="homeAbout outperformingMonthsHelp">?</div></div>
+                            <div class="marketWrap">
+                                <p></p>
+                                <canvas id="outperfMonths"></canvas>
+                            </div>
+                        </div>
+                        <div class="marketPieElement">
+                            <div class="summaryElementCaption">Downside deviation<div class="homeAbout downsideDiviationHelp">?</div></div>
+                            <div class="marketWrap">
+                                <p></p>
+                                <canvas id="downDeviation"></canvas>
+                            </div>
+                        </div>
+                        <div class="marketPieElement">
+                            <div class="summaryElementCaption">worst 1 day move<div class="homeAbout worstOneDayMoveHelp">?</div></div>
+                            <div class="marketWrap">
+                                <p class="cherryPie"></p>
+                                <canvas id="worstMove" class="cherryPie"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+
+            <div class="riskWrap">
+                <div class="riskMeasures riskGeneralBlock">
+                    <div class="summaryElementCaption">risk measures<div class="bottomLine"></div></div>
+                    <div class="riskItem">
+                        <div class="homeAbout betaPrimaryHelp">?</div>
+                        <div class="summaryElementCaption betaVsBMI firstRisk">Beta (vs Broad Market Index)</div>
+
+                        <div class="riskWrapper">
+                            <div class="riskItemCanvasWrap">
+                                <canvas id="riskBMI"></canvas>
+                            </div>
+                            <div class="riskContent riskBMI">
+                                <div class="deltaIndicator"></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="riskItem">
+                        <div class="homeAbout betaSecomdaryHelp">?</div>
+                        <div class="summaryElementCaption betaVsSecondBMI">Beta (vs Benchmark)</div>
+
+                        <div class="riskWrapper">
+                            <div class="riskItemCanvasWrap">
+                                <canvas id="riskBenchmark"></canvas>
+                            </div>
+                            <div class="riskContent riskBenchmark">
+                                <div class="deltaIndicator"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="riskItem">
+                        <div class="homeAbout volatilityHelp">?</div>
+                        <div class="summaryElementCaption annualVolatility">Annual Volatility</div>
+
+                        <div class="riskWrapper">
+                            <div class="riskItemCanvasWrap">
+                                <canvas id="riskVolatility"></canvas>
+                            </div>
+                            <div class="riskContent riskVolatiity">
+                                <div class="deltaIndicator"></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="riskItem">
+                        <div class="homeAbout correlationHelp">?</div>
+                        <div class="summaryElementCaption correlation">Correlation</div>
+
+                        <div class="riskWrapper">
+                            <div class="riskItemCanvasWrap">
+                                <canvas id="riskCorrelation"></canvas>
+                            </div>
+                            <div class="riskContent riskCorrelation">
+                                <div class="deltaIndicator"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+
+                <div class="financialRatios riskGeneralBlock">
+                    <div class="summaryElementCaption">financial ratios<div class="bottomLine"></div></div>
+
+                    <div class="riskItem">
+                        <div class="homeAbout sharpeRatioHelp">?</div>
+                        <div class="summaryElementCaption sharpeRatio">Sharpe ratio (original definition)</div>
+
+                        <div class="riskWrapper">
+                            <div class="riskItemCanvasWrap">
+                                <canvas id="ratiosVolatility"></canvas>
+                            </div>
+                            <div class="riskContent sharpeRatio">
+                                <div class="deltaIndicator"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="riskItem">
+                        <div class="homeAbout sortinoRatioHelp">?</div>
+                        <div class="summaryElementCaption sortinoRatio">Sortino Ratio</div>
+
+                        <div class="riskWrapper">
+                            <div class="riskItemCanvasWrap">
+                                <canvas id="ratiosCorrelation"></canvas>
+                            </div>
+                            <div class="riskContent sortinoRatio">
+                                <div class="deltaIndicator"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+
+                </div>
+                <div class="clearfix"></div>
+            </div>
+
+        </div>
+        <div class="sorryBlock summaryInfo">
+            <div class="summaryElementCaption">Oops...</div>
+            <p>Sorry, no data to display</p>
+            <span>:(</span>
+        </div>
+    </div>
+</div>
+<div class="popup">
+    <div class="popupArrow"></div>
+    <div class="popupHeader">
+        <!--<div class="arrowLeft"></div> -->
+        <!--<div class="securityCaption"> -->
+        Southern Copper Corp - <b>SCCO</b>
+
+    </div>
+    <div class="popupContent">
+        <div style="border: 1px solid #2f4050">
+            <div class="popupContentBlock">
+                <h4>Price</h4>
+                <p class="dayOfLastPrice"></p>
+                <p class="currentPrice">$27.13</p>
+                <p class="dayPriceChange">(0.00%)</p>
+                <h3>Return MTD</h3>
+                <p class="mtd"></p>
+            </div>
+            <div class="popupContentBlock">
+                <h4 class="weekCount">52 Week Range</h4>
+                <canvas id="niceChart" width="100" height="65"></canvas>
+                <span class="rangeLeft">$23.41</span><span class="rangeRight">$33.31</span>
+                <div class="popupSlider"></div>
+                <!--<input class="popupSlider" type="text" data-slider="true">  -->
+            </div>
+            <div class="popupContentBlock">
+                <h4>Returns</h4>
+                <p class="endOfPreMonth"></p>
+                <table>
+                    <tr><td class="MO">1MO</td><td><div class="arrowUp">&#x27A8;</div><span>5.55%</span></td></tr>
+                    <tr><td class="MO6">3MO</td><td><div class="arrowUp">&#x27A8;</div><span>4.20%</span></td></tr>
+                    <tr><td class="YR">1YR</td><td><div class="arrowUp">&#x27A8;</div><span>11.73%</span></td></tr>
+                </table>
+            </div>
+            <div style="clear: both"></div>
+        </div>
+        <p>SCC owns and operate mines, and produces copper molybdenum and precious metals</p>
+        <a href="@Url.Content("~/Investment/SecuritiesHome")">See more details</a>
+    </div>
+</div>
+<!--Load these page level functions-->
+@section Styles {
+    @Styles.Render("~/Content/plugins/priceSlider")
+    @Styles.Render("~/Content/plugins/chartStyles")
+    @Styles.Render("~/Content/plugins/barChart")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")    
+    }
+
+@section Scripts {
+
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/dateRange")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/chosen")
+    @Scripts.Render("~/plugins/select2")
+
+    <script src="~/Scripts/plugins/charts/Chartjs/Chart.js"></script>
+    <script src="~/Scripts/plugins/charts/Chartjs/src/Chart.Bar.js"></script>
+    <script src="~/Scripts/plugins/charts/Chartjs/src/Chart.Core.js"></script>
+    <script src="~/Scripts/plugins/charts/Chartjs/src/Chart.Doughnut.js"></script>
+    <script src="~/Scripts/plugins/charts/Chartjs/src/Chart.Line.js"></script>
+    <script src="~/Scripts/plugins/charts/Chartjs/src/Chart.PolarArea.js"></script>
+    <script src="~/Scripts/plugins/charts/Chartjs/src/Chart.Radar.js"></script>
+    <script src="~/Scripts/plugins/charts/drawChart.js"></script>
+    <script src="~/Scripts/plugins/slider/js/simple-slider.min.js"></script>
+    <script src="~/Scripts/plugins/charts/Chartjs/Chart.js"></script>
+    <script src="~/Scripts/plugins/charts/mainBar.js"></script>
+    <script src="~/Scripts/plugins/priceSlider/nouislider.js"></script>
+    <script src="~/Scripts/plugins/popupInfo/popup.js"></script>
+
+    <script type="text/javascript">
+
+        function DownloadProductAllocationCsv(){            
+            $('.downloadProductId').val(@ViewBag.ProductId);
+            $('.downloadProductAllocation').click();
+        };
+        
+
+        function Test(name) {
+            var sortType = $('#filterTypeId').val();
+            var sortedarray = @Html.Raw(Json.Encode(@ViewBag.SortList));
+            for(var i =0; i<sortedarray.length;i++){
+                if (sortedarray[i].Text==name) {
+                    sortType = sortedarray[i].Value;
+                }
+
+            }
+            if (name.indexOf('Gics') != -1) {
+                name=name.replace('Gics', 'GICS Classification');
+            }
+            $("#sortby").text(' ('+name.replace('Sort','Sorted')+')');
+
+            $.ajax({
+                url: '@Url.Content("~/Investment/UpdateProductCalculation")',
+                data: { 'productId': '@ViewBag.ProductId', 'sortType': sortType },
+                type: "GET",
+                error: function (error) {
+                    alert("error");
+                },
+                success: function (data) {
+                    $('.modelTable').remove();
+
+                    var colorSet = [
+                        blue = "#1468B7",
+                        red = "#DA042B",
+                        green = "#419E2A",
+                        purple = "#C10BBC",
+                        yellow = "#DEE04A",
+                        orange = "#FBBE11",
+                        aqua = "#16EFD1",
+                        brown = "#A27E69"
+                    ];
+                    modelData = JSON.parse(data).gics;
+
+                    for (var i = 0; i < Object.keys(modelData).length; i++) {
+                        $('.modelWrap').append('<table class="table table-striped table-bordered table-hover dataTable modelTable productHomeTable no-footer popupTable table'+i+'">' +
+                            '<thead display: table-row-group;><tr>' +
+                             '<th colspan="3">&#9660; Security name</th>' +
+                             //'<th style="text-align: right;width:6%" class="security-type-head"></th>' +
+                             '<th style="text-align: right;width:6%" class="modelWeight"></th>' +
+                             '<th style="text-align: right;width:15%" class="modelReturn"></th>' +
+                            '</tr></thead><tbody></tbody></table>');
+                        var table = $('.table'+i)[0].getElementsByTagName('tbody')[0];
+                        var weight = 0;
+                        var returnMO = 0;
+                        for (var j = 0; j < Object.keys(modelData[Object.keys(modelData)[i]]).length - 1; j++) {
+                            var newRow = table.insertRow(j);
+                            if (j % 2 == 0) $(newRow).addClass("odd"); else $(newRow).addClass("even");
+
+                            newRow.insertCell(0).innerHTML = modelData[Object.keys(modelData)[i]]['securityData' + j].code;
+                            newRow.insertCell(1).innerHTML = "<a href=" + '@Url.Content("~/Investment/SecuritiesHome?code=")' + modelData[Object.keys(modelData)[i]]['securityData' + j].code + ">" + modelData[Object.keys(modelData)[i]]['securityData' + j].name + "</a>";
+                            newRow.insertCell(2).innerHTML = modelData[Object.keys(modelData)[i]]['securityData' + j].securityType;
+                            newRow.insertCell(3).innerHTML = parseFloat(modelData[Object.keys(modelData)[i]]['securityData' + j].allocation).toFixed(2) + "%";
+                            newRow.insertCell(4).innerHTML = "&nbsp;  &nbsp;  <span style='text-align: right;' class='moTable pull-right'>" + modelData[Object.keys(modelData)[i]]['securityData' + j].monthReturn + "</span><span style='text-align: right;' class='yrTable pull-right'>" +
+                                modelData[Object.keys(modelData)[i]]['securityData' + j].yearReturn + "</span>";
+
+                            if (parseFloat(newRow.cells[3].innerHTML) > 0) $(newRow.cells[3]).addClass("deltaUp").html(parseFloat(newRow.cells[3].innerHTML).toFixed(2) + "%");
+                            else if (newRow.cells[3].innerHTML == 0) { $(newRow.cells[3]).html(parseInt(newRow.cells[3].innerHTML).toFixed(2) + "%"); }
+                            else $(newRow.cells[3]).addClass("deltaDown").html(parseFloat(newRow.cells[3].innerHTML.slice(1)).toFixed(2) + "%");
+
+                            if (parseFloat($(newRow).find(".moTable").html()) > 0) $(newRow).find(".moTable").addClass("deltaUp").html("&#x25B2;" + parseFloat($(newRow).find(".moTable").html()).toFixed(4) + "%");
+                            else if ($(newRow).find(".moTable").html() == 0) { "&nbsp;  " + $(newRow).find(".moTable").html(parseInt($(newRow).find(".moTable").html()).toFixed(4) + "%"); }
+                            else $(newRow).find(".moTable").addClass("deltaDown").html("&#x25BC;" + parseFloat($(newRow).find(".moTable").html().slice(1)).toFixed(4) + "%");
+
+                            if (parseFloat($(newRow).find(".yrTable").html()) > 0) $(newRow).find(".yrTable").addClass("deltaUp").html("&#x25B2;" + parseFloat($(newRow).find(".yrTable").html()).toFixed(4) + "%");
+                            else if ($(newRow).find(".yrTable").html() == 0) { "&nbsp;  " + $(newRow).find(".yrTable").html(parseInt($(newRow).find(".yrTable").html()).toFixed(4) + "%"); }
+                            else $(newRow).find(".yrTable").addClass("deltaDown").html("&#x25BC;" + parseFloat($(newRow).find(".yrTable").html().slice(1)).toFixed(4) + "%");
+                        }
+
+                        var color = Math.floor(Math.random() * (colorSet.length));
+
+                        //$(table).parent().find('thead th')[0].innerHTML = modelData[Object.keys(modelData)[i]].gicsData[Object.keys(modelData[Object.keys(modelData)[i]].gicsData)[0]];
+                        //$(table).parent().find('thead th')[0].style.borderLeft = "5px solid " + colorSet[color];
+                        //$(table).parent().find('thead th')[1].innerHTML =  modelData[Object.keys(modelData)[i]].gicsData[Object.keys(modelData[Object.keys(modelData)[i]].gicsData)[1]] + "%";
+                        //$(table).parent().find('thead th')[2].innerHTML = "<span class='yrTable'>" + parseFloat(modelData[Object.keys(modelData)[i]].gicsData[Object.keys(modelData[Object.keys(modelData)[i]].gicsData)[2]]).toFixed(4) + "%" + "</span><span class='moTable'>"
+                        //                                                + parseFloat(modelData[Object.keys(modelData)[i]].gicsData[Object.keys(modelData[Object.keys(modelData)[i]].gicsData)[3]]).toFixed(4) + "%" + "</span>";
+
+                        $(table).parent().find('thead th')[0].innerHTML = modelData[Object.keys(modelData)[i]].gicsData[Object.keys(modelData[Object.keys(modelData)[i]].gicsData)[0]];
+                        $(table).parent().find('thead th')[0].style.borderLeft = "5px solid " + colorSet[color];
+                        $(table).parent().find('thead th')[1].innerHTML = modelData[Object.keys(modelData)[i]].gicsData[Object.keys(modelData[Object.keys(modelData)[i]].gicsData)[1]] + "%";
+                        $(table).parent().find('thead th')[2].innerHTML = "";
+                        //Commented cell for year/month return
+                        /*"<span class='yrTable'>" + parseFloat(modelData[Object.keys(modelData)[i]].gicsData[Object.keys(modelData[Object.keys(modelData)[i]].gicsData)[2]]).toFixed(4) + "%" + "</span><span class='moTable'>"
+                                                                        + parseFloat(modelData[Object.keys(modelData)[i]].gicsData[Object.keys(modelData[Object.keys(modelData)[i]].gicsData)[3]]).toFixed(4) + "%" + "</span>";
+                        
+                        
+                        if (parseFloat($('.table' + i + ' thead tr th span.yrTable').html()) >= 0) $('.table' + i + ' thead tr th span.yrTable').addClass("deltaUp").html("&#x25B2;" + $('.table' + i + ' thead tr th span.yrTable').html());
+                        else $('.table' + i + ' thead tr th span.yrTable').addClass("deltaDown").html("&#x25BC;" + $('.table' + i + ' thead tr th span.yrTable').html().slice(1));
+                        if (parseFloat($('.table' + i + ' thead tr th span.moTable').html()) >= 0) $('.table' + i + ' thead tr th span.moTable').addClass("deltaUp").html("&#x25B2;" + $('.table' + i + ' thead tr th span.moTable').html());
+                        else $('.table' + i + ' thead tr th span.moTable').addClass("deltaDown").html("&#x25BC;" + $('.table0 thead tr th span.moTable').html().slice(1));
+                        */
+
+                        colorSet.slice(color, 1);
+                    }
+                    //setTimeout(function () {
+                    //    $('.weightHead').width($('.modelTable tbody td')[0].getBoundingClientRect().width - 2);
+                    //    $('.segmentHead').width($('.modelTable tbody td')[1].getBoundingClientRect().width - 1);
+                    //    $('.symbolHead').width($('.modelTable tbody td')[2].getBoundingClientRect().width - 1);
+                    //    $('.switchHead').width($('.modelTable tbody td')[3].getBoundingClientRect().width - 1);
+                    //}, 50);
+                    chartFunction('@Url.Content("~/Investment/TestAjax")', '@Url.Content("~/Error/Index")');
+
+                    //$('.weightHead').width($('.modelTable tbody td')[0].getBoundingClientRect().width - 2);
+                    //$('.segmentHead').width($('.modelTable tbody td')[1].getBoundingClientRect().width - 1);
+                    //$('.symbolHead').width($('.modelTable tbody td')[2].getBoundingClientRect().width - 1);
+                    //$('.switchHead').width($('.modelTable tbody td')[3].getBoundingClientRect().width - 1);
+                }
+            });
+
+        }
+        @*
+        function Test() {
+
+            var sortType = $('#filterTypeId').val();
+
+            $.ajax({
+                url: '@Url.Content("~/Investment/ProductCalculation")',
+                data: { 'productVersionId': '@ViewBag.ProductVersionId', 'sortType': sortType },
+                type: "GET",
+                error: function (error) {
+                    alert("error");
+                },
+                success: function (data) {
+                    $('.modelTable').remove();
+
+                    var colorSet = [
+                    blue = "#1468B7",
+                    red = "#DA042B",
+                    green = "#419E2A",
+                    purple = "#C10BBC",
+                    yellow = "#DEE04A",
+                    orange = "#FBBE11",
+                    aqua = "#16EFD1",
+                    brown = "#A27E69"
+                    ]
+                    modelData = JSON.parse(data).gics;
+                    for (var i = 0; i < Object.keys(modelData).length; i++) {
+                        $('.modelWrap').append('<table class="table table-striped table-bordered table-hover dataTable modelTable no-footer table' + i + '"><thead><tr><th class="modelWeight"></th><th colspan="2">&#9660; Security name</th><th class="modelReturn"></th></tr></thead><tbody></tbody></table>');
+                        var table = $('.table' + i)[0].getElementsByTagName('tbody')[0];
+                        var weight = 0;
+                        var returnMO = 0;
+                        for (var j = 0; j < Object.keys(modelData[Object.keys(modelData)[i]]).length - 1; j++) {
+                            var newRow = table.insertRow(j);
+                            if (j % 2 == 0) $(newRow).addClass("odd"); else $(newRow).addClass("even");
+
+                            newRow.insertCell(0).innerHTML = parseFloat(modelData[Object.keys(modelData)[i]]['securityData' + j].allocation).toFixed(2) + "%";
+                            newRow.insertCell(1).innerHTML = "<a href='/Investment/SecuritiesHome?code=" + modelData[Object.keys(modelData)[i]]['securityData' + j].code + "'>" + modelData[Object.keys(modelData)[i]]['securityData' + j].name + "</a>";
+                            newRow.insertCell(2).innerHTML = modelData[Object.keys(modelData)[i]]['securityData' + j].code;
+                            newRow.insertCell(3).innerHTML = "&nbsp;  &nbsp;  <span class='moTable'>" + modelData[Object.keys(modelData)[i]]['securityData' + j].monthReturn + "</span><span class='yrTable'>" +
+                                                            modelData[Object.keys(modelData)[i]]['securityData' + j].yearReturn + "</span>"
+                            if (parseFloat(newRow.cells[0].innerHTML) > 0) $(newRow.cells[0]).addClass("deltaUp").html("&#x25B2;" + parseFloat(newRow.cells[0].innerHTML).toFixed(2) + "%");
+                            else if (newRow.cells[0].innerHTML == 0) { $(newRow.cells[0]).html(parseInt(newRow.cells[0].innerHTML).toFixed(2) + "%"); }
+                            else $(newRow.cells[0]).addClass("deltaDown").html("&#x25BC;" + parseFloat(newRow.cells[0].innerHTML.slice(1)).toFixed(2) + "%");
+
+                            if (parseFloat($(newRow).find(".moTable").html()) > 0) $(newRow).find(".moTable").addClass("deltaUp").html("&#x25B2;" + parseFloat($(newRow).find(".moTable").html()).toFixed(4) + "%");
+                            else if ($(newRow).find(".moTable").html() == 0) { "&nbsp;  " + $(newRow).find(".moTable").html(parseInt($(newRow).find(".moTable").html()).toFixed(4) + "%"); }
+                            else $(newRow).find(".moTable").addClass("deltaDown").html("&#x25BC;" + parseFloat($(newRow).find(".moTable").html().slice(1)).toFixed(4) + "%");
+
+                            if (parseFloat($(newRow).find(".yrTable").html()) > 0) $(newRow).find(".yrTable").addClass("deltaUp").html("&#x25B2;" + parseFloat($(newRow).find(".yrTable").html()).toFixed(4) + "%");
+                            else if ($(newRow).find(".yrTable").html() == 0) { "&nbsp;  " + $(newRow).find(".yrTable").html(parseInt($(newRow).find(".yrTable").html()).toFixed(4) + "%"); }
+                            else $(newRow).find(".yrTable").addClass("deltaDown").html("&#x25BC;" + parseFloat($(newRow).find(".yrTable").html().slice(1)).toFixed(4) + "%");
+
+
+                        }
+                        var color = Math.floor(Math.random() * (colorSet.length));
+
+                        $(table).parent().find('thead th')[0].innerHTML = modelData[Object.keys(modelData)[i]].gicsData[Object.keys(modelData[Object.keys(modelData)[i]].gicsData)[1]] + "%";
+                        $(table).parent().find('thead th')[0].style.borderLeft = "5px solid " + colorSet[color];
+                        $(table).parent().find('thead th')[1].innerHTML = modelData[Object.keys(modelData)[i]].gicsData[Object.keys(modelData[Object.keys(modelData)[i]].gicsData)[0]];
+                        $(table).parent().find('thead th')[2].innerHTML = "<span class='yrTable'>" + parseFloat(modelData[Object.keys(modelData)[i]].gicsData[Object.keys(modelData[Object.keys(modelData)[i]].gicsData)[2]]).toFixed(4) + "%" + "</span><span class='moTable'>"
+                                                                        + parseFloat(modelData[Object.keys(modelData)[i]].gicsData[Object.keys(modelData[Object.keys(modelData)[i]].gicsData)[3]]).toFixed(4) + "%" + "</span>";
+                        if (parseFloat($('.table' + i + ' thead tr th span.yrTable').html()) >= 0) $('.table' + i + ' thead tr th span.yrTable').addClass("deltaUp").html("&#x25B2;" + $('.table' + i + ' thead tr th span.yrTable').html());
+                        else $('.table' + i + ' thead tr th span.yrTable').addClass("deltaDown").html("&#x25BC;" + $('.table' + i + ' thead tr th span.yrTable').html().slice(1));
+                        if (parseFloat($('.table' + i + ' thead tr th span.moTable').html()) >= 0) $('.table' + i + ' thead tr th span.moTable').addClass("deltaUp").html("&#x25B2;" + $('.table' + i + ' thead tr th span.moTable').html());
+                        else $('.table' + i + ' thead tr th span.moTable').addClass("deltaDown").html("&#x25BC;" + $('.table0 thead tr th span.moTable').html().slice(1));
+
+
+                        colorSet.slice(color, 1)
+                    }
+                    setTimeout(function () {
+                        $('.weightHead').width($('.modelTable tbody td')[0].getBoundingClientRect().width - 2);
+                        $('.segmentHead').width($('.modelTable tbody td')[1].getBoundingClientRect().width - 1);
+                        $('.symbolHead').width($('.modelTable tbody td')[2].getBoundingClientRect().width - 1);
+                        $('.switchHead').width($('.modelTable tbody td')[3].getBoundingClientRect().width - 1);
+
+                        $(document).on('click', '.modelTable thead', function () {
+                            $(this).next().slideToggle();
+                        });
+                    }, 50);
+                    chartFunction('@Url.Content("~/Investment/TestAjax")', '@Url.Content("~/Error/Index")');
+
+                    $('.weightHead').width($('.modelTable tbody td')[0].getBoundingClientRect().width - 2);
+                    $('.segmentHead').width($('.modelTable tbody td')[1].getBoundingClientRect().width - 1);
+                    $('.symbolHead').width($('.modelTable tbody td')[2].getBoundingClientRect().width - 1);
+                    $('.switchHead').width($('.modelTable tbody td')[3].getBoundingClientRect().width - 1);
+                }
+            });
+        }
+*@
+
+        /*----------------MunuTab------------------*/
+        $(document).ready(function () {
+            var slider = $('.summarySlider')[0];
+            var headerTabs = $('.headerTab');
+            var contentTabs = $('.contentWrap > .contentTab');
+            var windowObj = $(window);
+            var activeContent = $('.activeContent');
+            var priceSlider = $('.priceSlider')[0];
+            var priceSliderRange = $('.priceSliderWrapper span');
+            var dataJSON;
+            var config;
+            var target;
+            var priceTable;
+            var fromdate;
+            var todate;
+            var spDate;
+            var pricePeriods = $('.pricePeriod');
+            var bigChartBase, summaryChart, priceChart, performanceChart;
+            var dataPeriods = new Array(6);
+            for (var i = 0; i < 6; i++) {
+                dataPeriods[i] = new Object();
+            }
+            var firstPerformanceLine = "#3FBFA5";
+            var secondPerformanceLine = "#1E85C6";
+            var mainGreenColor = "rgb(26,179,148)";
+            var mainGreenFillColor = "rgba(26,179,148, 0.3)";
+            var thirdPerformanceLine = "rgb(155, 52, 156)";
+            var transparentColor = "transparent";
+            var lineColor = $('.lineColor');
+            var priceDataset = {};
+            var modelData = {};
+            var summaryDataset, performanceDataset;
+            var performanceData = {
+                labels: [],
+                datasets: [
+                    {
+                        label: "First Line",
+                        data: [],
+                        strokeColor: mainGreenColor,
+                        fillColor: mainGreenFillColor,// "rgba(255, 0, 0, 0.1)"
+                        pointColor: mainGreenFillColor
+                    },
+                    {
+                        label: "Coming soon...",
+                        data: [],
+                        strokeColor: secondPerformanceLine,
+                        fillColor: "rgba(30,130,198,0.3)", //"rgba(0, 0, 255, 0.1)"
+                        pointColor: secondPerformanceLine
+                    },
+                    {
+                        label: "Yellow line",
+                        data: [],
+                        strokeColor: thirdPerformanceLine,
+                        fillColor: "rgba(155,52,156,0.3)",
+                        pointColor: thirdPerformanceLine
+                    }
+                ]
+            }
+            var priceData = {
+                labels: [],
+                datasets: [{
+                    fillColor: mainGreenFillColor,
+                    // fillColor: "rgba(30,130,198,0.3)",
+                    strokeColor: mainGreenColor,
+                    pointColor: mainGreenColor,
+                    pointStrokeColor: "rgba(255,255,255,0.8)",
+                    //   width: 1000,
+                    //   height: 625,
+                    data: []
+                }]
+            }
+            noUiSlider.create(slider, {
+                start: 0,
+                connect: "upper",
+                disabled: true,
+                range: {
+                    min: 0,
+                    max: 100
+                },
+                step: 1//(maxPrice - minPrice) / 50
+            });
+            noUiSlider.create(priceSlider, {
+                start: 0,
+                connect: "upper",
+                disabled: true,
+                range: {
+                    min: 0,
+                    max: 100
+                },
+                step: 1//(maxPrice - minPrice) / 50
+            });
+
+
+            slider.setAttribute('disabled', true);
+
+
+            $(headerTabs[0]).on('click', function () {
+                target = $(this);
+                changeTab();
+                if (summaryChart != undefined) summaryChart.destroy();
+                runSummaryTab();
+            });
+
+            $(headerTabs[1]).on('click', function () {
+                target = $(this);
+                changeTab();
+
+                if (priceChart != undefined) priceChart.destroy();
+                runPricesTab();
+            });
+
+            $(headerTabs[2]).on('click', function () {
+                target = $(this);
+                changeTab();
+
+            });
+
+            $(headerTabs[3]).on('click', function () {
+                target = $(this);
+                changeTab();
+                if (performanceChart != undefined) performanceChart.destroy();
+                runPerformanceTab();
+            });
+
+            $(headerTabs[4]).on('click', function () {
+                target = $(this);
+                changeTab();
+                runRiskTab();
+            });
+
+
+
+            $('.pieShow').on('click', function () {
+
+
+            });
+
+            pricePeriods.on('click', function () {
+                priceChart.destroy();
+                pricePeriods.removeClass("activePeriod");
+                $(this).addClass("activePeriod");
+                buildLineChart($(this).index());
+            });
+
+
+            window.onload = function() {
+                getData();
+
+                setTimeout(function() {
+                }, 300);
+            };
+
+            $('.getIncome').on('click', function () { IncomeData() });
+
+            headerTabs.on('click', function () {
+
+            });
+            /*----------------END MunuTab------------------*/
+
+            /*----------------BarChart (IncomeTab)------------------*/
+            var options = {
+                maintainAspectRatio: true,
+                responsive: false
+            };
+
+            var barChartData = {
+                labels: [],
+                datasets: [{
+                    fillColor: mainGreenColor,
+                    highlightFill: mainGreenFillColor,
+                    data: []
+                }]
+            };
+            Chart.types.Bar.extend({
+                name: "BarAlt",
+                draw: function () {
+                    Chart.types.Bar.prototype.draw.apply(this, arguments);
+                }
+
+            });
+            /*----------------END BarChart (IncomeTab)------------------*/
+
+            windowObj.on('resize', function () {
+                //  adaptiveChart(priceChart, $('.priceChartWrap'));
+            });
+
+            function buildModelTables(data) {
+                var colorSet = [
+                    blue = "#1468B7",
+                    red = "#DA042B",
+                    green = "#419E2A",
+                    purple = "#C10BBC",
+                    yellow = "#DEE04A",
+                    orange = "#FBBE11",
+                    aqua = "#16EFD1",
+                    brown = "#A27E69"
+                ];
+
+                //начальная загрузка.......
+
+                for (var i = 0; i < Object.keys(modelData).length; i++) {
+                    $('.modelWrap').append('<table class="table table-striped table-bordered table-hover dataTable modelTable productHomeTable no-footer popupTable table'+i+'">' +
+                        '<thead display: table-row-group;><tr>' +
+                         '<th colspan="3">&#9660; Security name</th>' +
+                         //'<th style="text-align: right;width:6%" class="security-type-head"></th>' +
+                         '<th style="text-align: right;width:6%" class="modelWeight"></th>' +
+                         '<th style="text-align: right;width:15%" class="modelReturn"></th></tr></thead><tbody></tbody></table>');
+                    var table = $('.table'+i)[0].getElementsByTagName('tbody')[0];
+                    var weight = 0;
+                    var returnMO = 0;
+                    for (var j = 0; j < Object.keys(modelData[Object.keys(modelData)[i]]).length - 1; j++) {
+                        var newRow = table.insertRow(j);
+                        if (j % 2 == 0) $(newRow).addClass("odd"); else $(newRow).addClass("even");
+
+                        newRow.insertCell(0).innerHTML = modelData[Object.keys(modelData)[i]]['securityData' + j].code;
+                        newRow.insertCell(1).innerHTML = "<a href=" + '@Url.Content("~/Investment/SecuritiesHome?code=")' + modelData[Object.keys(modelData)[i]]['securityData' + j].code + ">" + modelData[Object.keys(modelData)[i]]['securityData' + j].name + "</a>";
+                        newRow.insertCell(2).innerHTML = modelData[Object.keys(modelData)[i]]['securityData' + j].securityType;
+                        newRow.insertCell(3).innerHTML = parseFloat(modelData[Object.keys(modelData)[i]]['securityData' + j].allocation).toFixed(2) + "%";
+                        newRow.insertCell(4).innerHTML = "&nbsp;  &nbsp;  <span style='text-align: right;' class='moTable pull-right'>" + modelData[Object.keys(modelData)[i]]['securityData' + j].monthReturn + "</span><span style='text-align: right;' class='yrTable pull-right'>" +
+                            modelData[Object.keys(modelData)[i]]['securityData' + j].yearReturn + "</span>";
+
+                        if (parseFloat(newRow.cells[3].innerHTML) > 0) $(newRow.cells[3]).addClass("deltaUp").html(parseFloat(newRow.cells[3].innerHTML).toFixed(2) + "%");
+                        else if (newRow.cells[3].innerHTML == 0) { $(newRow.cells[3]).html(parseInt(newRow.cells[3].innerHTML).toFixed(2) + "%"); }
+                        else $(newRow.cells[3]).addClass("deltaDown").html(parseFloat(newRow.cells[3].innerHTML.slice(1)).toFixed(2) + "%");
+
+                        if (parseFloat($(newRow).find(".moTable").html()) > 0) $(newRow).find(".moTable").addClass("deltaUp").html("&#x25B2;" + parseFloat($(newRow).find(".moTable").html()).toFixed(4) + "%");
+                        else if ($(newRow).find(".moTable").html() == 0) { "&nbsp;  " + $(newRow).find(".moTable").html(parseInt($(newRow).find(".moTable").html()).toFixed(4) + "%"); }
+                        else $(newRow).find(".moTable").addClass("deltaDown").html("&#x25BC;" + parseFloat($(newRow).find(".moTable").html().slice(1)).toFixed(4) + "%");
+
+                        if (parseFloat($(newRow).find(".yrTable").html()) > 0) $(newRow).find(".yrTable").addClass("deltaUp").html("&#x25B2;" + parseFloat($(newRow).find(".yrTable").html()).toFixed(4) + "%");
+                        else if ($(newRow).find(".yrTable").html() == 0) { "&nbsp;  " + $(newRow).find(".yrTable").html(parseInt($(newRow).find(".yrTable").html()).toFixed(4) + "%"); }
+                        else $(newRow).find(".yrTable").addClass("deltaDown").html("&#x25BC;" + parseFloat($(newRow).find(".yrTable").html().slice(1)).toFixed(4) + "%");
+                    }
+
+                    var color = Math.floor(Math.random() * (colorSet.length));
+
+                    $(table).parent().find('thead th')[0].innerHTML = modelData[Object.keys(modelData)[i]].gicsData[Object.keys(modelData[Object.keys(modelData)[i]].gicsData)[0]];
+                    $(table).parent().find('thead th')[0].style.borderLeft = "5px solid " + colorSet[color];
+                    $(table).parent().find('thead th')[1].innerHTML = modelData[Object.keys(modelData)[i]].gicsData[Object.keys(modelData[Object.keys(modelData)[i]].gicsData)[1]] + "%";
+                    $(table).parent().find('thead th')[2].innerHTML = "";
+                    
+                    //Commented cell for year/month return
+                    /*"<span class='yrTable'>" + parseFloat(modelData[Object.keys(modelData)[i]].gicsData[Object.keys(modelData[Object.keys(modelData)[i]].gicsData)[2]]).toFixed(4) + "%" + "</span><span class='moTable'>"
+                                                                    + parseFloat(modelData[Object.keys(modelData)[i]].gicsData[Object.keys(modelData[Object.keys(modelData)[i]].gicsData)[3]]).toFixed(4) + "%" + "</span>";    
+                    
+                    if (parseFloat($('.table' + i + ' thead tr th span.yrTable').html()) >= 0) $('.table' + i + ' thead tr th span.yrTable').addClass("deltaUp").html("&#x25B2;" + $('.table' + i + ' thead tr th span.yrTable').html());
+                    else $('.table' + i + ' thead tr th span.yrTable').addClass("deltaDown").html("&#x25BC;" + $('.table' + i + ' thead tr th span.yrTable').html().slice(1));
+                    if (parseFloat($('.table' + i + ' thead tr th span.moTable').html()) >= 0) $('.table' + i + ' thead tr th span.moTable').addClass("deltaUp").html("&#x25B2;" + $('.table' + i + ' thead tr th span.moTable').html());
+                    else $('.table' + i + ' thead tr th span.moTable').addClass("deltaDown").html("&#x25BC;" + $('.table0 thead tr th span.moTable').html().slice(1));
+                    */
+
+                    colorSet.slice(color, 1);
+                }
+
+                $(document).on('click', '.modelTable thead', function () {
+                    $(this).next().slideToggle();
+                });
+
+                chartFunction('@Url.Content("~/Investment/TestAjax")', '@Url.Content("~/Error/Index")');
+
+
+                $('.MOReturn').on('click', function () {
+                    $(this).addClass("activeReturn");
+                    $('.YRReturn').removeClass("activeReturn");
+                    $('.yrTable').hide();
+                    $('.moTable').show();
+                });
+
+                $('.YRReturn').on('click', function () {
+                    $(this).addClass("activeReturn");
+                    $('.MOReturn').removeClass("activeReturn");
+                    $('.yrTable').show();
+                    $('.moTable').hide();
+                });
+            }
+
+
+
+
+
+            //$(window).on('resize', function () {
+            //    if ($('.modelTable') !== undefined) {
+            //        $('.weightHead').width($('.modelTable tbody td')[0].getBoundingClientRect().width - 2);
+            //        $('.segmentHead').width($('.modelTable tbody td')[1].getBoundingClientRect().width - 1);
+            //        $('.symbolHead').width($('.modelTable tbody td')[2].getBoundingClientRect().width - 1);
+            //        $('.switchHead').width($('.modelTable tbody td')[3].getBoundingClientRect().width - 1);
+            //    }
+            //})
+
+            function hexToRgb(hex) {
+                // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+                var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+                hex = hex.replace(shorthandRegex, function (m, r, g, b) {
+                    return r + r + g + g + b + b;
+                });
+
+                var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? "rgba(" + parseInt(result[1], 16).toString() + "," + parseInt(result[2], 16).toString() + "," + parseInt(result[3], 16).toString() + "," : null;
+            }
+
+            function IncomeData() {
+                var ctx = document.getElementById("canvas").getContext("2d");
+
+                barChartData.labels = [];
+                barChartData.datasets[0].data = [];
+
+                for (var i = 0; i < dataJSON.yearlyDevid.length - 1; i++) {
+                    barChartData.labels.push(dataJSON.yearlyDevid[i].date);
+                    if (dataJSON.yearlyDevid[i].Rate == "") dataJSON.yearlyDevid[i].Rate = 0;
+                    barChartData.datasets[0].data.push(dataJSON.yearlyDevid[i].Rate);
+                }
+
+                for (i = 0; i < $('.dividendTable tr').length - 1; i++) {
+                    document.getElementsByClassName('dividendTable')[0].deleteRow(i + 1)
+                }
+
+                for (i = 0; i < dataJSON.devidList.length; i++) {
+                    var newRow = document.getElementsByClassName('dividendTable')[0].insertRow(i + 1);
+                    newRow.insertCell(0).innerHTML = dataJSON.devidList[i].IncomeType;
+                    newRow.insertCell(1).innerHTML = dataJSON.devidList[i].BalanceDate.slice(0, dataJSON.devidList[i].BalanceDate.search(" "));
+                    newRow.insertCell(2).innerHTML = dataJSON.devidList[i].ExDivDate.slice(0, dataJSON.devidList[i].ExDivDate.search(" "));
+                    newRow.insertCell(3).innerHTML = dataJSON.devidList[i].RecordDate.slice(0, dataJSON.devidList[i].RecordDate.search(" "));
+                    newRow.insertCell(4).innerHTML = dataJSON.devidList[i].PaymentDate.slice(0, dataJSON.devidList[i].PaymentDate.search(" "));
+                    newRow.insertCell(5).innerHTML = parseFloat(dataJSON.devidList[i].IncomeAmount).toFixed(2);
+                }
+
+                $('.incomeCurrencyCaption').text(priceDataset.currencyCode);
+
+                window.myBar = new Chart(ctx).Bar(barChartData, {
+                    responsive: true,
+                    barValueSpacing: 30,               //Number - Spacing between each of the X value sets
+                    scaleLineWidth: 0,
+                    showTooltips: true,
+                    barStrokeWidth: 0,                //width of conturline
+                    scaleGridLineWidth: 1,            //Number - Width of the grid lines (contur)
+                    scaleGridLineColor: "#ebeeef",    //String - Colour of the grid lines
+                    scaleOverride: true,
+                    scaleSteps: 5,                    //qty of lines
+                    scaleBeginAtZero: true,
+                    scaleShowGridLines: true,        //Boolean - Whether grid lines are shown across the chart
+                    scaleShowHorizontalLines: true,   //Boolean - Whether to show horizontal lines (except X axis)
+                    scaleFontColor: "#86888a",
+                    scaleShowVerticalLines: true,     //Boolean - Whether to show vertical lines (except Y axis)
+                    barShowStroke: true              //Boolean - If there is a stroke on each bar
+                });
+                /*
+                                    myBar.datasets[0].bars[0].fillColor = "#e74c3c"; //bar 1
+                                    myBar.datasets[0].bars[1].fillColor = "#f39c12"; //bar 1
+                                    myBar.datasets[0].bars[2].fillColor = "#2ecc71"; //bar 2
+                                    myBar.datasets[0].bars[3].fillColor = "#3498db"; //bar 3
+                                    myBar.datasets[0].bars[4].fillColor = "#9b59b6"; //bar 3
+                                    */
+
+                for (i = 0; i < barChartData.datasets[0].data.length; i++) {
+                    $($('.incomeTable tr:nth-child(2)').find('td')[i + 1]).html(parseFloat(barChartData.datasets[0].data[i]).toFixed(2));
+                }
+
+                for (i = 0; i < myBar.datasets[0].bars.length; i++) {
+                    myBar.datasets[0].bars[i].highlightFill = mainGreenFillColor;//hexToRgb(myBar.datasets[0].bars[i].fillColor) + "0.8)";
+                }
+
+                var min = myBar.datasets[0].bars[0].value;
+                var max = parseFloat(myBar.datasets[0].bars[0].value);
+
+                for (var a = 0; a < myBar.datasets[0].bars.length; a++) {
+                    if (myBar.datasets[0].bars[a].value < min) min = myBar.datasets[0].bars[a].value;
+                    if (myBar.datasets[0].bars[a].value > max) max = myBar.datasets[0].bars[a].value;
+                }
+
+                myBar.scale.max = Math.floor(max) + 1;
+                myBar.scale.stepValue = myBar.scale.max / myBar.scale.steps;
+
+                myBar.update();
+
+            }
+
+            function GetCbaGrowth() {
+                $.ajax({
+                    url: '@Url.Content("~/Investment/GetCbaGrowth")',
+                    data: { 'securityCode': '@ViewBag.CodeName' },
+                    type: "GET",
+                    cache: false,
+                    error: function (error) {
+                        window.location.href = '@Url.Content("~/Error/Index")';
+                    },
+                    success: function (data) {
+                        alert(data);
+                    }
+                });
+                return;
+            }
+
+            function GetDividYield() {
+
+
+                $('.performanceChartWrapper .chartLegend ').text('AUD');
+                //$('.performanceChartWrapper .chartLegend ').text(performanceDataset.currencyCode);
+
+                $('.perfUpdated').html(performanceDataset.ratesFirstLine[performanceDataset.ratesFirstLine.length - 2].date);
+                $('.perfFirst').html(performanceData.labels[0]);//data.ratesFirstLine[0].date.slice(0, data.ratesFirstLine[0].date.search(" ")));
+
+                $('.summaryElementCaption.perfomanceStartDate').text('Growth of $10,000 invested since ' + performanceData.labels[0]);
+
+                $('.tableCaption b').html('Period Ending ' + performanceDataset.ratesFirstLine[performanceDataset.ratesFirstLine.length - 2].date);
+
+                performanceChart = createLineChart("performanceChart", performanceData, {
+                    scaleLabel: "<%= ' ' + value %>",
+                    datasetStrokeWidth: 1,
+                    showXLabels: 7,
+                    scaleFontSize: 12,
+                    pointDotRadius: 2,
+                    pointDotStrokeWidth: 1,
+                    pointHitDetectionRadius: 5,
+                    bezierCurve: true,
+                    scaleOverride: true,
+                    scaleSteps: 10,
+                    scaleStepWidth: .5,
+                    scaleStartValue: 0,
+                    scaleShowVerticalLines: false,
+                    scaleGridLineColor: "rba(0,0,0,0.7)",
+                    legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>",
+                    responsive: true
+                });
+
+                $('.firstLineName').text(performanceDataset.securityCode);
+                $('.secondLineName').text(performanceDataset.primeryBenchmarkName);
+                $('.thirdLineName').text(performanceDataset.secondaryBenchmarkName)
+
+                $('.firstBenchmarkReturnName').text(performanceDataset.primeryBenchmarkName);
+                $('.secondBenchmarkReturnName').text(performanceDataset.secondaryBenchmarkName);
+
+                var performanceInfo = $('.performanceInfo');
+                var mtdPerf = $('.mtdDelta');
+                var mtdGain = $('.mtdGain');
+                var mtdDivid = $('.mtdDivid');
+
+                performanceInfo.find('p').find('i').html(" " + performanceDataset.MtdDateGlobal.slice(0, performanceDataset.MtdDateGlobal.search(" ")));
+                mtdPerf.html(performanceDataset.MtdGlobal + "%");
+                mtdGain.html(performanceDataset.MtdGlobal + "%");
+                mtdDivid.html(performanceDataset.dividMtd + "%");
+
+                if (parseFloat(performanceDataset.MtdGlobal) > 0) mtdPerf.removeClass('deltaDown').addClass('deltaUp')
+                else if (parseFloat(performanceDataset.MtdGlobal) < 0) mtdPerf.removeClass('deltaUp').addClass('deltaDown')
+                else if (performanceDataset.MtdGlobal == 0) {
+                    mtdPerf.removeClass('deltaUp deltaDown');
+                    mtdPerf.html('0.00%');
+                }
+
+                if (performanceDataset.MtdGlobal == "Infinity") {
+                    mtdGain.removeClass('deltaUp deltaDown');
+                    mtdGain.removeClass('deltaUp deltaDown');
+                    mtdGain.html('0.00%');
+                }
+                else if (parseFloat(performanceDataset.MtdGlobal) > 0) mtdGain.removeClass('deltaDown').addClass('deltaUp')
+                else if (parseFloat(performanceDataset.MtdGlobal) < 0) mtdGain.removeClass('deltaUp').addClass('deltaDown')
+                else if (performanceDataset.MtdGlobal == 0) {
+                    mtdGain.removeClass('deltaUp deltaDown');
+                    mtdGain.html('0.00%');
+                }
+
+                if (parseFloat(performanceDataset.dividMtd) > 0) mtdDivid.removeClass('deltaDown').addClass('deltaUp')
+                else if (parseFloat(performanceDataset.dividMtd) < 0) mtdDivid.removeClass('deltaUp').addClass('deltaDown')
+                else if (performanceDataset.dividMtd == 0) {
+                    mtdDivid.removeClass('deltaUp deltaDown');
+                    mtdDivid.html('0.00%');
+                }
+
+                $('.performanceLegend').addClass('performanceLegendShow');
+                lineColor[0].style.backgroundColor = firstPerformanceLine;
+                lineColor[1].style.backgroundColor = secondPerformanceLine;
+                lineColor[2].style.backgroundColor = thirdPerformanceLine;
+                fitChart(performanceChart);
+
+                performanceTableRow = $('.performanceInfoRow');
+
+                for (var i = 0; i < performanceDataset.TSR.length; i++) {
+                    $($($(performanceTableRow[0]).find('td'))[i + 1]).text(parseFloat(performanceDataset.prices[i].value).toFixed(2) + "%");
+                    $($($(performanceTableRow[1]).find('td'))[i + 1]).text(parseFloat(performanceDataset.devidends[i].value).toFixed(2) + "%");
+                    $($($(performanceTableRow[2]).find('td'))[i + 1]).text(parseFloat(performanceDataset.TSR[i].value).toFixed(2) + "%");
+                    $($($(performanceTableRow[3]).find('td'))[i + 1]).text(parseFloat(performanceDataset.benchmark[i].value).toFixed(2) + "%");
+                    $($($(performanceTableRow[4]).find('td'))[i + 1]).text(parseFloat(performanceDataset.secondaryBenchmark[i].value).toFixed(2) + "%");
+                }
+            }
+
+            $('.performanceShowTable').on('click', function () {
+                GetDividYield();
+            });
+
+            function getData() {
+                $.ajax({
+                    url: '@Url.Content("~/Investment/ProductHomeData")',
+                    data: { 'productVersionId': '@ViewBag.ProductVersionId', 'model': '@ViewBag.Model' },
+                    type: "GET",
+                    cache: false,
+                    error: function (error) {
+                        window.location.href = '@Url.Content("~/Error/Index")';
+                    },
+                    success: function (data) {
+                        summaryDataset = {
+                            labels: [],
+                            datasets: [{
+                                data: [],
+                                strokeColor: mainGreenColor,
+                                //    strokeColor: "#41C0A6",
+                                strokeWidth: 10,
+                                fillColor: mainGreenFillColor,
+                                //     fillColor: "rgba(65,192,166,0.5)",
+                                pointColor: secondPerformanceLine,
+                                pointStrokeColor: "rgba(255,255,255,0.8)"
+                            }]
+                        }
+
+                        data = JSON.parse(data);
+                        modelData = data.gics;
+
+                        if (data.hasPrises == "false") {
+                            //$('.summaryChartWrap, .summaryInfo').css({ "visibility": "hidden" });
+                            //$('.sorryBlock').css({ "visibility": "visible" }).show();
+                            //$('.headerTab').unbind('click').addClass('noHover').removeClass('headerTab');
+
+                            buildModelTables();
+
+                            return;
+                        }
+
+                        priceDataset.sevenDays = data.sevenDays;
+                        priceDataset.month = data.month;
+                        priceDataset.threeMonth = data.threeMonth;
+                        priceDataset.year = data.year;
+                        priceDataset.twoYears = data.twoYears;
+                        priceDataset.threeYears = data.threeYears;
+                        priceDataset.currencyCode = data.currencyCode;
+
+                        dataJSON = data.Income;
+
+                        summaryDataset.data = data.range;
+                        summaryDataset.datas = data.datas;
+                        summaryDataset.datasets[0].data = [];
+                        summaryDataset.labels = [];
+
+                        for (var i = 0; i < data.range.length - 1; i++) {
+                            summaryDataset.labels.push(data.range[i].date.slice(0, data.range[i].date.search(" ")));
+                            summaryDataset.datasets[0].data.push(data.range[i].UnitPrice)
+                        }
+
+                        performanceDataset = data.perfomanceRisk;
+
+                        performanceData.labels = [];
+                        performanceData.datasets[0].data = [];
+                        performanceData.datasets[1].data = [];
+                        
+                        for (var i = 0; i < performanceDataset.ratesFirstLine.length - 1; i++) {
+                            performanceDataset.ratesFirstLine[i].date = performanceDataset.ratesFirstLine[i].date.slice(0, performanceDataset.ratesFirstLine[i].date.search(" "));
+                            performanceData.labels.push(performanceDataset.ratesFirstLine[i].date);
+                            performanceData.datasets[0].data.push(parseFloat(performanceDataset.ratesFirstLine[i].Rate));
+                            performanceData.datasets[1].data.push(parseFloat(performanceDataset.ratesSecondLine[i].Rate));
+                            performanceData.datasets[2].data.push(parseFloat(performanceDataset.ratesThirsLine[i].Rate));
+                        }
+                        
+                        getSummary();
+                        buildModelTables();
+                    }
+                });
+            };
+
+            function getSummary() {
+                $('.summaryChartWrap .chartLegend').text(summaryDataset.datas.currencyCode);
+
+                $('.rangeLeft').text(summaryDataset.datas.minPrice);
+                $('.rangeRight').text(summaryDataset.datas.maxPrice);
+
+
+                var datas = summaryDataset.datas;
+
+                $('.sliderMin').html(parseFloat(datas.minPrice).toFixed(2));
+                $('.sliderNow').html(parseFloat(datas.latestPrice).toFixed(2));
+                $('.sliderMax').html(parseFloat(datas.maxPrice).toFixed(2));
+
+
+                var sliderCurrentPosition = ((datas.latestPrice - datas.minPrice) / (datas.maxPrice - datas.minPrice) * 100).toFixed(2);
+                slider.noUiSlider.set(Math.floor(sliderCurrentPosition));
+
+                var summaryInfo = $('.summaryInfoContent');
+                var currentPrice = $('.summaryCurrentPrice');
+                var dayPriceChange = $('.summaryPriceDelta');
+                var summaryMTD = $('.summaryDeltaMTD');
+
+
+                $('.summaryElementCaption .returnsAt').html(datas.endOfPreMonth.slice(0, datas.endOfPreMonth.search(" ")));
+                $('.summaryCurrentPrice').html(datas.latestPrice);
+                currentPrice.html("$" + datas.latestPrice);
+                dayPriceChange.html("(" + parseFloat(datas.priceChange).toFixed(2) + "%)");
+                if (parseFloat(datas.priceChange).toFixed(2) > 0) dayPriceChange.addClass('deltaUp');
+                else if (parseFloat(datas.priceChange).toFixed(2) < 0) dayPriceChange.addClass('deltaDown');
+                summaryMTD.html(datas.MTD + "%");
+
+                if (datas.MTD > 0) {
+                    summaryMTD.removeClass('deltaDown').addClass('deltaUp')
+                } else if (datas.MTD < 0) {
+                    summaryMTD.removeClass('deltaUp').addClass('deltaDown');
+                }
+
+                $(summaryInfo[0]).find("span").html(datas.MO + "%");
+                if (parseFloat(datas.MO) > 0) $(summaryInfo[0]).addClass('deltaUp')
+                else if (parseFloat(datas.MO) < 0) $(summaryInfo[0]).addClass('deltaDown')
+                else if (datas.MO == "N/A") {
+                    $(summaryInfo[0]).find('.arrowUp').hide();
+                    $(summaryInfo[0]).find('span').html('N/A');
+                } else if (datas.MO == "0") {
+                    $(summaryInfo[0]).find('.arrowUp').hide();
+                }
+                $(summaryInfo[1]).find("span").html(datas.MO3 + "%");
+                if (parseFloat(datas.MO3) > 0) $(summaryInfo[1]).addClass('deltaUp')
+                else if (parseFloat(datas.MO3) < 0) $(summaryInfo[1]).addClass('deltaDown')
+                else if (datas.MO3 == "N/A") {
+                    $(summaryInfo[1]).find('.arrowUp').hide();
+                    $(summaryInfo[1]).find('span').html('N/A');
+                } else if (datas.MO3 == "0") {
+                    $(summaryInfo[1]).find('.arrowUp').hide();
+                }
+                $(summaryInfo[2]).find("span").html(datas.YR + "%");
+                if (parseFloat(datas.YR) > 0) $(summaryInfo[2]).addClass('deltaUp')
+                else if (parseFloat(datas.YR) < 0) $(summaryInfo[2]).addClass('deltaDown');
+                else if (datas.YR == "N/A") {
+                    $(summaryInfo[2]).find('.arrowUp').hide();
+                    $(summaryInfo[2]).find('span').html('N/A');
+                } else if (datas.YR == "0") {
+                    $(summaryInfo[2]).find('.arrowUp').hide();
+                }
+
+                $('.summaryUpdated').html(summaryDataset.data[summaryDataset.data.length - 2].date.slice(0, summaryDataset.data[summaryDataset.data.length - 2].date.search(" ")));
+                $('.summaryFirst').html(summaryDataset.data[0].date.slice(0, summaryDataset.data[0].date.search(" ")));
+
+                $('.summaryElementCaption').find('.priceAt').html(datas.dateOfLastPrice.slice(0, datas.dateOfLastPrice.search(" ")));
+
+                $('.securityType span').html(datas.securityType);
+                $('.assetClass span').html(datas.assetClass + " &nbsp; ");
+                $('.expenceRatio span').html(parseFloat(datas.expenseRatio).toFixed(2));
+                $('.region span').html(datas.regionId);
+                $('.gicsType span').html(datas.gics);
+
+                summaryChart = createLineChart("summaryChart", summaryDataset, {
+                    scaleLabel: "<%= ' ' + value %>",
+                    showScale: true,
+                    showXLabels: 10,
+                    showTooltips: true,
+                    datasetStrokeWidth: 1,
+                    pointDotRadius: 0,
+                    pointDotStrokeWidth: 0,
+                    pointHitDetectionRadius: 1,
+                    bezierCurve: true,
+                    scaleOverride: true,
+                    scaleSteps: 10,
+                    scaleStepWidth: .5,
+                    scaleStartValue: 0,
+                    scaleShowGridLines: false,
+                    scaleShowVerticalLines: false,
+                    scaleGridLineColor: "rba(0,0,0,0.7)",
+                    responsive: true,
+                    maintainAspectRatio: true
+                });
+
+                /*     niceChart.scale.yLabelWidth = 80;
+                     niceChart.scale.fontSize = 12;
+                     niceChart.scale.font = "italic 12px 'Open Sans', 'Helvetica', 'Arial', sans-serif";*/
+                summaryChart.strokeWidth = 10;
+                summaryChart.update();
+
+                fitChart(summaryChart);
+            }
+
+
+            function GetPrices() {
+
+                data = priceDataset;
+
+                $('.priceChartWrap .chartLegend').text(data.currencyCode);
+
+                dataPeriods[0] = data.sevenDays;
+                dataPeriods[1] = data.month;
+                dataPeriods[2] = data.threeMonth;
+                dataPeriods[3] = data.year;
+                dataPeriods[4] = data.twoYears;
+                dataPeriods[5] = data.threeYears;
+
+                for (var j = 0; j < dataPeriods.length; j++) {
+                    for (var i = 0; i < dataPeriods[j].length - 1; i++) {
+                        if (dataPeriods[j][i].date.search(" ") !== -1) dataPeriods[j][i].date = dataPeriods[j][i].date.slice(0, dataPeriods[j][i].date.search(" "));
+                    }
+                }
+
+
+                var period = 1;
+                buildLineChart(period);
+
+            }
+
+            function GetRiskAnalitics() {
+
+                $('.riskContent').html("<div class='deltaIndicator'></div>");
+
+                var downColor = "#e74c3c";
+                var upColor = "#1ab394";
+                var transparent = "rgba(128,128,128,0.3)";
+                var riskPies = [];
+                var riskLineData = {
+                    BMI: {
+                        labels: ["1", '2'],
+                        datasets: [
+                            {
+                                strokeColor: upColor,
+                                fillColor: "transparent",
+                                pointDotRadius: 2,
+                                pointDotStrokeWidth: 1,
+                                data: [6, 3]
+                            }
+                        ]
+                    },
+                    bench: {
+                        labels: ["1", '2'],
+                        datasets: [
+                            {
+                                strokeColor: upColor,
+                                fillColor: "transparent",
+                                pointDotRadius: 2,
+                                pointDotStrokeWidth: 1,
+                                data: [3, 8]
+                            }
+                        ]
+                    },
+                    volatility: {
+                        labels: ["1", '2'],
+                        datasets: [
+                            {
+                                strokeColor: upColor,
+                                fillColor: "transparent",
+                                pointDotRadius: 2,
+                                pointDotStrokeWidth: 1,
+                                data: [4, 3]
+                            }
+                        ]
+                    },
+                    correlation: {
+                        labels: ["1", '2'],
+                        datasets: [
+                            {
+                                strokeColor: upColor,
+                                fillColor: "transparent",
+                                pointDotRadius: 2,
+                                pointDotStrokeWidth: 1,
+                                data: [2, 5]
+                            }
+                        ]
+                    },
+                    ratios1: {
+                        labels: ["1", '2'],
+                        datasets: [
+                            {
+                                strokeColor: upColor,
+                                fillColor: "transparent",
+                                pointDotRadius: 2,
+                                pointDotStrokeWidth: 1,
+                                data: [2, 5]
+                            }
+                        ]
+                    },
+                    ratios2: {
+                        labels: ["1", '2'],
+                        datasets: [
+                            {
+                                strokeColor: upColor,
+                                fillColor: "transparent",
+                                pointDotRadius: 2,
+                                pointDotStrokeWidth: 1,
+                                data: [2, 5]
+                            }
+                        ]
+                    }
+                };
+
+                var doughnutAreas = [parseFloat(performanceDataset.marketMeasures.bestMonth), parseFloat(performanceDataset.marketMeasures.worstMonth), parseFloat(performanceDataset.marketMeasures.avrGain), parseFloat(performanceDataset.marketMeasures.avrLoss),
+                                     parseFloat(performanceDataset.marketMeasures.securityPositiveMonth), parseFloat(performanceDataset.marketMeasures.securityOutperformingMonth), parseFloat(performanceDataset.marketMeasures.downsideRisk), parseFloat(performanceDataset.marketMeasures.worstDayChange)];
+
+                var riskDoughnutData = [
+                    [
+                     {
+                         value: Math.round(doughnutAreas[0] * 360),
+                         color: upColor
+                     }, {
+                         value: 360 - Math.round(doughnutAreas[0] * 360),
+                         color: transparent
+                     }],
+                    [
+                     {
+                         value: Math.round(doughnutAreas[1] * (-360)),
+                         color: downColor
+                     }, {
+                         value: 360 - Math.round(doughnutAreas[1] * (-360)),
+                         color: transparent
+                     }],
+                    [
+                     {
+                         value: Math.round(doughnutAreas[2] * 360),
+                         color: upColor
+                     }, {
+                         value: 360 - Math.round(doughnutAreas[2] * 360),
+                         color: transparent
+                     }],
+                    [
+                     {
+                         value: Math.round(doughnutAreas[3] * (-360)),
+                         color: downColor
+                     }, {
+                         value: 360 - Math.round(doughnutAreas[3] * (-360)),
+                         color: transparent
+                     }
+                    ],
+                    [
+                     {
+                         value: Math.round(doughnutAreas[4] * 360),
+                         color: upColor
+                     }, {
+                         value: 360 - Math.round(doughnutAreas[4] * 360),
+                         color: transparent
+                     }
+                    ],
+                    [
+                     {
+                         value: Math.round(doughnutAreas[5] * 360),
+                         color: upColor
+                     }, {
+                         value: 360 - Math.round(doughnutAreas[5] * 360),
+                         color: transparent
+                     }
+                    ],
+                    [
+                     {
+                         value: Math.round(doughnutAreas[6] * 360),
+                         color: upColor
+                     }, {
+                         value: 360 - Math.round(doughnutAreas[6] * 360),
+                         color: transparent
+                     }
+                    ],
+                    [
+                     {
+                         value: Math.round(doughnutAreas[7] * (-360)),
+                         color: downColor
+                     }, {
+                         value: 360 - Math.round(doughnutAreas[7] * (-360)),
+                         color: transparent
+                     }
+                    ]
+                ];
+
+                for (var i = 0; i < $('.marketPieElement').length; i++) {
+                    $($('.marketPieElement')[i]).find('p').html(Math.round(doughnutAreas[i] * 100) + "%");
+                    if ($($('.marketPieElement')[i]).find('p').html().search('Infinity') != -1) {
+                        $($('.marketPieElement')[i]).find('p').next().css({ "visibility": "hidden" });
+                        $($('.marketPieElement')[i]).find('p').css({ "color": "#676a6c" }).html("No data to display")
+                    }
+                }
+
+                var riskLineOptions = {
+                    //animation: false,
+                    animationSteps: 60,
+                    showScale: true,
+                    showTooltips: true,
+                    bezierCurve: false,
+                    scaleOverride: true,
+                    scaleStartValue: 0,
+                    // scaleSteps: 4,
+                    scaleStepWidth: 1,
+                    scaleShowGridLines: false,
+                    scaleShowHorizontalLines: true,
+                    scaleShowVerticalLines: false,
+                    pointDotRadius: 1,
+                    pointHitDetectionRadius: 3,
+                    pointDotStrokeWidth: 1,
+                    responsive: true
+                };
+
+                var riskDoughnutOptions = {
+                    showTooltips: false,
+                    percentageInnerCutout: 0,
+                    segmentsStrokeWidth: 0,
+                    responsive: true
+                };
+
+                riskLineData.BMI.labels = [];
+                riskLineData.bench.labels = [];
+                riskLineData.volatility.labels = [];
+                riskLineData.correlation.labels = [];
+                riskLineData.ratios1.labels = [];
+                riskLineData.ratios2.labels = [];
+
+                riskLineData.BMI.datasets[0].data = [];
+                riskLineData.bench.datasets[0].data = [];
+                riskLineData.volatility.datasets[0].data = [];
+                riskLineData.correlation.datasets[0].data = [];
+                riskLineData.ratios1.datasets[0].data = [];
+                riskLineData.ratios2.datasets[0].data = [];
+
+                if (performanceDataset.betaRisk.length == 0) {
+                    $('.riskItem .riskItemCanvasWrap').css("visibility", "hidden");
+                    $('.riskItem .riskContent').html('No data to display chart');
+                } else if (performanceDataset.betaRisk.length == 1) $('.riskItem .riskItemCanvasWrap').css("visibility", "hidden");;
+
+                if (performanceDataset.betaSecondRisk.length == 0) {
+                    $('.riskItem .riskItemCanvasWrap').css("visibility", "hidden");;
+                    $('.riskItem .riskContent').html('No data to display chart');
+                }
+                else if (performanceDataset.betaSecondRisk.length == 1) $('.riskItem .riskItemCanvasWrap').css("visibility", "hidden");;
+
+                if (performanceDataset.volatilityRisk.length == 0) {
+                    $('.riskItem .riskItemCanvasWrap').css("visibility", "hidden");;
+                    $('.riskItem .riskContent').html('No data to display chart');
+                } else if (performanceDataset.volatilityRisk.length == 1) $('.riskItem .riskItemCanvasWrap').css("visibility", "hidden");;
+                if (performanceDataset.correlationRisk.length == 0) {
+                    $('.riskItem .riskItemCanvasWrap').css("visibility", "hidden");;
+                    $('.riskItem .riskContent').html('No data to display chart');
+                } else if (performanceDataset.correlationRisk.length == 1) $('.riskItem .riskItemCanvasWrap').css("visibility", "hidden");;
+                if (performanceDataset.sharpeRatioCountRisk.length == 0) {
+                    $('.riskItem .riskItemCanvasWrap').css("visibility", "hidden");;
+                    $('.riskItem .riskContent').html('No data to display chart');
+                } else if (performanceDataset.sharpeRatioCountRisk.length == 1) $('.riskItem .riskItemCanvasWrap').css("visibility", "hidden");;
+                if (performanceDataset.sortinoRatioCountRisk.length == 0) {
+                    $('.riskItem .riskItemCanvasWrap').css("visibility", "hidden");;
+                    $('.riskItem .riskContent').html('No data to display chart');
+                } else if (performanceDataset.sortinoRatioCountRisk.length == 1) $('.riskItem .riskItemCanvasWrap').css("visibility", "hidden");;
+
+                for (i = 0; i < performanceDataset.betaRisk.length; i++) {
+                    riskLineData.BMI.labels.push("");
+                    riskLineData.BMI.datasets[0].data.push(parseFloat(performanceDataset.betaRisk[i].value));
+                    if (performanceDataset.betaRisk.length == 0) {
+                        $('.riskItem .riskItemCanvasWrap, .riskItem .riskContent').hide();
+                    }
+                }
+                for (i = 0; i < performanceDataset.betaSecondRisk.length; i++) {
+                    riskLineData.bench.labels.push("");
+                    riskLineData.bench.datasets[0].data.push(parseFloat(performanceDataset.betaSecondRisk[i].value));
+
+                }
+                for (i = 0; i < performanceDataset.volatilityRisk.length; i++) {
+                    riskLineData.volatility.labels.push("");
+                    riskLineData.volatility.datasets[0].data.push(parseFloat(performanceDataset.volatilityRisk[i].value));
+                    if (performanceDataset.volatilityRisk.length == 0) {
+                        $('.riskItem .riskItemCanvasWrap, .riskItem .riskContent').hide();
+                    }
+                }
+                for (i = 0; i < performanceDataset.correlationRisk.length; i++) {
+                    riskLineData.correlation.labels.push("");
+                    riskLineData.correlation.datasets[0].data.push(parseFloat(performanceDataset.correlationRisk[i].value));
+
+                }
+                for (i = 0; i < performanceDataset.sharpeRatioCountRisk.length; i++) {
+                    riskLineData.ratios1.labels.push("");
+                    riskLineData.ratios1.datasets[0].data.push(Math.abs(parseFloat(performanceDataset.sharpeRatioCountRisk[i].value)));
+
+                }
+                for (i = 0; i < performanceDataset.sortinoRatioCountRisk.length; i++) {
+                    riskLineData.ratios2.labels.push("");
+                    riskLineData.ratios2.datasets[0].data.push(Math.abs(parseFloat(performanceDataset.sortinoRatioCountRisk[i].value)));
+
+                }
+
+                if (performanceDataset.betaRisk.length > 0) $('.riskBMI').prepend(parseFloat(performanceDataset.betaRisk[performanceDataset.betaRisk.length - 1].value).toFixed(2));
+                if (performanceDataset.betaSecondRisk.length > 0) $('.riskBenchmark').prepend(parseFloat(performanceDataset.betaSecondRisk[performanceDataset.betaSecondRisk.length - 1].value).toFixed(2));
+                if (performanceDataset.volatilityRisk.length > 0) $('.riskVolatiity').prepend(parseFloat(performanceDataset.volatilityRisk[performanceDataset.volatilityRisk.length - 1].value).toFixed(2));
+                if (performanceDataset.correlationRisk.length > 0) $('.riskCorrelation').prepend(parseFloat(performanceDataset.correlationRisk[performanceDataset.correlationRisk.length - 1].value).toFixed(2));
+
+                if (performanceDataset.sharpeRatioCountRisk.length > 0) $('.sharpeRatio').prepend(parseFloat(performanceDataset.sharpeRatioCountRisk[performanceDataset.sharpeRatioCountRisk.length - 1].value).toFixed(2));
+                if (performanceDataset.sortinoRatioCountRisk.length > 0) $('.sortinoRatio').prepend(parseFloat(performanceDataset.sortinoRatioCountRisk[performanceDataset.sortinoRatioCountRisk.length - 1].value).toFixed(2));
+
+
+                $('.summaryElementCaption.betaVsBMI')
+                    .text('BETA  (' + performanceDataset.securityCode + ' VS ' + performanceDataset.primeryBenchmarkName + ')');
+
+                $('.summaryElementCaption.betaVsSecondBMI')
+                    .text('BETA  (' + performanceDataset.securityCode + ' VS ' + performanceDataset.secondaryBenchmarkName + ')');
+
+                $('.summaryElementCaption.annualVolatility')
+                    .text('ANNUAL VOLATILITY (' + performanceDataset.securityCode + ')');
+
+                $('.summaryElementCaption.correlation')
+                    .text('CORRELATION (' + performanceDataset.securityCode + ' VS ' + performanceDataset.primeryBenchmarkName + ')');
+
+                $('.summaryElementCaption.sharpeRatio').text("SHARPE RATIO (" + performanceDataset.securityCode + ')');
+                $('.summaryElementCaption.sortinoRatio').text("SORTINO  RATIO (" + performanceDataset.securityCode + ')');
+
+
+                var bestMonth = createDoughnutChart('bestMonth', riskDoughnutData[0], riskDoughnutOptions);
+                var worstMonth = createDoughnutChart('worstMonth', riskDoughnutData[1], riskDoughnutOptions);
+                var positiveMonths = createDoughnutChart('averageGain', riskDoughnutData[2], riskDoughnutOptions);
+                var outperformingMonths = createDoughnutChart('averageLost', riskDoughnutData[3], riskDoughnutOptions);
+                var positiveMonths = createDoughnutChart('positiveMonths', riskDoughnutData[4], riskDoughnutOptions);
+                var outperfMonths = createDoughnutChart('outperfMonths', riskDoughnutData[5], riskDoughnutOptions);
+                var downDeviation = createDoughnutChart('downDeviation', riskDoughnutData[6], riskDoughnutOptions);
+                var worstMove = createDoughnutChart('worstMove', riskDoughnutData[7], riskDoughnutOptions);
+
+                var lineBMI = riskLineData.BMI.datasets[0].data.length > 1 ? createLineChart('riskBMI', riskLineData.BMI, riskLineOptions) : null;
+                var lineBench = riskLineData.bench.datasets[0].data.length > 1 ? createLineChart('riskBenchmark', riskLineData.bench, riskLineOptions) : null;
+                var lineVolatility = riskLineData.volatility.datasets[0].data.length > 1 ? createLineChart('riskVolatility', riskLineData.volatility, riskLineOptions) : null;
+                var lineCorrelation = riskLineData.correlation.datasets[0].data.length > 1 ? createLineChart('riskCorrelation', riskLineData.correlation, riskLineOptions) : null;
+                var ratiosVolatility = riskLineData.ratios1.datasets[0].data.length > 1 ? createLineChart('ratiosVolatility', riskLineData.ratios1, riskLineOptions) : null;
+                var ratiosCorrelation = riskLineData.ratios2.datasets[0].data.length > 1 ? createLineChart('ratiosCorrelation', riskLineData.ratios2, riskLineOptions) : null;
+
+                for (i = 0; i < 4; i++) {
+                    if (parseFloat($($('.riskContent')[i]).html()) > 0) {
+                        $($('.deltaIndicator')[i]).addClass('arrow-up').parent().removeClass("deltaUp deltaDown").addClass("deltaUp");
+                    } else {
+                        $($('.deltaIndicator')[i]).addClass('arrow-down').parent().removeClass("deltaUp deltaDown").addClass("deltaDown");
+                        if (i == 0) {
+                            if (lineBMI) lineBMI.datasets[0].strokeColor = downColor;
+                        } else if (i == 1) {
+                            if (lineBench) lineBench.datasets[0].strokeColor = downColor
+                        } else if (i == 2) {
+                            if (lineVolatility) lineVolatility.datasets[0].strokeColor = downColor
+                        } else if (i == 3) {
+                            if (lineCorrelation) lineCorrelation.datasets[0].strokeColor = downColor
+                        }
+                    }
+                }
+
+                if (parseFloat($('.riskContent.sharpeRatio').html()) > 0) {
+                    $('.riskContent.sharpeRatio .deltaIndicator').addClass('arrow-up').parent().removeClass("deltaUp deltaDown").addClass("deltaUp");
+                } else $('.riskContent.sharpeRatio .deltaIndicator').addClass('arrow-down').parent().removeClass("deltaUp deltaDown").addClass("deltaDown");
+
+                if (parseFloat($('.riskContent.sortinoRatio ').html()) > 0) {
+                    $('.riskContent.sortinoRatio  .deltaIndicator').addClass('arrow-up').parent().removeClass("deltaUp deltaDown").addClass("deltaUp");
+                } else $('.riskContent.sortinoRatio  .deltaIndicator').addClass('arrow-down').parent().removeClass("deltaUp deltaDown").addClass("deltaDown");
+
+
+                if (lineBMI) fitChart(lineBMI);
+                if (lineBench) fitChart(lineBench);
+                if (lineVolatility) fitChart(lineVolatility);
+                if (lineCorrelation) fitChart(lineCorrelation);
+                if (ratiosVolatility) fitChart(ratiosVolatility);
+                if (ratiosCorrelation) fitChart(ratiosCorrelation);
+
+            }
+
+            function changeTab() {
+                if (!target.hasClass('activeTab')) {
+                    var index = $('.headerTab').filter(function () { return $(this).hasClass('activeTab') }).removeClass('activeTab').index();
+                    target.addClass('activeTab');
+                    $(contentTabs[index]).removeClass('activeContent');
+                    $(contentTabs[target.index()]).addClass('activeContent');
+
+
+                }
+            }
+
+            function buildLineChart(period) {
+
+
+
+                priceData.labels = [];
+                priceData.datasets[0].data = [];
+
+                for (var i = 0; i < dataPeriods[period].length - 1; i++) {
+                    priceData.labels.push(dataPeriods[period][i].date);
+                    priceData.datasets[0].data.push(dataPeriods[period][i].Rate);
+                }
+
+                $('.priceUpdated').html(priceData.labels[priceData.labels.length - 1]);
+                $('.priceFirst').html(priceData.labels[0]);
+
+                priceChart = createLineChart("priceChart", priceData, {
+                    scaleLabel: "<%= ' ' + value %>",
+                    datasetStrokeWidth: 1,
+                    showXLabels: 7,
+                    scaleFontSize: 12,
+                    pointDotRadius: 2,
+                    pointDotStrokeWidth: 1,
+                    pointHitDetectionRadius: 1,
+                    bezierCurve: true,
+                    scaleOverride: true,
+                    scaleSteps: 10,
+                    scaleStepWidth: .1,
+                    scaleStartValue: 0,
+                    scaleShowGridLines: false,
+                    scaleShowVerticalLines: false,
+                    scaleGridLineColor: "rba(0,0,0,0.7)",
+                    responsive: true
+                });
+
+                var min = parseFloat(priceChart.datasets[0].points[0].value);
+                var max = parseFloat(priceChart.datasets[0].points[0].value);
+
+                for (var i = 0; i < priceChart.datasets[0].points.length; i++) {
+                    if (parseFloat(priceChart.datasets[0].points[i].value) < min) min = parseFloat(priceChart.datasets[0].points[i].value);
+                    if (parseFloat(priceChart.datasets[0].points[i].value) > max) max = parseFloat(priceChart.datasets[0].points[i].value);
+                }
+
+                var lastPrice = priceChart.datasets[0].points[priceChart.datasets[0].points.length - 1].value;
+                $('.pricePeriodsContainer .priceSliderWrapper .sliderMin').html(parseFloat(min).toFixed(2));
+                $('.pricePeriodsContainer .priceSliderWrapper .sliderNow').html(parseFloat(lastPrice).toFixed(2));
+                $('.pricePeriodsContainer .priceSliderWrapper .sliderMax').html(parseFloat(max).toFixed(2));
+                priceSlider.setAttribute('disabled', true);
+                var sliderCurrentPosition = Math.floor((lastPrice - min) / (max - min) * 100);
+                priceSlider.noUiSlider.set(sliderCurrentPosition);
+
+                //  priceChart.scale.height = $('.priceChartWrap').height();
+                //  priceChart.scale.width = $('.priceChartWrap').width();
+                priceChart.update();
+
+                fitChart(priceChart);
+            }
+
+            function adaptiveChart(chart, wrapper) {
+                if (wrapper.width() < 1000) {
+                    //   console.log($(this).width());
+                    chart.options.responsive = false;
+                    chart.scale.width = wrapper.width();
+                    chart.scale.height = chart.scale.width / 1.5;
+                    // chartBack.height(bigChartBase.scale.height);
+                    chart.update();
+                }
+            }
+
+            $('.summaryChartWrap').on('resize', function () {
+                alert('123123');
+            });
+
+            windowObj.on('resize', function () {
+                //      fitChart(niceChart);
+            });
+
+            function fitChart(chartName) {
+                var min = parseFloat(chartName.datasets[0].points[0].value);
+                var max = parseFloat(chartName.datasets[0].points[0].value);
+                for (var j = 0; j < chartName.datasets.length; j++) {
+                    for (var i = 0; i < chartName.datasets[j].points.length; i++) {
+                        if (parseFloat(chartName.datasets[j].points[i].value) < min) min = parseFloat(chartName.datasets[j].points[i].value);
+                        if (parseFloat(chartName.datasets[j].points[i].value) > max) max = parseFloat(chartName.datasets[j].points[i].value);
+                    }
+                }
+
+                var minLevel = Math.floor(min).toString().length;
+                var maxLevel = Math.floor(max).toString().length;
+
+                if (minLevel > 1) {
+                    min = parseInt(min.toString()[0] + Math.pow(10, minLevel - 1).toString().slice(1));
+                } else if (min < 1) {
+                    min = min.toString();
+                    for (var i = 0; i < min.length; i++) {
+                        if (min[i] !== '0' && min[i] !== '.') {
+                            minLevel = min.slice(2, i);
+                            min = min[i];
+                            break;
+                        }
+                    }
+                    min = parseFloat("0." + minLevel + min);
+
+                } else if (minLevel == 1) min = Math.floor(min);
+
+
+                if (maxLevel > 1) {
+                    maxUpd = parseInt(max.toString()[0]) + 1;
+                    max = parseInt(maxUpd + Math.pow(10, maxLevel - 1).toString().slice(1));
+                    // max = (Math.floor(max / Math.pow(10, maxLevel - 1)) + Math.pow(10, maxLevel - 2)) * Math.pow(10, maxLevel - 1);
+                } else if (maxLevel == 1) max = Math.floor(max) + 1;
+                else if (max < 1) {
+                    max = max.toString();
+                    for (var i = 0; i < max.length; i++) {
+                        if (max[i] !== '0' && max[i] !== '.') {
+                            maxLevel = max.slice(2, i);
+                            max = (parseInt(max[i]) + 1).toString();
+                            break;
+                        }
+                    }
+                    max = parseFloat("0." + maxLevel + max);
+                }
+
+                chartName.scale.min = min;
+                chartName.scale.max = max;
+                chartName.scale.stepValue = ((chartName.scale.max - chartName.scale.min) / chartName.scale.steps).toFixed(2);
+                chartName.options.scaleStepWidth = chartName.scale.stepValue;
+                chartName.scale.xLabelRotation = 45;
+
+                chartName.update();
+            }
+
+            function runSummaryTab() {
+                getSummary();
+            }
+
+            function runPricesTab() {
+                //priceChart.destroy();
+
+                GetPrices();
+                pricePeriods.removeClass('activePeriod');
+                $(pricePeriods[1]).addClass('activePeriod');
+
+                //    $(pricePeriods[1]).click();
+            }
+
+            function runIncomeTab() {
+                IncomeData();
+            }
+
+            function runPerformanceTab() {
+                GetDividYield();
+            }
+
+            function runRiskTab() {
+                setTimeout(function () {
+                    GetRiskAnalitics();
+
+
+                }, 100);
+            }
+
+            function runAnalyticsTab() {
+                //$('.weightHead').width($('.modelTable tbody td')[0].getBoundingClientRect().width - 2);
+                //$('.segmentHead').width($('.modelTable tbody td')[1].getBoundingClientRect().width - 1);
+                //$('.symbolHead').width($('.modelTable tbody td')[2].getBoundingClientRect().width - 1);
+                //$('.switchHead').width($('.modelTable tbody td')[3].getBoundingClientRect().width - 1);
+                setTimeout(function () {
+                    //      $('.pieShow').click();
+
+                    var downColor = "#e74c3c";
+                    var upColor = "#1ab394";
+                    var transparentColor = "transparent";
+
+                    var securityLineData = {
+                        labels: ["1", "2", "3", "4", "5", "6", "7", "8"],
+                        datasets: [{
+                            data: [2, 3, 3, 2, 3, 2, 3, 4],
+                            fillColor: transparentColor,
+                            strokeColor: upColor,
+                            pointColor: "#fff",
+                            pointStrokeColor: upColor,
+                            pointStrokeWidth: 5
+                        }]
+                    };
+                    var doughnutAreas = [80, 225, 180, 150];
+                    var securityDoughnutData = [
+                        [{
+                            value: 90,
+                            color: transparentColor
+                        },
+                         {
+                             value: doughnutAreas[0],
+                             color: upColor
+                         },
+                         {
+                             value: 270 - doughnutAreas[0],
+                             color: transparentColor
+                         }],
+                        [{
+                            value: 90,
+                            color: transparentColor
+                        },
+                         {
+                             value: doughnutAreas[1],
+                             color: upColor
+                         },
+                         {
+                             value: 270 - doughnutAreas[1],
+                             color: transparentColor
+                         }],
+                        [{
+                            value: 90,
+                            color: transparentColor
+                        },
+                         {
+                             value: doughnutAreas[2],
+                             color: downColor
+                         },
+                         {
+                             value: 270 - doughnutAreas[2],
+                             color: transparentColor
+                         }],
+                        [{
+                            value: 90,
+                            color: transparentColor
+                        },
+                         {
+                             value: doughnutAreas[3],
+                             color: downColor
+                         },
+                         {
+                             value: 270 - doughnutAreas[3],
+                             color: transparentColor
+                         }]
+                    ];
+
+                    var securityLineOptions = {
+                        showScale: false,
+                        showTooltips: false,
+                        bezierCurve: false,
+                        scaleOverride: true,
+                        scaleStartValue: 0,
+                        scaleSteps: 4,
+                        scaleStepWidth: 1,
+                        pointDotRadius: 3,
+                        pointDotStrokeWidth: 2,
+                        animationSteps: 150,
+                        responsive: true
+                    };
+
+                    var securityDoughnutOptions = {
+                        showTooltips: false,
+                        onAnimationProgress: function () {
+
+                            this.chart.ctx.font = '20px OpenSansBold';
+                            this.chart.ctx.textAlign = 'center';
+                            this.chart.ctx.textBaseline = 'middle';
+
+                            var x = this.chart.canvas.clientWidth / 2;
+                            var y = this.chart.canvas.clientHeight / 2;
+
+                            var x_fix = 0;
+                            var y_fix = 2;
+
+                            this.chart.ctx.beginPath();
+                            this.chart.ctx.arc(x, y, x / 4, 0, 2 * Math.PI);
+
+                            var fillColor;
+                            if (this.chart.canvas.className == "downPie") fillColor = "#ec7d88";
+                            else fillColor = "#75b3a6";
+                            this.chart.ctx.fillStyle = fillColor;
+                            this.chart.ctx.fill();
+                            this.chart.ctx.lineWidth = 5;
+                            this.chart.ctx.strokeStyle = fillColor;
+                            this.chart.ctx.stroke();
+                            this.chart.ctx.fillStyle = '#fff';
+                            var temp = this.chart.canvas.id;
+                            this.chart.ctx.fillText(
+                                $('span').filter(function () {
+                                    return $(this).hasClass(temp);
+                                }).html(),
+                                x + x_fix, y + y_fix);
+                        },
+                        responsive: true
+                    };
+
+                    var visits24Line = createLineChart('visits24Line', securityLineData, securityLineOptions);
+                    var visitsWeekLine = createLineChart('visitsWeekLine', securityLineData, securityLineOptions);
+
+                    securityLineData.datasets[0].data = [4, 3, 2, 3, 2, 3, 3, 2];
+                    securityLineData.datasets[0].strokeColor = downColor;
+                    securityLineData.datasets[0].pointStrokeColor = downColor;
+
+                    var visitsMonthLine = createLineChart('visitsMonthLine', securityLineData, securityLineOptions);
+                    var visitsAverageLine = createLineChart('visitsAverageLine', securityLineData, securityLineOptions);
+
+                    var visits24Doughnut = createDoughnutChart('visits24Doughnut', securityDoughnutData[0], securityDoughnutOptions);
+                    var visitsWeekDoughnut = createDoughnutChart('visitsWeekDoughnut', securityDoughnutData[1], securityDoughnutOptions);
+                    var visitsMonthDoughnut = createDoughnutChart('visitsMonthDoughnut', securityDoughnutData[2], securityDoughnutOptions);
+                    var visitsAverageDoughnut = createDoughnutChart('visitsAverageDoughnut', securityDoughnutData[3], securityDoughnutOptions);
+
+
+                    var usage = $('.usagePercent');
+                    for (var i = 0; i < usage.length; i++) {
+                        var self = $(usage[i]);
+                        if (self.parent().find('.serverStatus').html() == "Up") {
+                            self
+                                .css({
+                                    "background": upColor
+                                })
+                                .animate({
+                                    "width": self.prev().html()
+                                }, 2000)
+                        } else {
+                            self
+                                .css({
+                                    "background": downColor
+                                })
+                                .animate({
+                                    "width": self.prev().html()
+                                }, 2000)
+                        }
+                    }
+
+
+                }, 100);
+            }
+
+
+
+        });
+
+    </script>
+}

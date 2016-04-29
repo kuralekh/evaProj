@@ -1,0 +1,33 @@
+﻿@model IEnumerable<Invest.ViewModel.Models.ProductModel>
+
+<div class="ibox-title">
+    <button class="btn btn-primary btn-sm" onclick="Create();">
+        Create Product
+    </button>
+</div>
+<div class="ibox-content">
+    <table id="example" class="table table-striped table-bordered table-hover" style="width: 100%">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Code)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.ProductType)
+                </th>
+                <th class="no-sort"></th>
+                <th class="no-sort"></th>
+            </tr>
+            <tr id="headerFilter" class="input-sm">
+                <th></th>
+                <th></th>
+                <th></th>
+                <th class="editSearch"></th>
+                <th class="editSearch"></th>
+            </tr>
+        </thead>
+    </table>
+</div>

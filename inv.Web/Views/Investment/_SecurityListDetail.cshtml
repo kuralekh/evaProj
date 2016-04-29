@@ -1,0 +1,55 @@
+﻿@model IEnumerable<Invest.ViewModel.Models.SecurityListDetailModel>
+
+
+<div class="ibox-content">
+    <table id="secListDetail" class="table table-striped table-bordered table-hover" style="width: 100%">
+        <thead>
+            <tr>
+                <th>Security Code</th>
+                <th>Status Code</th>
+                <th>Status Date</th>
+                <th>Allocation</th>
+                <th>Portfolio Weight</th>
+                <th class="editSearch hidden"></th>
+                <th class="editSearch hidden"></th>
+                @*<th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th class="hidden"></th>*@
+            </tr>
+            <tr class="input-sm" id="secListDetailheaderFilter">
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th class="editSearch hidden"></th>
+                <th class="editSearch hidden"></th>
+                @*<th class="editSearch"></th>
+            <th class="editSearch"></th>
+            <th class="editSearch"></th>
+            <th class="editSearch"></th>
+            <th class="editSearch hidden"></th>*@
+            </tr>
+        </thead>
+        <tfoot id="footerSecDetail">
+            <tr class="input-sm">
+                <th></th>
+                <th></th>
+                <th></th>
+                <th id="txtTotalAllocation" style="text-align: right;"></th>
+                <th id="txtTotalPortfolioWeight" style="text-align: right;"></th>
+                <th class="editSearch hidden"></th>
+                <th class="editSearch hidden"></th>
+                @*<th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>*@
+            </tr>
+        </tfoot>
+        <tbody></tbody>
+
+    </table>
+</div>

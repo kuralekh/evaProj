@@ -1,0 +1,254 @@
+﻿@using System.Text
+@using Invest.Web.Utility;
+@using System;
+@model IEnumerable<Invest.ViewModel.Models.ProductModel>
+
+@{
+    ViewBag.Title = "Product Dashboard";
+}
+
+<style>
+    figcaption {
+        /*height: 90px;*/
+        width: 100%;
+        top: auto;
+        bottom: 0;
+        -webkit-backface-visibility: hidden;
+        -moz-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+
+    figcaption {
+        position: absolute;
+        bottom: 0;
+        display: none;
+        padding: 20px;
+        background: #2c3f52;
+        /*background: rgba(200, 200, 200, 0.9);*/
+        opacity: 0.9;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    .contact-box {
+        overflow: hidden;
+        position: relative;
+    }
+</style>
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-12">
+        <h2>@ViewBag.Title</h2>
+        <ol class="breadcrumb pull-left">
+            <li>Investment</li>
+            <li class="active">
+                <strong>@ViewBag.Title</strong>
+            </li>
+        </ol>
+        <div class="pull-right">
+
+            <button type="button" id="btnGrid" class="btn btn-default" onclick="ShowData('grid')"><i class="fa fa-th-large"></i> Grid</button>
+            <button type="button" id="btnList" class="btn" onclick="ShowData('list')"><i class="fa fa-list"></i> List</button>
+        </div>
+        <div class="col-lg-2 pull-right">
+            @Html.DropDownList("DisplayStatus", (IEnumerable<SelectListItem>)ViewData["StatusList"], new { @class = "chosen-select-deselect", id = "DdlDisplayStatus" })
+        </div>
+        
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row" id="divGrid"></div>
+    <div class="row" id="divList" style="display: none">
+
+    </div>
+</div>
+
+<!-- View Modal -->
+<div class="modal inmodal fade" id="ModelsModal">
+    <div class="modal-dialog modal-lg" style="width: 750px" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Model List</h4>
+            </div>
+            <div id="dvModels">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/Content/plugins/chosen/chosenStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/chosen")
+}
+
+<script>
+    var status = true;
+    var Viewtype = "grid";
+    $(function () {
+
+        GetGridData();
+
+        var config = {
+            '.chosen-select': {},
+            '.chosen-select-deselect': { allow_single_deselect: true },
+            '.chosen-select-no-single': { disable_search_threshold: 10 },
+            '.chosen-select-no-results': { no_results_text: 'Oops, nothing found!' },
+            '.chosen-select-width': { width: "95%" }
+        };
+
+        for (var selector in config) {
+
+            $(selector).chosen(config[selector]);
+
+        }
+
+        $("#DdlDisplayStatus").on("change", function () {
+            if ($("#DdlDisplayStatus").val() == 0) {
+                status = false;
+            } else {
+                status = true;
+            }
+            if (Viewtype == "grid") {
+                GetGridData();
+                //ShowData("grid");
+            } else {
+                GetListData();
+                //ShowData("list");
+            }
+        });
+
+    });
+
+    function GetProductDetails(id) {
+
+        $.ajax({
+            url: '@Url.Content("~/Investment/GetProductDashboard")',
+            data: { productID: id },
+            type: "GET",
+            cache: false,
+            error: function (error) {
+                window.location.href = '@Url.Content("~/Error/Index")';
+            },
+            success: function (data) {
+
+                $('#dvModels').html(data);
+                $("#ModelsModal").modal('show');
+                $("#myModalLabel").html("Product Detail");
+                $('.modal-footer').show();
+                //on button click
+                $('.btn-primary').click(function () {
+                    if ($('#ModelEditForm').valid()) {
+                        $('#error').hide();
+                        $('.busy').show();
+                        $(".modal-footer").hide();
+                    }
+                });
+                $('.busy').hide();
+                $('.alert').hide();
+            }
+        });
+        return;
+    }
+
+    function ShowData(type) {
+        if (type == 'grid') {
+            $('#btnGrid').addClass("btn-default");
+            $('#btnList').removeClass("btn-default");
+            $('#divGrid').show();
+            $('#divList').hide();
+            GetGridData();
+        }
+        else if (type == 'list') {
+            $('#btnGrid').removeClass("btn-default");
+            $('#btnList').addClass("btn-default");
+            $('#divGrid').hide();
+            $('#divList').show();
+            GetListData();
+        }
+    }
+
+    function GetGridData() {
+
+        $.ajax({
+            url: '@Url.Content("~/Investment/GetProductGridListData")',
+            data: { type: 'grid', status: status },
+            type: "GET",
+            cache: false,
+            error: function (error) {
+
+                window.location.href = '@Url.Content("~/Error/Index")';
+            },
+            success: function (data) {
+
+                $('#divGrid').html(data);
+                Viewtype = "grid";
+                $('.busy').hide();
+                $('.alert').hide();
+                OnLoadEvents();
+            }
+        });
+        return;
+
+    }
+
+    function GetListData() {
+        $.ajax({
+            url: '@Url.Content("~/Investment/GetProductGridListData")',
+            data: { type: 'list', status: status },
+            type: "GET",
+            cache: false,
+            error: function (error) {
+
+                window.location.href = '@Url.Content("~/Error/Index")';
+            },
+            success: function (data) {
+
+
+                $('#divList').html(data);
+                Viewtype = "list";
+                $('.busy').hide();
+                $('.alert').hide();
+                OnLoadEvents();
+                $('#example').dataTable();
+            }
+        });
+        return;
+    }
+
+    function OnLoadEvents() {
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+        $('.contact-box').mouseout(function () {
+            $(this).find('figcaption').stop().slideUp();
+        });
+
+        $('.contact-box').mouseover(function () {
+            $(this).find('figcaption').stop().slideDown();
+        });
+
+        $(".detailsModel").click(function (event) {
+            event.stopPropagation();
+            //alert("Details Clicked.");
+            var pVerId = $(this).attr('productversionid');
+            var pCode = $(this).attr('productcode');
+            var url = encodeURI('@Url.Content("~/Investment/AnalyticHome")' + '?code=' + pCode + '&type=Product&verid=' + pVerId);
+            window.location = url;
+        });
+
+        $(".btnQView").click(function (event) {
+            event.stopPropagation();
+            //alert("Quick View Clicked.");
+            var pId = $(this).attr('productid');
+            GetProductDetails(pId);
+        });
+    }
+
+</script>
+

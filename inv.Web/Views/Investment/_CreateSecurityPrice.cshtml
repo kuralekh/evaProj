@@ -1,0 +1,195 @@
+﻿@model Invest.ViewModel.Models.SecurityPriceModel
+
+@*@using (Ajax.BeginForm("CreateSecurityPrice", new { area = "", controller = "Investment" }, new AjaxOptions { HttpMethod = "Post", OnSuccess = "onSuccess_Create", OnFailure = "onFailure" }, new { id = "PriceCreateForm", @class = "form-horizontal" }))
+{*@
+@{
+    var rateIndex = ViewBag.IsRateIndex;
+}
+
+<form action="@Url.Action("CreateSecurityPrice", "Investment", new { area = "" })" method="POST" enctype="multipart/form-data" class="form-horizontal PriceCreateForm " id="PriceCreateForm">
+    @Html.AntiForgeryToken()
+    <div class="form-horizontal">
+        <div class="modal-body">
+            @Html.ValidationSummary(true)
+           
+            <div class="form-group">
+                <label class="control-label col-sm-4">Security</label>
+                @*@Html.LabelFor(model => model.SecurityId, new { @class = "control-label col-sm-4" })*@
+                <div class="col-sm-5">
+                    @Html.DropDownListFor(model => model.SecurityId, new List<SelectListItem>(), new { @class = "select2-ajax", id = "ddlSecurityId", @style = "width:100% !important" })
+                    @Html.ValidationMessageFor(model => model.SecurityId)
+                </div>
+            </div>
+
+            <div class="form-group has-feedback">
+                @Html.LabelFor(model => model.Date, new { @class = "control-label col-sm-4" })
+                <div class="col-sm-5">
+                    <div class="input-group date">
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>@Html.TextBoxFor(model => model.Date, "{0:dd/MM/yyyy}", new { @class = "form-control", placeholder = "DD/MM/YYYY", id = "txtDate" })
+                    </div>
+                    @Html.ValidationMessageFor(model => model.Date)
+                </div>
+            </div>
+
+           
+            @if (rateIndex == false)
+            {
+            <div class="form-group">
+                @Html.LabelFor(model => model.CurrencyId, new { @class = "control-label col-sm-4" })
+                <div class="col-sm-5">
+                    @Html.DropDownListFor(m => m.CurrencyId, (IEnumerable<SelectListItem>)ViewData["currencylist"], new { @class = "chosen-select-deselect", id = "ddlCurrencyId" })
+                    @*@Html.ValidationMessageFor(model => model.Password)*@
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.UnitPrice, new { @class = "control-label col-sm-4" })
+                <div class="col-sm-5">
+                    @Html.TextBoxFor(model => model.UnitPrice, new { @class = "form-control", placeholder = "Unit Price", id = "txtUnitPrice" })
+                    @Html.ValidationMessageFor(model => model.UnitPrice)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.PriceNAV, new { @class = "control-label col-sm-4" })
+                <div class="col-sm-5">
+                    @Html.TextBoxFor(model => model.PriceNAV, new { @class = "form-control", placeholder = "NAV Price", id = "txtPriceNAV" })
+                    @Html.ValidationMessageFor(model => model.PriceNAV)
+                </div>
+            </div>
+            <div class="form-group">
+                    @Html.LabelFor(model => model.PricePUR, new { @class = "control-label col-sm-4" })
+                    <div class="col-sm-5">
+                        @Html.TextBoxFor(model => model.PricePUR, new { @class = "form-control", placeholder = "PUR Price", id = "txtPricePUR" })
+                        @Html.ValidationMessageFor(model => model.PricePUR)
+                    </div>
+                </div>
+            <div class="form-group propertydiv">
+                @Html.LabelFor(model => model.ValuationTypeId, new { @class = "control-label col-sm-4" })
+                <div class="col-sm-5">
+                    @Html.DropDownListFor(m => m.ValuationTypeId, (IEnumerable<SelectListItem>)ViewData["valuationTypeList"], new { @class = "chosen-select-deselect", id = "ddlValuationTypeId" })
+                    @*@Html.ValidationMessageFor(model => model.ValuationTypeId)*@
+                </div>
+            </div>
+            <div class="form-group propertydiv">
+                @Html.LabelFor(model => model.Valuer, new { @class = "control-label col-sm-4" })
+                <div class="col-sm-5">
+                    @Html.TextBoxFor(model => model.Valuer, new { @class = "form-control", placeholder = "Valuer", id = "txtValuer" })
+                    @*@Html.ValidationMessageFor(model => model.Valuer)*@
+                </div>
+            </div>
+            <div class="form-group propertydiv">
+                @Html.LabelFor(model => model.File, new { @class = "control-label col-sm-4" })
+                <div class="col-sm-5">
+                    @Html.TextBoxFor(model => model.File, new { @class = "form-control ", type = "File", id = "File", name = "File" })
+                    <label id="filevalidation" class="field-validation-error"></label>
+                </div>
+            </div>
+            }
+            
+           
+      
+            <div class="form-group">
+                @Html.LabelFor(model => model.InterestRate, new { @class = "control-label col-sm-4" })
+                <div class="col-sm-5">
+                    @Html.TextBoxFor(model => model.InterestRate, new { @class = "form-control", placeholder = "Interest Rate", id = "txtInterestRate" })
+                    @Html.ValidationMessageFor(model => model.InterestRate)
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="btnClose" type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Create</button>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-12">
+                <div class="alert alert-success alert-dismissable">
+                    <strong>Successfully Created Security Price! </strong><span class="has-success"></span>
+                </div>
+                <div id="error" class="alert alert-danger alert-dismissable" style="display: none;">
+                    <strong>Error Occured! </strong><span class="has-error"></span>
+                </div>
+                @*<div class="busy">
+                    <img id="imgLoader" src="~/Images/Processing.gif" />
+                </div>*@
+            </div>
+        </div>
+    </div>
+    @*}*@
+    </form>
+    <script>
+        $(document).ready(function () {
+            $('form.PriceCreateForm').on('submit', function (e) {
+                e.preventDefault();
+                
+                var $that = $(this),
+                formData = new FormData($that.get(0));
+
+                alert(formData);
+                alert($that.attr('action'));
+                alert($that.attr('method'));
+
+                if ($('#PriceCreateForm').valid()) {
+                    $.ajax({
+                        url: $that.attr('action'),
+                        type: $that.attr('method'),
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                        dataType: 'json',
+                        success: function (json) {
+                            if (json.status == "success") {
+                                $('.has-success').html(json.message).show();
+                                $('.alert-success').show();
+                                ResetModalControls();
+                            }
+                            else {
+                                $('.has-error').html(json.message).show();
+                                $('.alert-danger').show();
+                            }
+
+                            $('.modal-footer').show();
+                            $('.busy').hide();
+                        }
+                    });
+                }
+                return false;
+            });
+
+            $('.input-group.date').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true,
+                format: "dd/mm/yyyy",
+                todayHighlight: true
+            });
+
+            $('.input-group.date').inputmask({
+                mask: '99/99/9999'
+            });
+            var config = {
+                '.chosen-select': {},
+                '.chosen-select-deselect': { allow_single_deselect: true, search_contains: true },
+                '.chosen-select-no-single': { disable_search_threshold: 10 },
+                '.chosen-select-no-results': { no_results_text: 'Oops, nothing found!' },
+                '.chosen-select-width': { width: "95%" }
+            };
+            for (var selector in config) {
+                $(selector).chosen(config[selector]);
+            }
+            $('#File').on('change', function () {
+                myfile = $(this).val();
+                var ext = myfile.split('.').pop();
+                if (ext == "pdf" || ext == "docx" || ext == "doc") {
+                    $("#filevalidation").text('');
+                } else {
+                    var clone = $(this).clone(false, false);
+                    $(this).replaceWith(clone);
+                    $("#filevalidation").text('Please input pdf or word file');
+                }
+            });
+        });
+    </script>
+
+
+

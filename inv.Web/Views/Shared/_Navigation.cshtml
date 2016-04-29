@@ -1,0 +1,620 @@
+﻿@using Invest.Web.Helpers
+@{
+    bool isTestServer = HMTLHelperExtensions.isTestServer;
+}
+
+<nav class="navbar-default navbar-static-side" role="navigation">
+    <div class="sidebar-collapse">
+        <ul class="nav" id="side-menu">
+            <li class="nav-header">
+                <div class="profile-element">
+                    <span>
+                        <img class="img-container" style="width:225px" src='@Url.Content("~/Images/mda-logo-white.png")' alt="MDA Operator">
+                    </span>
+                </div>
+                <div class="logo-element">MDA</div>
+            </li>
+
+            <li class="@Html.IsSelected(controller: "Home") @Html.IsSelected(controller: "Documents")">
+                <a href="#"><i class="fa fa-home"></i> <span class="nav-label">Home</span> <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level">
+                    <li class="@Html.IsSelected(action: "Calendar")"><a href="@Url.Action("Calendar", new { area = "", controller = "Home" })">Calendar</a></li>
+                    <li class="@Html.IsSelected(action: "Inbox")"><a href="@Url.Action("Inbox", new { area = "", controller = "Home" })">Inbox</a></li>
+                    <li class="@Html.IsSelected(action: "Task")"><a href="@Url.Action("Task", new { area = "", controller = "Home" })">Task</a></li>
+                    <li class="@Html.IsSelected(action: "News")"><a href="@Url.Action("News", new { area = "", controller = "Home" })">News</a></li>
+                    <li class="@Html.IsSelected(controller: "Documents")"><a href="@Url.Action("Index", "Documents", new { area = "" })"><i class="fa fa-folder"></i> Documents </a></li>
+                </ul>
+            </li>
+            <li class="@Html.IsSelected(action: "AdminAccount") @Html.IsSelected(action: "Mapping") @Html.IsSelected(action: "Services") @Html.IsSelected(action: "Clients") @Html.IsSelected(action: "InvestmentProgramTabs") @Html.IsSelected(action: "InvestmentServices") @Html.IsSelected(action: "TransactionDetails") @Html.IsSelected(controller: "ClientGroup")  @Html.IsSelected(action: "HoldingV2")">
+                <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">Account</span> <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level">
+                    <li class="@Html.IsSelected(action: "AdminAccount")"><a href="@Url.Action("AdminAccount", new { area = "", controller = "Admin" })">Accounts</a></li>
+                    <li class="@Html.IsSelected(action: "Clients")"><a href="@Url.Action("Clients", new { area = "", controller = "AccountsV2" })">Clients</a></li>
+                    <li class="@Html.IsSelected(controller: "ClientGroup")"><a href="@Url.Action("Index", new { area = "", controller = "ClientGroup" })">Group</a></li>
+                    <li class="@Html.IsSelected(action: "HoldingV2")"><a href="@Url.Action("HoldingV2", new { area = "", controller = "Accounts" })">Holding</a></li>
+                    <li class="@Html.IsSelected(action: "InvestmentServices") @Html.IsSelected(action: "InvestmentProgramTabs")"><a href="@Url.Action("InvestmentServices", new { area = "", controller = "Accounts" })">Investment Services</a></li>
+                    <li class="@Html.IsSelected(action: "TransactionDetails")"><a href="@Url.Action("TransactionDetails", new { area = "", controller = "Accounts" })">Transactions</a></li>
+                </ul>
+            </li>
+            <li class="@Html.IsSelected(action: "LogConvert") @Html.IsSelected(action: "Export") @Html.IsSelected(action: "Import") @Html.IsSelected(controller: "TemplateFee")">
+                <a href="#"><i class="fa fa-user"></i> <span class="nav-label">Admin</span> <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level">
+                    <li class="@Html.IsSelected(action: "LogConvert")">
+                        <a href="@Url.Action("LogConvert", new { area = "", controller = "Admin" })">
+                            Events
+                        </a>
+                    </li>
+                    @if (isTestServer)
+                    {
+                        <li class="@Html.IsSelected(action: "Export")">
+                            <a href="@Url.Action("Export", new { area = "", controller = "Admin" })">
+                                Export
+                            </a>
+                        </li>
+
+                        <li class="@Html.IsSelected(action: "Import")">
+                            <a href="@Url.Action("Import", new { area = "", controller = "Admin" })">
+                                Import
+                            </a>
+                        </li>
+                    }
+                    <li class="@Html.IsSelected(controller: "TemplateFee")">
+                        <a href="#"> <span class="nav-label">Template Fee</span> <span class="fa arrow"></span></a>
+                        <ul class="nav nav-third-level">
+                            <li class="@Html.IsSelected(action: "Templates")"><a href="@Url.Action("Templates", new { area = "", controller = "TemplateFee" })">Templates</a></li>
+                            <li class="@Html.IsSelected(action: "TemplateVersion")"><a href="@Url.Action("TemplateVersion", new { area = "", controller = "TemplateFee" })">Templates Versions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li class="@Html.IsSelected(controller: "Adviser") @Html.IsSelected(action: "AFSLLicenseeDetails") @Html.IsSelected(action: "ApprovedProductList") @Html.IsSelected(action: "FundManager") @Html.IsSelected(controller: "ClientAccount") @Html.IsSelected(controller: "Corporation") @Html.IsSelected(action: "Institution") @Html.IsSelected(controller: "Contact") @Html.IsSelected(controller: "Practice") @Html.IsSelected(controller: "Users")">
+                <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">Entity Manager</span> <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level">
+                    <li class="@Html.IsSelected(action: "Index", controller: "Adviser")">
+                        <a href="@Url.Action("Index", "Adviser", new { area = "" })">Adviser</a>
+                    </li>
+                    <li class="@Html.IsSelected(action: "AFSLLicenseeDetails") @Html.IsSelected(action: "ApprovedProductList")">
+                        <a href="#" onclick="GoToScreen('@Url.Action("AFSLLicenseeDetails", new { area = "", controller = "AFSLLicensee" })')"> <span class="nav-label">AFSL</span> <span class="fa arrow DoNothing"></span></a>
+                        <ul class="nav nav-third-level">
+                            <li class="@Html.IsSelected(action: "ApprovedProductList")">
+                                <a href="@Url.Action("ApprovedProductList", new { area = "", controller = "AFSLLicensee" })">
+                                    APL
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="@Html.IsSelected(controller: "ClientAccount") @Html.IsSelected(action: "InvestmentServices")">
+                        <a href="@Url.Action("Index", new { area = "", controller = "ClientAccount" })">
+                            Client
+                        </a>
+                    </li>
+                    <li class="@Html.IsSelected(controller: "Corporation")">
+                        <a href="@Url.Action("Index", new { area = "", controller = "Corporation" })">
+                            Corporations
+                        </a>
+                    </li>
+                    @if (isTestServer)
+                    {
+                        <li class="@Html.IsSelected(action: "FundManager")">
+                            <a href="@Url.Action("FundManager", new { area = "", controller = "EntityManager" })">
+                                Fund Manager
+                            </a>
+                        </li>
+                    }
+
+                    <li class="@Html.IsSelected(action: "Institution")">
+                        <a href="@Url.Action("Institution", new { area = "", controller = "EntityManager" })">
+                            Institution
+                        </a>
+                    </li>
+                    <li class="@Html.IsSelected(controller: "Contact")">
+                        <a href="@Url.Action("Index", new { area = "", controller = "Contact" })">
+                            Person
+                        </a>
+                    </li>
+                    <li class="@Html.IsSelected(controller: "Practice")">
+                        <a href="@Url.Action("Index", "Practice", new { area = "" })">
+                            Practice
+                        </a>
+                    </li>
+                    <li class="@Html.IsSelected(action: "Users") ">
+                        <a href="@Url.Action("Users", new { area = "Administration", controller = "Users" })">
+                            User
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="@Html.IsSelected(controller: "Investment") @Html.IsSelected(action: "InvestmentServiceTemplates") @Html.IsSelected(action: "InvestmentServicesTemplateTabs")">
+                <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">Investment</span> <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level">
+                    <li class="@Html.IsSelected(action: "InvestmentServiceTemplates") @Html.IsSelected(action: "InvestmentServicesTemplateTabs")">
+                        <a href="@Url.Action("InvestmentServiceTemplates", new { area = "", controller = "Accounts" })">Investment Templates</a>
+                    </li>
+                    <li class="@Html.IsSelected(action: "ViewModelDetail") @Html.IsSelected(action: "ModelsDashboard") @Html.IsSelected(action: "ModelsDetails") @Html.IsSelected(action: "ModelsDetailList") @Html.IsSelected(action: "ModelsDetailListDetail") @Html.IsSelected(action: "ModelPrice") ">
+                        <a href="#" onclick="GoToScreen('@Url.Action("ModelsDashboard", new { area = "", controller = "Investment" })')"> <span class="nav-label">Models</span> <span class="fa arrow DoNothing"></span></a>
+                        <ul class="nav nav-third-level">
+
+                            <li class="@Html.IsSelected(action: "ModelsDetails")">
+                                <a href="@Url.Action("ModelsDetails", new { area = "", controller = "Investment" })">
+                                    @*<i class="fa fa-fw fa-folder-open"></i>*@ Details
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "ModelPrice")">
+                                <a href="@Url.Action("ModelPrice", new { area = "", controller = "Investment" })">
+                                    @*<i class="fa fa-fw fa-folder-open"></i>*@ Price
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "ModelsDetailList")  @Html.IsSelected(action: "ModelsDetailListDetail")">
+                                <a href="@Url.Action("ModelsDetailList", new { area = "", controller = "Investment" })">
+                                    @*<i class="fa fa-fw fa-folder-open"></i>*@ Composition
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="@Html.IsSelected(action: "ProductDetails") @Html.IsSelected(action: "ProductDashboard") @Html.IsSelected(action: "ProductRates") @Html.IsSelected(action: "ProductSecurity") @Html.IsSelected(action: "ProductSecurityDetail")  @Html.IsSelected(action: "ProductPrice") @Html.IsSelected(action: "ProductSecuritiesDetail")">
+                        <a href="#" onclick="GoToScreen('@Url.Action("ProductDashboard", new { area = "", controller = "Investment" })')"> <span class="nav-label">Products</span> <span class="fa arrow DoNothing"></span></a>
+                        <ul class="nav nav-third-level">
+                            <li class="@Html.IsSelected(action: "ProductDetails") @Html.IsSelected(action: "ProductSecuritiesDetail")">
+                                <a href="@Url.Action("ProductDetails", new { area = "", controller = "Investment" })">
+                                    Details
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "ProductPrice")">
+                                <a href="@Url.Action("ProductPrice", new { area = "", controller = "Investment" })">
+                                    @*<i class="fa fa-fw fa-folder-open"></i>*@ Price
+                                </a>
+                            </li>
+
+                            <li class="@Html.IsSelected(action: "ProductRates")">
+                                <a href="@Url.Action("ProductRates", new { area = "", controller = "Investment" })">
+                                    Rates
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "ProductSecurity")">
+                                <a href="@Url.Action("ProductSecurity", new { area = "", controller = "Investment" })">
+                                    Security List
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "ProductSecurityDetail")">
+                                <a href="@Url.Action("ProductSecurityDetail", new { area = "", controller = "Investment" })">
+                                    Security List Composition
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="@Html.IsSelected(action: "Screen") @Html.IsSelected(action: "ScreenDetail")">
+                        <a href="#" onclick="GoToScreen('@Url.Action("Screen", new { area = "", controller = "Investment" })')"> <span class="nav-label">Screens</span> <span class="fa arrow DoNothing"></span></a>
+                        <ul class="nav nav-third-level">
+                            <li class="@Html.IsSelected(action: "ScreenDetail")">
+                                <a href="@Url.Action("ScreenDetail", new { area = "", controller = "Investment" })">
+                                    Composition
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="@Html.IsSelected(action: "SecuritiesDashboard")  @Html.IsSelected(action: "SecuritiesDetails") @Html.IsSelected(action: "SecuritiesPrice")  @Html.IsSelected(action: "SecuritiesIncome")  @Html.IsSelected(action: "RateIndex") @Html.IsSelected(action: "OptionSecurities") @Html.IsSelected(action: "TermDeposit") ">
+                        <a href="#" onclick="GoToScreen('@Url.Action("SecuritiesDashboard", new { area = "", controller = "Investment" })')"> <span class="nav-label">Securities</span> <span class="fa arrow DoNothing"></span></a>
+                        <ul class="nav nav-third-level">
+
+                            <li class="@Html.IsSelected(action: "SecuritiesDetails")">
+                                <a href="@Url.Action("SecuritiesDetails", new { area = "", controller = "Investment" })">
+                                    Details
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "SecuritiesPrice")">
+                                <a href="@Url.Action("SecuritiesPrice", new { area = "", controller = "Investment" })">
+                                    Price
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "SecuritiesIncome")">
+                                <a href="@Url.Action("SecuritiesIncome", new { area = "", controller = "Investment" })">
+                                    Income
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "RateIndex")">
+                                <a href="@Url.Action("RateIndex", new { area = "", controller = "Investment"})">
+                                    Rate
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "OptionSecurities")">
+                                <a href="@Url.Action("OptionSecurities", new { area = "", controller = "Investment" })">
+                                    Option
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "TermDeposit")">
+                                <a href="@Url.Action("TermDeposit", new { area = "", controller = "Investment" })">
+                                    TD's
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="@Html.IsSelected(action: "Prices")">
+                        <a href="@Url.Action("Prices", new { area = "", controller = "Investment" })">
+                            @*<i class="fa fa-fw fa-folder-open"></i>*@ Prices
+                        </a>
+                    </li>
+                 </ul>
+            </li>
+            @if (isTestServer)
+            {
+                <li class="@Html.IsSelected(controller: "Order")">
+                    <a href="#"><i class="fa fa-reorder"></i> <span class="nav-label">Order</span> <span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level">
+                        <li class="@Html.IsSelected(action: "OrderBuy")">
+                            <a href="@Url.Action("OrderBuy", new {area = "", controller = "Order"})">
+                                Buy
+                            </a>
+                        </li>
+                        <li class="@Html.IsSelected(action: "OrderSell")">
+                            <a href="@Url.Action("OrderSell", new {area = "", controller = "Order"})">
+                                Sell
+                            </a>
+                        </li>
+                        <li class="@Html.IsSelected(action: "OrderMultiple")">
+                            <a href="@Url.Action("OrderMultiple", new {area = "", controller = "Order"})">
+                                Multiple
+                            </a>
+                        </li>
+                        <li class="@Html.IsSelected(action: "OrderPending")">
+                            <a href="@Url.Action("OrderPending", new {area = "", controller = "Order"})">
+                                Pending
+                            </a>
+                        </li>
+                        <li class="@Html.IsSelected(action: "OrderActive")">
+                            <a href="@Url.Action("OrderActive", new {area = "", controller = "Order"})">
+                                Active
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
+            }
+            @*<li class="@Html.IsSelected(action: "AFSLLicenseeDashboard") @Html.IsSelected(action: "AFSLLicenseeSecurity")">
+                    <a href="#"><i class="fa fa-cogs"></i> <span class="nav-label">AFSL Licensee</span> <span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level">
+                        <li class="@Html.IsSelected(action: "AFSLLicenseeDashboard")">
+                            <a href="@Url.Action("AFSLLicenseeDashboard", new { area = "", controller = "AFSLLicensee" })">
+                                Dashboard
+                            </a>
+                        </li>
+
+
+                        <li class="@Html.IsSelected(action: "AFSLLicenseeSecurity")">
+                            <a href="@Url.Action("AFSLLicenseeSecurity", new { area = "", controller = "AFSLLicensee" })">
+                                Security
+                            </a>
+                        </li>
+                    </ul>
+                </li>*@
+            <li class="@Html.IsSelected(action: "Fees") @Html.IsSelected(action: "Rebalance") @Html.IsSelected(action: "NewClient") @Html.IsSelected(action: "ClientChange") @Html.IsSelected(action: "Reports") @Html.IsSelected(action: "Statements") @Html.IsSelected(action: "WFProcess")">
+                <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">Process</span> <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level">
+                    @if (isTestServer)
+                    {
+                        <li class="@Html.IsSelected(action: "Fees")">
+                            <a href="@Url.Action("Fees", new {area = "", controller = "Processes"})">
+                                @*<i class="fa fa-fw fa-folder-open"></i>*@
+                                Fees
+                            </a>
+                        </li>
+                        <li class="@Html.IsSelected(action: "Rebalance")">
+                            <a href="@Url.Action("Rebalance", new {area = "", controller = "Processes"})">
+                                @*<i class="fa fa-fw fa-folder-open"></i>*@
+                                Rebalance
+                            </a>
+                        </li>
+
+                        <li class="@Html.IsSelected(action: "ClientChange")">
+                            <a href="@Url.Action("ClientChange", new {area = "", controller = "Processes"})">
+                                @*<i class="fa fa-fw fa-folder-open"></i>*@
+                                Client Change
+                            </a>
+                        </li>
+                        <li class="@Html.IsSelected(action: "Reports")">
+                            <a href="@Url.Action("Reports", new {area = "", controller = "Processes"})">
+                                @*<i class="fa fa-fw fa-folder-open"></i>*@
+                                Reports
+                            </a>
+                        </li>
+                        <li class="@Html.IsSelected(action: "Statements")">
+                            <a href="@Url.Action("Statements", new {area = "", controller = "Processes"})">
+                                @*<i class="fa fa-fw fa-folder-open"></i>*@
+                                Statements
+                            </a>
+                        </li>
+                    }
+                    <li class="@Html.IsSelected(action: "NewClient") @Html.IsSelected(action: "DetailClients")">
+                        <a href="@Url.Action("NewClient", new {area = "", controller = "Processes"})">
+                            @*<i class="fa fa-fw fa-folder-open"></i>*@
+                            New Client
+                        </a>
+                    </li>
+                    <li class="@Html.IsSelected(action: "WFProcess")">
+                        <a href="@Url.Action("WFProcess", new { area = "", controller = "Processes" })">
+                            Work Flow Process
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="@Html.IsSelected(controller: "Settings") @Html.IsSelected(controller: "AccessList")">
+                <a href="#"><i class="fa fa-cogs"></i> <span class="nav-label">Settings</span> <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level">
+
+                    <li class="@Html.IsSelected(action: "SystemSettings")">
+                        <a href="@Url.Action("SystemSettings", new { area = "Administration", controller = "Settings" })">
+                            <i class="fa fa-fw fa-cogs"></i> System Settings
+                        </a>
+                    </li>
+                    <li class="@Html.IsSelected(action: "Index")">
+                        <a href="@Url.Action("Index", new { area = "Administration", controller = "AccessList" })">
+                            <i class="fa fa-fw fa-cogs"></i> Access List
+                        </a>
+                    </li>
+                    <li class="@Html.IsSelected(action: "AccountType")  @Html.IsSelected(action: "PriceType")  @Html.IsSelected(action: "ServiceType")  @Html.IsSelected(action: "RebalancingType")  @Html.IsSelected(action: "ModelType")  @Html.IsSelected(action: "SecurityCategory")  @Html.IsSelected(action: "SecurityType")  @Html.IsSelected(action: "Unitised")  @Html.IsSelected(action: "Market") @Html.IsSelected(action: "UserGroup") @Html.IsSelected(action: "FeesAndAdjustmentType") @Html.IsSelected(action: "Currency")  @Html.IsSelected(action: "AssetClass")  @Html.IsSelected(action: "SubAssetClass")  @Html.IsSelected(action: "Region")  @Html.IsSelected(action: "GICS")  @Html.IsSelected(action: "Rating")  @Html.IsSelected(action: "Status")  @Html.IsSelected(action: "PricingSource")  @Html.IsSelected(action: "DistributionType")  @Html.IsSelected(action: "DistributionFrequency")  @Html.IsSelected(action: "TransactionType")  @Html.IsSelected(action: "IncomeType")  @Html.IsSelected(action: "GICSType")  @Html.IsSelected(action: "ValuationType")  @Html.IsSelected(action: "RateListType")  @Html.IsSelected(action: "ProductType")  @Html.IsSelected(action: "IndexType") @Html.IsSelected(action: "TypeAddress") @Html.IsSelected(action: "RoleDefintion") @Html.IsSelected(action: "AttachmentType") @Html.IsSelected(action: "TemplateFeeType") @Html.IsSelected(action: "ThirdParty")">
+                        <a href="#">
+                            <i class="fa fa-cogs"></i> <span class="nav-label">Lists Maintenance</span> <span class="fa arrow"></span>
+                        </a>
+                        <ul id="ulListMaintenance" class="nav nav-third-level">
+                            <li class="@Html.IsSelected(action: "AccountType")">
+                                <a href="@Url.Action("AccountType", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Account Type
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "ServiceType")">
+                                <a href="@Url.Action("ServiceType", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Service Type
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "RebalancingType")">
+                                <a href="@Url.Action("RebalancingType", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Rebalancing Type
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "ModelType")">
+                                <a href="@Url.Action("ModelType", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Model Type
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "SecurityCategory")">
+                                <a href="@Url.Action("SecurityCategory", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Security Category
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "SecurityType")">
+                                <a href="@Url.Action("SecurityType", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Security Type
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "Unitised")">
+                                <a href="@Url.Action("Unitised", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Unitised
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "Market")">
+                                <a href="@Url.Action("Market", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-fw fa-university"></i> Market
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "UserGroup")">
+                                <a href="@Url.Action("UserGroup", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-group"></i> User Group
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "FeesAndAdjustmentType")">
+                                <a href="@Url.Action("FeesAndAdjustmentType", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Fees And Adjustment Type
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "Currency")">
+                                <a href="@Url.Action("Currency", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-fw fa-money"></i> Currency
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "AssetClass")">
+                                <a href="@Url.Action("AssetClass", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Asset Class
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "SubAssetClass")">
+                                <a href="@Url.Action("SubAssetClass", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Sub Asset Class
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "Region")">
+                                <a href="@Url.Action("Region", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Region
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "GICS")">
+                                <a href="@Url.Action("GICS", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i>  GICS - Sector
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "Rating")">
+                                <a href="@Url.Action("Rating", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Rating
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "Status")">
+                                <a href="@Url.Action("Status", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-fw fa-list"></i> Status
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "PricingSource")">
+                                <a href="@Url.Action("PricingSource", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-fw fa-money"></i> Pricing Source
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "DistributionType")">
+                                <a href="@Url.Action("DistributionType", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Distribution Type
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "DistributionFrequency")">
+                                <a href="@Url.Action("DistributionFrequency", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Distribution Frequency
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "TransactionType")">
+                                <a href="@Url.Action("TransactionType", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-fw fa-money"></i> Transaction Type
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "IncomeType")">
+                                <a href="@Url.Action("IncomeType", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-fw fa-money"></i> Income Type
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "GICSType")">
+                                <a href="@Url.Action("GICSType", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> GICS - Industry Group
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "ValuationType")">
+                                <a href="@Url.Action("ValuationType", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Valuation Type
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "AttachmentType")">
+                                <a href="@Url.Action("AttachmentType", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Attachment Type
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "TemplateFeeType")">
+                                <a href="@Url.Action("TemplateFeeType", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Template Fee Type
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "ThirdParty")">
+                                <a href="@Url.Action("ThirdParty", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Third Party
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "RateListType")">
+                                <a href="@Url.Action("RateListType", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Rate List Type
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "ProductType")">
+                                <a href="@Url.Action("ProductType", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Product Type
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "IndexType")">
+                                <a href="@Url.Action("IndexType", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Index Type
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "PriceType")">
+                                <a href="@Url.Action("PriceType", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Price Type
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "TypeAddress")">
+                                <a href="@Url.Action("TypeAddress", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Address Type
+                                </a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "RoleDefintion")">
+                                <a href="@Url.Action("RoleDefintion", new { area = "Administration", controller = "Settings" })">
+                                    <i class="fa fa-list"></i> Role Defintion
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    @if (isTestServer)
+                    {
+                        <li class="@Html.IsSelected(action: "UICustomisation")">
+                            <a href="@Url.Action("UICustomisation", new {area = "", controller = "Settings"})">
+                                UI Customisation
+                            </a>
+                        </li>
+                        <li class="@Html.IsSelected(action: "Logo")">
+                            <a href="@Url.Action("Logo", new {area = "", controller = "Settings"})">
+                                Logo
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </li>
+            <li class="@Html.IsSelected(action: "HoldingsTransactions") @Html.IsSelected(action: "WorkFlowSchemas") @Html.IsSelected(action: "WFDesigner") @Html.IsSelected(action: "ImportLogConvert") @Html.IsSelected(controller: "EntityCore") @Html.IsSelected(action: "ReportHoldTransaction")">
+                <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">Other</span> <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level">
+                    <li class="@Html.IsSelected(action: "WorkFlowSchemas")">
+                        <a href="@Url.Action("WorkFlowSchemas", new { area = "", controller = "Processes" })">
+                            @*<i class="fa fa-fw fa-folder-open"></i>*@
+                            Schemas
+                        </a>
+                    </li>
+                    <li class="@Html.IsSelected(action: "WFDesigner")">
+                        <a href="@Url.Action("WFDesigner", new { area = "", controller = "Processes" })">
+                            @*<i class="fa fa-fw fa-folder-open"></i>*@
+                            Schema Designer
+                        </a>
+                    </li>
+
+                    <li class="@Html.IsSelected(action: "ImportLogConvert")">
+                        <a href="@Url.Action("ImportLogConvert", new { area = "", controller = "Admin" })">
+                            Event Log Import
+                        </a>
+                    </li>
+
+                    <li class="@Html.IsSelected(action: "ImportETLLogConvert")">
+                        <a href="@Url.Action("ImportETLLogConvert", new { area = "", controller = "Admin" })">
+                            Event Log Import ETL
+                        </a>
+                    </li>
+
+                    <li class="@Html.IsSelected(action: "Index", controller: "EntityCore")">
+                        <a href="@Url.Action("Index", "EntityCore", new { area = "" })">
+                            <i class="fa fa-search-plus"></i> Searсh Entity
+                        </a>
+                    </li>
+                    <li class="@Html.IsSelected(action: "ReportHoldTransaction")">
+                        <a href="@Url.Action("ReportHoldTransaction", new { area = "", controller = "Admin" })">
+                            Report Hold Transaction
+                        </a>
+                    </li>
+
+                    <li class="@Html.IsSelected(action: "HoldingsTransactions") hidden">
+                        <a href="@Url.Action("HoldingsTransactions", new { area = "", controller = "Admin" })">
+                            Holdings/Transactions
+                        </a>
+                    </li>
+                    <li class="">
+                        <a target="_blank" href="http://52.62.253.64/analyticswebtest/">
+                            Analytics
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="~/BackJobs" target="_blank"><i class="fa fa-cogs"></i> <span class="nav-label">Background Jobs</span> </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<script>
+    var isDoNothing = false;
+    function CompareAndSort(a, b) {
+        var strA = a.innerText || a.textContent;
+        var strB = b.innerText || b.textContent;
+        return strA.trim().localeCompare(strB.trim());
+    }
+    //Sort List Maintenance Menu Items
+    $('#ulListMaintenance li').sort(CompareAndSort).appendTo($('#ulListMaintenance'));
+
+    function GoToScreen(url) {
+        //
+        if (isDoNothing) {
+            isDoNothing = false;
+        }
+        else {
+            window.location = url;
+        }
+    }
+
+    $(".DoNothing").click(function (event) {
+        isDoNothing = true;
+    });
+</script>

@@ -1,0 +1,470 @@
+﻿@model IEnumerable<Invest.ViewModel.Models.ProductPriceModel>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Price";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-8">
+        <h2>@ViewBag.Title</h2>
+        <ol class="breadcrumb">
+            <li>Investment</li>
+            <li>Products</li>
+            <li class="active">
+                <strong>@ViewBag.Title</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-4">
+        <div class="row" style="padding-top: 13px;">
+            <div class="col-lg-12">
+                <div class="input-group">
+                    <span class="input-group-btn">
+                        <div class="customFileUpload btn btn-primary">
+                            <span>Browse</span>
+                            <input id="uploadFileMain" type="file" class="upload" accept=".csv" />
+                        </div>
+                    </span>
+                    <input id="uploadFile" name="uploadFile" placeholder="Accept .csv File Only" class="form-control" accept=".csv" disabled="disabled" />
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="col-lg-12" style=" padding-top: 12px;">
+                <ul class="list-inline pull-right">
+                    <li><button type="submit" id="submitfile" class="btn btn-primary"><i class="fa fa-upload"></i> Upload File</button></li>
+                    <li style=" padding-right: 0px;"><button type="button" class="btn btn-success" onclick="window.location = '@Url.Action("DownLoadTemplateProductPrice", "Investment")'"><i class="fa fa-download"></i> Download Template File</button></li>
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    @*<div class="col-lg-5" style="padding-top: 30px;">
+        <table>
+            <tr>
+                <td><input type="file" name="uploadFile" accept=".csv" id="uploadFile" style="width:300px" /></td>
+                <td>
+                    <button type="submit" id="submitfile" class="btn btn-primary">Upload</button>
+                    <button type="button" class="btn btn-success " onclick="window.location = '@Url.Action("DownLoadTemplateProductPrice", "Investment")'"><i class="fa fa-download"></i> Download template file</button>
+                </td>
+            </tr>
+        </table>
+    </div>*@
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins" id="dvProductPriceList">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal inmodal fade" id="ProductPriceModal">
+    <div class="modal-dialog" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Product Price</h4>
+            </div>
+            <div id="dvProductPrice"></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal inmodal fade" id="containerFilterModal">
+    <div class="modal-dialog" role="dialog" aria-labelledby="titleFilterModal" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="titleFilterModal"></h4>
+            </div>
+            <div id="blockFilterModal"></div>
+        </div>
+    </div>
+</div>
+
+<!--Load these page level functions-->
+@section Styles {
+    @Styles.Render("~/plugins/dateRangeStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/Content/plugins/chosen/chosenStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/dateRange")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/chosen")
+
+    <script type="text/javascript">
+        var config;
+        var productPriceTable;
+        var fromdate;
+        var todate;
+        var spDate;
+
+        $(function () {
+
+            document.getElementById("uploadFileMain").onchange = function () {
+                var path = this.value;
+                var lastIndex = path.lastIndexOf("\\");
+                var filename = path.substring(lastIndex + 1);
+                $("#uploadFile").val(filename);
+            };
+
+            $('#submitfile').on('click', function (e) {
+                e.preventDefault();
+                var files = document.getElementById('uploadFileMain').files;
+                if (files.length > 0) {
+                    if (window.FormData !== undefined) {
+                        var data = new FormData();
+                        for (var x = 0; x < files.length; x++) {
+                            data.append("file" + x, files[x]);
+                        }
+
+                        $.ajax({
+                            type: "POST",
+                            url: '@Url.Action("FileUploadProductValid", "Investment")',
+                            contentType: false,
+                            processData: false,
+                            data: data,
+                            success: function (result) {CompleteUploadFile(result);},
+                            error: function (xhr, status, p3) {On_Failure();}
+                        });
+                    } else {
+                        alert("Браузер не поддерживает загрузку файлов HTML5!");
+                    }
+                }
+            });
+
+            function CompleteUploadFile(data) {
+                $('#blockFilterModal').html(data);
+                $("#containerFilterModal").modal('show');
+                $('.modal-footer').show();
+            }
+
+            $('#containerFilterModal').on('hidden.bs.modal', function () {
+                $('#uploadFile').val('');
+                $('#uploadFileMain').val('');
+                GetProductPriceDetail();
+            });
+
+            //When Model hides
+            $('#ProductPriceModal').on('hidden.bs.modal', function () {
+                if (productPriceTable != undefined)
+                    productPriceTable.fnDraw();
+            });
+
+            GetProductPriceDetail();
+
+            config = {
+                '.chosen-select': {},
+                '.chosen-select-deselect': { allow_single_deselect: true, search_contains: true },
+                '.chosen-select-no-single': { disable_search_threshold: 10 },
+                '.chosen-select-no-results': { no_results_text: 'Oops, nothing found!' },
+                '.chosen-select-width': { width: "95%" }
+            };
+
+        });
+
+        //Download button extension for table tools
+        $.fn.dataTable.TableTools.buttons.download = $.extend(true, {}, $.fn.dataTable.TableTools.buttonBase,
+        {
+            "sButtonText": "Download",
+            "sUrl": "",
+            "sType": "Get",
+            "fnData": false,
+            "fnClick": function (button, config) {
+                var dt = new $.fn.dataTable.Api(this.s.dt);
+                var data = dt.ajax.params() || {};
+
+                // Optional static additional parameters
+                // data.customParameter = ...;
+                data.Id = $("#select2_Product").val();
+                data.FromDate = fromdate;
+                data.ToDate = todate;
+
+                if (config.fnData) {
+                    config.fnData(data);
+                }
+
+                var iframe = $('<iframe/>', {
+                    id: "RemotingIFrame"
+                }).css({
+                    border: 'none',
+                    width: 0,
+                    height: 0
+                })
+                    .appendTo('body');
+
+                var contentWindow = iframe[0].contentWindow;
+                contentWindow.document.open();
+                contentWindow.document.close();
+
+                var form = contentWindow.document.createElement('form');
+                form.setAttribute('method', config.sType);
+                form.setAttribute('action', config.sUrl);
+
+                var input = contentWindow.document.createElement('input');
+                input.name = 'json';
+                input.value = JSON.stringify(data);
+
+                form.appendChild(input);
+                contentWindow.document.body.appendChild(form);
+                form.submit();
+            }
+        });
+
+
+
+
+        function GetProductPriceDetail() {
+            $.ajax({
+                url: '@Url.Content("~/Investment/GetProductPriceDetail")',
+                data: {},
+                type: "GET",
+                cache: false,
+                error: function (error) {
+                    window.location.href = '@Url.Content("~/Error/Index")';
+                },
+                success: function (data) {
+                    $('#dvProductPriceList').html(data);
+                    for (var selector in config) {
+                        $(selector).chosen(config[selector]);
+                    }
+                    $('input[name="daterange"]').daterangepicker().val('');
+                }
+            });
+            return;
+        }
+
+
+        function GetProductPriceDetailByFilter() {
+            var id = $("#select2_Product").val();
+
+            var daterange = $("#TxtDateRange").val();
+            fromdate = null;
+            todate = null;
+            if (daterange != null && daterange != "") {
+
+                spDate = daterange.split("-");
+                //Convert dd/mm/yyyy to mm/dd/yyyy
+                fromdate = dateManager.convert(spDate[0].trim());
+                todate = dateManager.convert(spDate[1].trim());
+            }
+
+            var url = '@Url.Content("~/Investment/GetProductPriceDetailByFilter")' + '?productId=' + id + '&fromdate=' + fromdate + '&todate=' + todate;
+            var csvUrl = '@Url.Content("~/Investment/DownloadProductPriceCsv")';
+            productPriceTable = $('#example').dataTable({
+                initComplete: function () {
+                    // Setup - add a text input to each header cell - Apply the filter
+                    $('#example thead tr#headerFilter th').each(function () {
+                        if (!($(this).hasClass("editSearch"))) {
+                            $('<input type="text" placeholder="Search" />').appendTo($(this).empty())
+                                .on('keyup', function () {
+                                    productPriceTable.api().columns($(this).parent().index() + ':visible').search(this.value).draw();
+                                });
+                        }
+                    });
+                },
+                "orderCellsTop": true,
+                "destroy": true,
+                "bServerSide": true,
+                "sAjaxSource": url,
+                "bProcessing": true,
+                "columns": [
+                    { "data": "ProductCode" },
+                    { "data": "ProductName" },
+                    {
+                        "data": "Date",
+                        "render": function (oObj) {
+                            var payDate = moment(oObj).format('DD/MM/YYYY');
+                            if (payDate == "01/01/0001")
+                                return null;
+                            return payDate;
+                        }
+                    },
+                    {
+                        "data": "CapitalPrice",
+                        "render": function (oObj) {
+                            if (oObj == null)
+                                return null;
+                            return '<div class="pull-right">' + oObj.toFixed(6) + '</div>';
+                        }
+                    },
+                    {
+                        "data": "IncomePrice",
+                        "render": function (oObj) {
+                            if (oObj == null)
+                                return null;
+                            return '<div class="pull-right">' + oObj.toFixed(6) + '</div>';
+                        }
+                    },
+                    {
+                        "data": "TRPrice",
+                        "render": function (oObj) {
+                            if (oObj == null)
+                                return null;
+                            return '<div class="pull-right">' + oObj.toFixed(6) + '</div>';
+                        }
+                    },
+                    {
+                        "data": "Id",
+                        "targets": 'no-sort',
+                        "orderable": false,
+                        "render": function (oObj) {
+                            return '<div class="text-center"><button class="btn-white btn btn-xs" onclick="GetProductPricelist(' + oObj + ')">Edit</button></div>';
+                            //return '<div class="text-center"><a href="javascript:GetProductPricelist(' + oObj + ')"><i title="Edit" class="fa fa-edit"></i></a></div>';
+                        }
+                    },
+                    {
+                        "data": "Id",
+                        "targets": 'no-sort',
+                        "orderable": false,
+                        "render": function (oObj) {
+                            return '<div class="text-center"><button class="btn-white btn btn-xs" onclick="DeleteProductPrice(' + oObj + ')">Delete</button></div>';
+                            //return '<div class="text-center"><a href="javascript:DeleteProductPrice(' + oObj + ')"><i title="Delete" class="fa fa-trash"></i></a></div>';
+                        }
+                    }
+                ],
+                "dom": 'T<"clear">lfrtip',
+                "tableTools": {
+                    "sSwfPath": "../scripts/plugins/dataTables/swf/copy_csv_xls_pdf.swf",
+                    "aButtons": [{ "sExtends": "download", "sButtonText": "CSV", "sUrl": csvUrl, "sToolTip": "Save as CSV" }]
+                }
+            });
+
+        }
+
+        function Create() {
+            $.ajax({
+                url: '@Url.Content("~/Investment/CreateProductPrice")',
+                data: {},
+                type: "GET",
+                cache: false,
+                error: function (error) {
+
+                    window.location.href = '@Url.Content("~/Error/Index")';
+                },
+                success: function (data) {
+
+                    $('#dvProductPrice').html(data);
+                    $("#ProductPriceModal").modal('show');
+                    $("#myModalLabel").html("Create Product Price");
+                    jQuery.validator.unobtrusive.parse("#ProductPriceCreateForm");
+                    $('.modal-footer').show();
+                    //on button click
+                    $('.btn-primary').click(function () {
+                        if ($('#ProductPriceCreateForm').valid()) {
+                            $('#error').hide();
+                            $('.busy').show();
+                            $(".modal-footer").hide();
+                        }
+                    });
+                    $('.busy').hide();
+                    $('.alert').hide();
+                }
+            });
+            return;
+        }
+
+        function RecalculatePrices() {
+            $.ajax({
+                url: '@Url.Content("~/Investment/CalculateProductPrice")',
+                data: {},
+                type: "GET",
+                cache: false,
+                error: function (error) {
+
+                    window.location.href = '@Url.Content("~/Error/Index")';
+                },
+                success: function (data) {
+
+                    $('#dvProductPrice').html(data);
+                    $("#ProductPriceModal").modal('show');
+                    $("#myModalLabel").html("Calculate Product Prices");
+                    jQuery.validator.unobtrusive.parse("#ProductPriceCreateForm");
+                    $('.modal-footer').show();
+                    //on button click
+                    $('.btn-primary').click(function () {
+                        if ($('#ProductPriceCreateForm').valid()) {
+                            $('#error').hide();
+                            $('.busy').show();
+                            $(".modal-footer").hide();
+                        }
+                    });
+                    $('.busy').hide();
+                    $('.alert').hide();
+                }
+            });
+            return;
+        }
+
+        function GetProductPricelist(id) {
+            if (id == null)
+                id = "1";
+            $.ajax({
+                url: '@Url.Content("~/Investment/GetProductPrice")',
+                data: { Id: id },
+                type: "GET",
+                cache: false,
+                error: function (error) {
+                    window.location.href = '@Url.Content("~/Error/Index")';
+                },
+                success: function (data) {
+                    $('#dvProductPrice').html(data);
+                    $("#ProductPriceModal").modal('show');
+                    $("#myModalLabel").html("Edit Product Price");
+                    jQuery.validator.unobtrusive.parse("#ProductPriceEditForm");
+                    $('.modal-footer').show();
+                    //on button click
+                    $('.btn-primary').click(function () {
+                        if ($('#ProductPriceEditForm').valid()) {
+                            $('#error').hide();
+                            $('.busy').show();
+                            $(".modal-footer").hide();
+                        }
+                    });
+                    $('.busy').hide();
+                    $('.alert').hide();
+                }
+            });
+            return;
+        }
+
+        function DeleteProductPrice(id) {
+            bootbox.confirm("Are you sure you want to delete?", function (result) {
+                if (result) {
+                    $.ajax({
+                        url: '@Url.Content("~/Investment/DeleteProductPrice")',
+                        data: { Id: id },
+                        type: "POST",
+                        cache: false,
+                        error: function (error) {
+                            window.location.href = '@Url.Content("~/Error/Index")';
+                        },
+                        success: function (data) {
+                            productPriceTable.fnDraw();
+                            bootbox.alert("Record has deleted successfully!");
+                        }
+                    });
+                }
+            });
+        }
+
+        function ResetModalControls() {
+            $('#txtDate').val('');
+            $('#txtCapitalPrice').val('');
+            $('#txtIncomePrice').val('');
+            $('#txtTRPrice').val('');
+
+            $('#ddlProductId').val('');
+            $('#ddlProductId').trigger("chosen:updated");
+        }
+    </script>
+}

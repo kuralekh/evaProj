@@ -1,0 +1,112 @@
+﻿@model Invest.ViewModel.Models.ProductPriceModel
+
+@using (Ajax.BeginForm("EditProductPrice", new { controller = "Investment" }, new AjaxOptions { HttpMethod = "Post", OnSuccess = "onSuccess", OnFailure = "onFailure" }, new { id = "ProductPriceEditForm", @class = "form-horizontal" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="form-horizontal">
+        <div class="modal-body">
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.Id)
+            <div class="form-group">
+                @Html.LabelFor(model => model.ProductId, new { @class = "control-label col-sm-4" })
+                <div class="col-sm-5">
+                    @Html.DropDownListFor(m => m.ProductId, (IEnumerable<SelectListItem>)ViewData["productList"], new { @class = "chosen-select-deselect" })
+                    @Html.ValidationMessageFor(model => model.ProductId)
+                </div>
+            </div>
+            <div class="form-group has-feedback">
+                @Html.LabelFor(model => model.Date, new { @class = "control-label col-sm-4" })
+                <div class="col-sm-5">
+                    <div class="input-group date">
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>@Html.TextBoxFor(model => model.Date, "{0:dd/MM/yyyy}", new { @class = "form-control", placeholder = "DD/MM/YYYY" })
+                    </div>
+                    @Html.ValidationMessageFor(model => model.Date)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.CapitalPrice, new { @class = "control-label col-sm-4" })
+                <div class="col-sm-5">
+                    @Html.TextBoxFor(model => model.CapitalPrice, new { @class = "form-control", placeholder = "Capital Price", id = "txtCapitalPrice" })
+                    @Html.ValidationMessageFor(model => model.CapitalPrice)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.IncomePrice, new { @class = "control-label col-sm-4" })
+                <div class="col-sm-5">
+                    @Html.TextBoxFor(model => model.IncomePrice, new { @class = "form-control", placeholder = "Income Price", id = "txtIncomePrice" })
+                    @Html.ValidationMessageFor(model => model.IncomePrice)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.TRPrice, new { @class = "control-label col-sm-4" })
+                <div class="col-sm-5">
+                    @Html.TextBoxFor(model => model.TRPrice, new { @class = "form-control", placeholder = "TR Price", id = "txtTRPrice" })
+                    @Html.ValidationMessageFor(model => model.TRPrice)
+                </div>
+            </div>
+           
+        </div>
+
+        <div class="modal-footer">
+            <button id="btnClose" type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-12">
+                <div class="alert alert-success alert-dismissable">
+                    <strong>Success! </strong><span class="has-success"></span>
+                </div>
+                <div id="error" class="alert alert-danger alert-dismissable" style="display: none;">
+                    <strong>Error! </strong><span class="has-error"></span>
+                </div>
+                <div class="busy">
+                    <img id="imgLoader" src="~/Images/Processing.gif" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    $(document).ready(function () {
+        $('.input-group.date').datepicker({
+            todayBtn: "linked",
+            keyboardNavigation: false,
+            forceParse: false,
+            calendarWeeks: true,
+            autoclose: true,
+            format: "dd/mm/yyyy",
+            todayHighlight: true
+        });
+
+        $('.input-group.date').inputmask({
+            mask: '99/99/9999'
+        });
+        var config = {
+            '.chosen-select': {},
+            '.chosen-select-deselect': { allow_single_deselect: true, search_contains: true },
+            '.chosen-select-no-single': { disable_search_threshold: 10 },
+            '.chosen-select-no-results': { no_results_text: 'Oops, nothing found!' },
+            '.chosen-select-width': { width: "95%" }
+        };
+        for (var selector in config) {
+            $(selector).chosen(config[selector]);
+        }
+
+        // Numbers Only
+        $("#txtCapitalPrice,#txtIncomePrice,#txtTRPrice").keydown(function (event) {
+            if (event.shiftKey == true) {
+                event.preventDefault();
+            }
+
+            if ((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105) || event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 37 || event.keyCode == 39 || event.keyCode == 46 || event.keyCode == 190 || event.keyCode == 110) {
+
+            } else {
+                event.preventDefault();
+            }
+
+            if ($(this).val().indexOf('.') !== -1 && (event.keyCode == 190 || event.keyCode == 110))
+                event.preventDefault();
+        });
+    });
+</script>

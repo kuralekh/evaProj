@@ -1,0 +1,637 @@
+﻿@model IEnumerable<Invest.ViewModel.Models.SecurityPriceModel>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Price";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-8">
+        <h2>@ViewBag.Title</h2>
+        <ol class="breadcrumb">
+            <li>Investment</li>
+            <li>Securities</li>
+            <li class="active">
+                <strong>@ViewBag.Title</strong>
+            </li>
+        </ol>
+        <div class="bigChartWrap">
+            <div class="vertical-align">
+                <div class="chartBack">
+                    <button class="test">test</button>
+                    <canvas id="bigChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="row" style="padding-top: 13px;">
+            <div class="col-lg-12">
+                <div class="input-group">
+                    <span class="input-group-btn">
+                        <div class="customFileUpload btn btn-primary">
+                            <span>Browse</span>
+                            <input id="uploadFileMain" type="file" class="upload" accept=".csv" />
+                        </div>
+                    </span>
+                    <input id="uploadFile" name="uploadFile" placeholder="Accept .csv File Only" class="form-control" accept=".csv" disabled="disabled" />
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="col-lg-12" style=" padding-top: 12px;">
+                <ul class="list-inline pull-right">
+                    <li><button type="submit" id="submitfile" class="btn btn-primary"><i class="fa fa-upload"></i> Upload File</button></li>
+                    <li style=" padding-right: 0px;"><button type="button" class="btn btn-success" onclick="window.location = '@Url.Action("DownLoadTemplateSecurityPrice", "Investment")'"><i class="fa fa-download"></i> Download Template File</button></li>
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    @*<div class="col-lg-5" style="padding-top: 30px;">
+            <div class="bigChartWrap">
+                <div class="vertical-align">
+                    <div class="chartBack">
+                        <button class="test">test</button>
+                        <canvas id="bigChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <table>
+                <tr>
+                    <td><input type="file" name="uploadFile" accept=".csv" id="uploadFile" style="width:300px" /></td>
+                    <td>
+                        <button type="submit" id="submitfile" class="btn btn-primary">Upload</button>
+                        <button type="button" class="btn btn-success " onclick="window.location = '@Url.Action("DownLoadTemplateSecurityPrice", "Investment")'"><i class="fa fa-download"></i> Download template file</button>
+                    </td>
+                </tr>
+            </table>
+        </div>*@
+
+    @*<form action="@Url.Action("FileUploadHandler", "Investment")" method="post" enctype="multipart/form-data">
+            <table>
+                <tr>
+                    <td>
+                        <input type="file" name="uploadFile" accept=".csv" id="uploadFile" style="width:350px" />
+                    </td>
+                    <td width="10"></td>
+                    <td>
+                        <button type="submit" class="btn btn-primary pull-left">Upload</button>
+                    </td>
+                    <td width="10"></td>
+                    <td>
+                        @Html.ActionLink("Download template file", "DownLoadTemplateSecurityPrice", "Investment");
+                    </td>
+                </tr>
+            </table>
+
+        </form>*@
+
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins" id="dvPriceList">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal inmodal fade" id="priceModal">
+    <div class="modal-dialog" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Price</h4>
+            </div>
+            <div id="dvPrice">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal inmodal fade" id="containerFilterModal">
+    <div class="modal-dialog" role="dialog" aria-labelledby="titleFilterModal" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="titleFilterModal"></h4>
+            </div>
+            <div id="blockFilterModal"></div>
+        </div>
+    </div>
+</div>
+
+<div class="popup">
+    <div class="popupArrow"></div>
+    <div class="popupHeader">
+        <!--<div class="arrowLeft"></div> -->
+        <!--<div class="securityCaption"> -->
+        Southern Copper Corp - <b>SCCO</b>
+
+    </div>
+    <div class="popupContent">
+        <div style="border: 1px solid #2f4050">
+            <div class="popupContentBlock">
+                <h4>Price</h4>
+                <p class="dayOfLastPrice"></p>
+                <p class="currentPrice">$27.13</p>
+                <p class="dayPriceChange">(0.00%)</p>
+                <h3>Return MTD</h3>
+                <p class="mtd"></p>
+            </div>
+            <div class="popupContentBlock">
+                <h4 class="weekCount">52 Week Range</h4>
+                <canvas id="niceChart" width="100" height="65"></canvas>
+                <span class="rangeLeft">$23.41</span><span class="rangeRight">$33.31</span>
+                <div class="popupSlider"></div>
+                <!--<input class="popupSlider" type="text" data-slider="true">  -->
+            </div>
+            <div class="popupContentBlock">
+                <h4>Returns</h4>
+                <p class="endOfPreMonth"></p>
+                <table>
+                    <tr><td class="MO">1MO</td><td><div class="arrowUp">&#x27A8;</div><span>5.55%</span></td></tr>
+                    <tr><td class="MO6">3MO</td><td><div class="arrowUp">&#x27A8;</div><span>4.20%</span></td></tr>
+                    <tr><td class="YR">1YR</td><td><div class="arrowUp">&#x27A8;</div><span>11.73%</span></td></tr>
+                </table>
+            </div>
+            <div style="clear: both"></div>
+        </div>
+        <p>SCC owns and operate mines, and produces copper molybdenum and precious metals</p>
+        <a href="@Url.Content("~/Investment/AnalyticHome")">See more details</a>
+    </div>
+</div>
+<!--Load these page level functions-->
+@section Styles {
+    @Styles.Render("~/Content/plugins/priceSlider")
+    @Styles.Render("~/plugins/dateRangeStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/Content/plugins/chosen/chosenStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/Content/plugins/select2/select2Styles")
+    @Styles.Render("~/Content/plugins/sliderStyle")
+    @Styles.Render("~/Content/plugins/chartStyles")
+}
+
+@section Scripts {
+    @**@
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/dateRange")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/chosen")
+    @Scripts.Render("~/plugins/select2")
+    @Scripts.Render("~/plugins/popupInfo")
+    @Scripts.Render("~/plugins/charts")
+    @Scripts.Render("~/plugins/slider/js")
+    @Scripts.Render("~/plugins/priceSlider")
+
+    <script type="text/javascript">
+
+        $(function () {
+
+            document.getElementById("uploadFileMain").onchange = function () {
+                var path = this.value;
+                var lastIndex = path.lastIndexOf("\\");
+                var filename = path.substring(lastIndex + 1);
+                $("#uploadFile").val(filename);
+            };
+
+            $('#submitfile').on('click', function (e) {
+                e.preventDefault();
+                var files = document.getElementById('uploadFileMain').files;
+                if (files.length > 0) {
+                    if (window.FormData !== undefined) {
+                        var data = new FormData();
+                        for (var x = 0; x < files.length; x++) {
+                            data.append("file" + x, files[x]);
+                        }
+                        $.ajax({
+                            type: "POST",
+                            url: '@Url.Action("FileUploadHandlerValid", "Investment")',
+                            contentType: false,
+                            processData: false,
+                            data: data,
+                            success: function (result) {
+                                CompleteUploadFile(result);
+                            },
+                            error: function (xhr, status, p3) {
+                                On_Failure();
+                                //alert(xhr.responseText);
+                            }
+                        });
+                    } else {
+                        alert("Браузер не поддерживает загрузку файлов HTML5!");
+                    }
+                }
+            });
+
+            function CompleteUploadFile(data) {
+                $('#blockFilterModal').html(data);
+                $("#containerFilterModal").modal('show');
+                $('.modal-footer').show();
+            }
+
+            $('#containerFilterModal').on('hidden.bs.modal', function () {
+                $('#uploadFile').val('');
+                $('#uploadFileMain').val('');
+                GetPriceDetail();
+            });
+
+            //When Model hides
+            $('#priceModal').on('hidden.bs.modal', function () {
+
+                if (priceTable != undefined)
+                    priceTable.fnDraw();
+            });
+            GetPriceDetail();
+
+            config = {
+                '.chosen-select': {},
+                '.chosen-select-deselect': { allow_single_deselect: true, search_contains: true },
+                '.chosen-select-no-single': { disable_search_threshold: 10 },
+                '.chosen-select-no-results': { no_results_text: 'Oops, nothing found!' },
+                '.chosen-select-width': { width: "95%" }
+            };
+            //to set focus on select2 Search input in case of modal cuts on screen on Firefox.
+            if (typeof InstallTrigger !== 'undefined') {
+                $.fn.modal.Constructor.prototype.enforceFocus = function () { };
+            }
+        });
+
+        //Download button extension for table tools
+        $.fn.dataTable.TableTools.buttons.download = $.extend(true, {}, $.fn.dataTable.TableTools.buttonBase,
+        {
+            "sButtonText": "Download",
+            "sUrl": "",
+            "sType": "Get",
+            "fnData": false,
+            "fnClick": function (button, config) {
+                var dt = new $.fn.dataTable.Api(this.s.dt);
+                var data = dt.ajax.params() || {};
+
+                // Optional static additional parameters
+                // data.customParameter = ...;
+                data.Id = $("#select2_Security").val();
+                data.FromDate = fromdate;
+                data.ToDate = todate;
+                data.IsAll = false;
+                if (config.fnData) {
+                    config.fnData(data);
+                }
+
+                var iframe = $('<iframe/>', {
+                    id: "RemotingIFrame"
+                }).css({
+                    border: 'none',
+                    width: 0,
+                    height: 0
+                })
+                    .appendTo('body');
+
+                var contentWindow = iframe[0].contentWindow;
+                contentWindow.document.open();
+                contentWindow.document.close();
+
+                var form = contentWindow.document.createElement('form');
+                form.setAttribute('method', config.sType);
+                form.setAttribute('action', config.sUrl);
+
+                var input = contentWindow.document.createElement('input');
+                input.name = 'json';
+                input.value = JSON.stringify(data);
+
+                form.appendChild(input);
+                contentWindow.document.body.appendChild(form);
+                form.submit();
+            }
+        });
+
+        //
+
+        function GetPriceDetail() {
+            $.ajax({
+                url: '@Url.Content("~/Investment/GetPriceDetail")',
+                data: {},
+                type: "GET",
+                cache: false,
+                error: function (error) {
+                    window.location.href = '@Url.Content("~/Error/Index")';
+                },
+                success: function (data) {
+                    $('#dvPriceList').html(data);
+                    for (var selector in config) {
+                        $(selector).chosen(config[selector]);
+                    }
+                    $('input[name="daterange"]').daterangepicker().val('');
+                    FillFilteredSecurities("select2_Security");
+                }
+            });
+            return;
+        }
+
+
+        function FillFilteredSecurities(ctrlId) {
+            $("#" + ctrlId).select2({
+                allowClear: true,
+                placeholder: "Select Security",
+                minimumInputLength: 1,
+                ajax: {
+                    url: '@Url.Content("~/Investment/GetFilteredSecurities")',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            code: params.term,
+                            type: "NoRate"
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: $.map(data.data, function (item) {
+                                return { results: item, id: item.Id, text: item.Code + ' - ' + item.Name };
+                            })
+                        };
+                    },
+                    cache: true
+                }
+            });
+        }
+
+
+        function GetPriceDetailByFilter() {
+            var sucurityCode = "";
+            if ($("#select2_Security").val() == null) {
+                $("#select2_Security").select2('open');
+                return;
+            }
+            var id = $("#select2_Security").val();
+
+            var daterange = $("#TxtDateRange").val();
+            fromdate = null;
+            todate = null;
+
+
+            if (daterange != null && daterange != "") {
+
+                spDate = daterange.split("-");
+                //Convert dd/mm/yyyy to mm/dd/yyyy
+                fromdate = dateManager.convert(spDate[0].trim());
+                todate = dateManager.convert(spDate[1].trim());
+            }
+
+            var url = '@Url.Content("~/Investment/GetPriceDetailByFilter")' + '?securityId=' + id + '&fromdate=' + fromdate + '&todate=' + todate;
+            var csvUrl = '@Url.Content("~/Investment/DownloadSecurityPriceCsv")';
+            priceTable = $('#example').dataTable({
+                initComplete: function () {
+                    // Setup - add a text input to each header cell - Apply the filter
+                    $('#example thead tr#headerFilter th').each(function () {
+                        if (!($(this).hasClass("editSearch"))) {
+                            $('<input type="text" placeholder="Search" />').appendTo($(this).empty())
+                                .on('keyup', function () {
+                                    priceTable.api().columns($(this).parent().index() + ':visible').search(this.value).draw();
+                                });
+                        }
+                    });
+                },
+                "orderCellsTop": true,
+                "destroy": true,
+                "bServerSide": true,
+                "sAjaxSource": url,
+                "bProcessing": true,
+                "columns": [
+                    {
+                        "data": "SecurityCode",
+                        "render": function (oObj) {
+                            sucurityCode = oObj;
+                            return '<a href=' + encodeURI('@Url.Content("~/Investment/AnalyticHome?code=")' + oObj + '&type=Security')+'>' + oObj + "</a>";
+                        }
+                    },
+                    {
+                        "data": "SecurityName",
+                        "render": function (oObj) {
+                            return '<a href=' + encodeURI('@Url.Content("~/Investment/AnalyticHome?code=")' + sucurityCode + '&type=Security')+'>' + oObj + "</a>";
+                        }
+                    },
+                    {
+                        "data": "Date",
+                        "render": function (oObj) {
+                            var payDate = moment(oObj).format('DD/MM/YYYY');
+                            if (payDate == "01/01/0001")
+                                return null;
+
+                            return payDate;
+                        }
+                    },
+                    {
+                        "data": "UnitPrice",
+                        "render": function (oObj) {
+                            if (oObj == null)
+                                return null;
+                            return '<div class="pull-right">' + oObj.toFixed(6) + '</div>';
+                        }
+                    },
+                    { "data": "Currency" },
+                    {
+                        "data": "Id",
+                        "targets": 'no-sort',
+                        "orderable": false,
+                        "render": function (oObj) {
+                            return '<div class="text-center"><button class="btn-white btn btn-xs" onclick="GetSecurityPricelist(' + oObj + ')">Edit</button></div>';
+                            //return '<div class="text-center"><a href="javascript:GetSecurityPricelist(' + oObj + ')"><i title="Edit" class="fa fa-edit"></i></a></div>';
+                        }
+                    },
+                    {
+                        "data": "Id",
+                        "targets": 'no-sort',
+                        "orderable": false,
+                        "render": function (oObj) {
+                            return '<div class="text-center"><button class="btn-white btn btn-xs" onclick="DeleteSecurityPrice(' + oObj + ')">Delete</button></div>';
+                            //return '<div class="text-center"><a href="javascript:DeleteSecurityPrice(' + oObj + ')"><i title="Delete" class="fa fa-trash"></i></a></div>';
+                        }
+                    }
+                ],
+                "dom": 'T<"clear">lfrtip',
+                "tableTools": {
+                    "sSwfPath": "../scripts/plugins/dataTables/swf/copy_csv_xls_pdf.swf",
+                    "aButtons": [{ "sExtends": "download", "sButtonText": "CSV", "sUrl": csvUrl, "sToolTip": "Save as CSV" }]
+                }
+            });
+            priceTable.api().on('draw.dt', function (e, settings, json, xhr) {
+                chartFunction('@Url.Content("~/Investment/TestAjax")',
+                    '@Url.Content("~/Error/Index")',
+                    '@Url.Content("~/Investment/AnalyticHome")');
+            });
+
+        }
+
+        function Create() {
+            $.ajax({
+                url: '@Url.Content("~/Investment/CreatePrice")',
+                data: {},
+                type: "GET",
+                cache: false,
+                error: function (error) {
+
+                    window.location.href = '@Url.Content("~/Error/Index")';
+                },
+                success: function (data) {
+                    $('#dvPrice').html(data);
+                    $("#priceModal").modal('show');
+                    FillFilteredSecurities("ddlSecurityId");
+                    $("#myModalLabel").html("Create Price");
+                    jQuery.validator.unobtrusive.parse("#PriceCreateForm");
+                    $('.modal-footer').show();
+                    $(".propertydiv").hide();
+                    //on change event
+                    $('#ddlSecurityId').on("change", function () {
+                        if ($('#ddlSecurityId').val() != "") {
+                   
+                            var securityid = $('#ddlSecurityId').val();
+                            if ($('#ddlSecurityId').val() != null) {
+                                $.ajax({
+                                    url: '@Url.Content("~/Investment/CheckNavSecurity")',
+                                    data: { securityId: securityid },
+                                    type: "GET",
+                                    cache: false,
+                                    async: true,
+                                    error: function (error) {
+
+                                        window.location.href = '@Url.Content("~/Error/Index")';
+                                    },
+                                    success: function (data) {
+                                        if (data == true) {
+                                            $(".propertydiv").show();
+                                        } else {
+                                            $(".propertydiv").hide();
+                                        }
+                                    }
+                                });
+                            } else {
+                                $(".propertydiv").hide();
+                            }
+                        }
+                    });
+
+                    //on button click
+                    $('.btn-primary').click(function () {
+                        if ($('#PriceCreateForm').valid()) {
+                            $('#error').hide();
+                            $('.busy').show();
+                            $(".modal-footer").hide();
+                        }
+                    });
+                    $('.busy').hide();
+                    $('.alert').hide();
+                }
+            });
+            return;
+        }
+
+        function GetSecurityPricelist(id) {
+            if (id == null)
+                id = "1";
+            $.ajax({
+                url: '@Url.Content("~/Investment/GetSecurityPrice")',
+                data: { Id: id },
+                type: "GET",
+                cache: false,
+                error: function (error) {
+                    window.location.href = '@Url.Content("~/Error/Index")';
+                },
+                success: function (data) {
+                    $('#dvPrice').html(data);
+                    FillFilteredSecurities("ddlSecurityId");
+                    $("#priceModal").modal('show');
+                    $("#myModalLabel").html("Edit Price");
+                    jQuery.validator.unobtrusive.parse("#PriceEditForm");
+                    $('.modal-footer').show();
+                    //onchange event
+
+                    $('#ddlSecurityId').on("change", function () {
+                      
+                        if ($('#ddlSecurityId').val() != "") {
+                            var securityid = $('#ddlSecurityId').val();
+                            if ($('#ddlSecurityId').val() != null) {
+                                $.ajax({
+                                    url: '@Url.Content("~/Investment/CheckNavSecurity")',
+                                    data: { securityId: securityid },
+                                    type: "GET",
+                                    async: true,
+                                    cache: false,
+                                    error: function (error) {
+
+                                        window.location.href = '@Url.Content("~/Error/Index")';
+                                    },
+                                    success: function (data) {
+                                        if (data == true) {
+                                            $(".propertydiv").show();
+                                        } else {
+                                            $(".propertydiv").hide();
+                                        }
+                                    }
+                                });
+                            } else {
+                                $(".propertydiv").hide();
+                            }
+                        }
+                    });
+                    //on button click
+                    $('.btn-primary').click(function () {
+                        if ($('#PriceEditForm').valid()) {
+                            $('#error').hide();
+                            $('.busy').show();
+                            $(".modal-footer").hide();
+                        }
+                    });
+                    $('.busy').hide();
+                    $('.alert').hide();
+                }
+            });
+            return;
+        }
+
+        function DeleteSecurityPrice(id) {
+            bootbox.confirm("Are you sure you want to delete?", function (result) {
+                if (result) {
+                    $.ajax({
+                        url: '@Url.Content("~/Investment/DeleteSecurityPrice")',
+                        data: { Id: id },
+                        type: "POST",
+                        cache: false,
+                        error: function (error) {
+                            window.location.href = '@Url.Content("~/Error/Index")';
+                        },
+                        success: function (data) {
+                            priceTable.fnDraw();
+                            bootbox.alert("Record has deleted successfully!");
+                        }
+                    });
+                }
+            });
+        }
+
+        function ResetModalControls() {
+            $('#txtDate').val('');
+            $('#txtUnitPrice').val('');
+            $('#txtPriceNAV').val('');
+            $('#txtPricePUR').val('');
+            $('#txtInterestRate').val('');
+            $('#txtValuer').val('');
+
+            var clone = $('#File').clone(false, false);
+            $("#File").replaceWith(clone);
+            $("#filevalidation").text('');
+
+            $("#ddlSecurityId").select2("val", "");
+            $('#ddlValuationTypeId').val('');
+            $('#ddlValuationTypeId').trigger("chosen:updated");
+
+            $('#ddlCurrencyId').val('5');
+            $('#ddlCurrencyId').trigger("chosen:updated");
+        }
+    </script>
+}

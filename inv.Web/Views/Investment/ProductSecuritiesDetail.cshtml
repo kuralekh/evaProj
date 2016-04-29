@@ -1,0 +1,324 @@
+﻿@model Invest.ViewModel.Models.ProductSecuritiesModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Product Securities";
+}
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-9">
+        <h2>@ViewBag.Title</h2>
+        <ol class="breadcrumb">
+            <li>Investment</li>
+            <li>Products</li>
+            <li>Details</li>
+            <li class="active">
+                <strong>@ViewBag.Title</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins" id="dvPSDetailList">
+            </div>
+            <div class="ibox float-e-margins" id="dvSecurityListDetail">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/Content/plugins/chosen/chosenStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/Content/plugins/select2/select2Styles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/dateRange")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/chosen")
+    @Scripts.Render("~/plugins/select2")
+    <script type="text/javascript">
+        var tblProductSecDetailList;
+        var productWeightTotal;
+        var portfolioWeightTotal;
+        var PFWeight;
+        var secLId;
+        var productSecurityTable;
+        var todate;
+        $.extend({
+            getUrlVars: function () {
+                var vars = [], hash;
+                var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+                for (var i = 0; i < hashes.length; i++) {
+                    hash = hashes[i].split('=');
+                    vars.push(hash[0]);
+                    vars[hash[0]] = hash[1];
+                }
+                return vars;
+            },
+            getUrlVar: function (name) {
+                return $.getUrlVars()[name];
+            }
+        });
+
+        $(function () {
+            $('#dvSecurityListDetail').hide();
+            GetModelsDetailList();
+            GetSecurityDetailListPage();
+        });
+
+        $.fn.dataTable.TableTools.buttons.download = $.extend(true, {}, $.fn.dataTable.TableTools.buttonBase,
+        {
+            "sButtonText": "Download",
+            "sUrl": "",
+            "sType": "Get",
+            "fnData": false,
+            "fnClick": function (button, config) {
+                var dt = new $.fn.dataTable.Api(this.s.dt);
+                var data = dt.ajax.params() || {};
+
+                data.Id = $.getUrlVar('productId');
+                data.Id_1 = $.getUrlVar('productVersionId');
+                data.Id_2 = secLId;
+                data.PFWeight = PFWeight;
+                var iframe = $('<iframe/>', {
+                    id: "RemotingIFrame"
+                }).css({
+                    border: 'none',
+                    width: 0,
+                    height: 0
+                })
+                    .appendTo('body');
+
+                var contentWindow = iframe[0].contentWindow;
+                contentWindow.document.open();
+                contentWindow.document.close();
+
+                var form = contentWindow.document.createElement('form');
+                form.setAttribute('method', config.sType);
+                form.setAttribute('action', config.sUrl);
+
+                var input = contentWindow.document.createElement('input');
+                input.name = 'json';
+                //  input.value = JSON.stringify(data);
+                input.value = JSON.stringify(data);
+
+                form.appendChild(input);
+                contentWindow.document.body.appendChild(form);
+                form.submit();
+            }
+        });
+
+        // load list partial view for table 1
+        function GetModelsDetailList() {
+            var url = '@Url.Content("~/Investment/GetProductSecListDetailPage")';
+            $.ajax({
+                url: url,
+                data: {},
+                type: "GET",
+                cache: false,
+                error: function (error) {
+                    window.location.href = '@Url.Content("~/Error/Index")';
+                },
+                success: function (data) {
+                    $('#dvPSDetailList').html(data);
+                    GetModelsDetailListByFilter();
+
+                }
+            });
+            return;
+        }
+
+        // load list partial view for table 2
+        function GetSecurityDetailListPage() {
+            var url = '@Url.Content("~/Investment/GetSecurityListDetailPage")';
+            $.ajax({
+                url: url,
+                data: {},
+                type: "GET",
+                cache: false,
+                error: function (error) {
+                    window.location.href = '@Url.Content("~/Error/Index")';
+                },
+                success: function (data) {
+                    $('#dvSecurityListDetail').html(data);
+                }
+            });
+            return;
+        }
+
+        //initialized 1st table (Securities and Security List)
+        function GetModelsDetailListByFilter() {
+            var proId = $.getUrlVar('productId');
+            var pId = $.getUrlVar('productVersionId');
+           
+            var url = '@Url.Content("~/Investment/GetProductSecListDetailPageData")' + '?productVersionId=' + pId + "&productId=" + proId;
+            var csvUrl = '@Url.Content("~/Investment/DownloadProductSecDetailCsv")';
+            tblProductSecDetailList = $('#example').dataTable({
+                initComplete: function () {
+                    // Setup - add a text input to each header cell - Apply the filter
+                    $('#example thead tr#headerFilter th').each(function () {
+                        if (!($(this).hasClass("editSearch"))) {
+                            $('<input type="text" placeholder="Search" />').appendTo($(this).empty())
+                                .on('keyup', function () {
+                                    tblProductSecDetailList.api().columns($(this).parent().index() + ':visible').search(this.value).draw();
+                                });
+
+                        }
+                    });
+                },
+                "orderCellsTop": true,
+                "destroy": true,
+                "bServerSide": true,
+                "sAjaxSource": url,
+                "bProcessing": true,
+                "columns": [
+                    { "data": "SecurityCode" },
+                    { "data": "SecurityName" },
+                    {
+                        "data": "Allocation",
+                        "render": function (oObj) {
+                            if (oObj == null)
+                                return null;
+                            return '<div class="pull-right">' + oObj.toFixed(2) + '%</div>';
+                        }
+                    },
+                     {
+                         "data": "SecurityListId",
+                         "targets": 'no-sort',
+                         "orderable": false,
+                         "render": function (oObj, obj2, obj3, obj4) {
+                             if (obj3.SecurityListId > 0) {
+                                 return '<div class="text-center"><button class="btn-white btn btn-xs" onclick="GetSecuritiylist(' + obj3.SecurityListId + "," + obj3.Allocation + ')">Detail</button></div>';
+                             }
+                             else {
+                                 return '';
+                             }
+                         }
+                     },
+                    {
+                        "data": "TotalAllocation",
+                        "visible": false
+                    }
+                ],
+                "fnFooterCallback": function (nRow, aasData, iStart, iEnd, aiDisplay) {
+                    if (aasData) {
+                       
+                        if (aasData[aiDisplay[0]] != undefined) {
+                            productWeightTotal = parseFloat(aasData[aiDisplay[0]]['TotalAllocation']);
+                            if (!isNaN(parseFloat(productWeightTotal))) {
+                                $("#txtAllocation").text("Sum: " + productWeightTotal.toFixed(2) + "%");
+                            }
+
+                            if (aasData[0].ProductCode) {
+                                $("#txtProductCode").val(aasData[0].ProductCode);
+                            }
+
+                            $("#txtAssetClass").val(aasData[0].AssetClass);
+                        }
+                    }
+                },
+                "dom": 'T<"clear">lfrtip',
+                "tableTools": {
+                    "sSwfPath": "../scripts/plugins/dataTables/swf/copy_csv_xls_pdf.swf",
+                    "aButtons": [{ "sExtends": "download", "sButtonText": "CSV", "sUrl": csvUrl, "sToolTip": "Save as CSV" }]
+                },
+            });
+        }
+        
+        //initialized 2nd table (Security List Detail)
+        function GetSecuritiylist(slId, pfWeight) {
+            $('#dvSecurityListDetail').show();
+            secLId = slId;
+            PFWeight = pfWeight;
+            todate = dateManager.format(new Date(), 'mm/dd/yyyy');
+            var url = '@Url.Content("~/Investment/GetProductSecurityDetailPageData")' + '?sListId=' + secLId + '&todate=' + todate + '&requestFrom=' + "ModelDetailListDetail" + '&isAll=' + false + '&pfWeight=' + PFWeight;
+            var csvUrl = '@Url.Content("~/Investment/DownloadProductSecurityDetailCsvFromModel")';
+            productSecurityTable = $('#secListDetail').dataTable({
+                initComplete: function () {
+                    // Setup - add a text input to each header cell - Apply the filter
+                    $('#secListDetail thead tr#secListDetailheaderFilter th').each(function () {
+                        if (!($(this).hasClass("editSearch"))) {
+                            $('<input type="text" placeholder="Search" />').appendTo($(this).empty())
+                                .on('keyup', function () {
+                                    productSecurityTable.api().columns($(this).parent().index() + ':visible').search(this.value).draw();
+                                });
+                        }
+                    });
+                },
+                "orderCellsTop": true,
+                "destroy": true,
+                "bServerSide": true,
+                "sAjaxSource": url,
+                "bProcessing": true,
+                "columns": [
+                    { "data": "SecurityCode" },
+                    { "data": "StatusCode" },
+                    {
+                        "data": "StatusDate",
+                        "render": function (oObj) {
+                            var prDate = moment(oObj).format('DD/MM/YYYY');
+                            if (prDate == "01/01/0001")
+                                return null;
+                            return prDate;
+                        }
+                    },
+                    {
+                        "data": "Allocation",
+                        "render": function (oObj) {
+                            if (oObj == null)
+                                return null;
+                            return '<div class="pull-right">' + oObj.toFixed(2) + '%</div>';
+                        }
+                    },
+                    {
+                        "data": "PortfolioWeight",
+                        "render": function (oObj) {
+                            if (oObj == null)
+                                return null;
+                            return '<div class="pull-right">' + oObj.toFixed(2) + '%</div>';
+                        }
+                    },
+                    {
+                        "data": "TotalAllocation",
+                        "visible": false
+                    },
+                    {
+                        "data": "TotalPortfolioWeight",
+                        "visible": false
+                    }
+                ],
+                "fnFooterCallback": function (nRow, aasData, iStart, iEnd, aiDisplay) {
+                    if (aasData) {
+                        if (aasData[aiDisplay[0]] != undefined) {
+                            productWeightTotal = parseFloat(aasData[aiDisplay[0]]['TotalAllocation']);
+                            if (!isNaN(parseFloat(productWeightTotal))) {
+                                $("#txtTotalAllocation").text("Sum: " + productWeightTotal.toFixed(2) + "%");
+                            }
+
+                            portfolioWeightTotal = parseFloat(aasData[aiDisplay[0]]['TotalPortfolioWeight']);
+                            if (!isNaN(parseFloat(portfolioWeightTotal))) {
+                                $("#txtTotalPortfolioWeight").text("Sum: " + portfolioWeightTotal.toFixed(2) + "%");
+                            }
+                        }
+                        $("html, body").animate({ scrollTop: $(document).height() }, "slow");
+                    }
+                },
+                "dom": 'T<"clear">lfrtip',
+                "tableTools": {
+                    "sSwfPath": "../scripts/plugins/dataTables/swf/copy_csv_xls_pdf.swf",
+                    "aButtons": [{ "sExtends": "download", "sButtonText": "CSV", "sUrl": csvUrl, "sToolTip": "Save as CSV" }]
+                },
+            });
+
+        }
+    </script>
+}

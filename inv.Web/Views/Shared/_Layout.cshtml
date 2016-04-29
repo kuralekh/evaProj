@@ -1,0 +1,271 @@
+﻿@using Invest.Web.Helpers
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>MDA Operator | @ViewBag.Title</title>
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700' rel='stylesheet' type='text/css'>
+
+    <!-- Add local styles, mostly for plugins css file -->
+    @if (IsSectionDefined("Styles"))
+    {
+        @RenderSection("Styles", required: false)
+    }
+
+    <!-- Add jQuery Style direct - used for jQGrid plugin -->
+    <link href="@Url.Content("~/Scripts/plugins/jquery-ui/jquery-ui.css")" rel="stylesheet" type="text/css" />
+
+    <link href="@Url.Content("~/Content/plugins/sliderStyle/simple-slider.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/plugins/sliderStyle/simple-slider-volume.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/plugins/priceSlider/nouislider.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/plugins/priceSlider/nouislider.pips.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/plugins/chartStyles/barChart.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/plugins//toastr/toastr.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/Content/plugins/chartStyles/style.css")" rel="stylesheet" type="text/css" />
+
+    <!-- Primary Inspinia style -->
+    @Styles.Render("~/Content/css")
+    @Styles.Render("~/font-awesome/css")
+
+
+    <style>
+        #divProcess img, .busy img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+        }
+
+        #divProcess, .busy {
+            display: block;
+            position: fixed;
+            top: 0%;
+            left: 0%;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            z-index: 999999;
+            -moz-opacity: 0.8;
+            opacity: .70;
+            filter: alpha(opacity=80);
+        }
+    </style>
+</head>
+<body>
+    <!-- JQuery Loaded in begining of body as required in Navigations and other-->
+    @Scripts.Render("~/bundles/jquery")
+    <div id="divProcess" style="display:none;">
+        <img src="~/Images/Processing.gif" alt="" />
+    </div>
+    <!-- Skin configuration box -->
+    @*@Html.Partial("_SkinConfig")*@
+
+    <!-- Wrapper-->
+    <!-- PageClass give you ability to specify custom style for specific view based on action -->
+    <div id="wrapper" class="@Html.PageClass()">
+
+        <!-- Navigation -->
+        @Html.Partial("_Navigation")
+
+        <!-- Page wraper -->
+        <div id="page-wrapper" class="gray-bg @ViewBag.SpecialClass">
+
+            <!-- Top Navbar -->
+            @Html.Partial("_TopNavbar")
+
+            <!-- Main view  -->
+            @RenderBody()
+
+            <!-- Footer -->
+            @Html.Partial("_Footer")
+
+        </div>
+        <!-- End page wrapper-->
+        <!-- Right Sidebar -->
+        @Html.Partial("_RightSidebar")
+
+    </div>
+    <!-- End wrapper-->
+    <!-- Section for main scripts render -->
+    <!-- JQuery Loaded in begining of body-->
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/plugins/slimScroll")
+    @Scripts.Render("~/bundles/inspinia")
+    @Scripts.Render("~/plugins/validate")
+    @Scripts.Render("~/plugins/toastr")
+
+
+    <!-- Skin config script - only for demo purpose-->
+    @Scripts.Render("~/bundles/skinConfig")
+
+    <!-- Handler for local scripts -->
+    @RenderSection("scripts", required: false)
+
+    <script>
+        $.ajaxSetup({
+            beforeSend: function () {
+                $('#divProcess').css('display', 'block');
+            },
+            complete: function () {
+                $('#divProcess').css('display', 'none');
+            }
+        });
+
+        function onSuccess_Create(context) {
+
+            if (context.status == "success") {
+                $('.has-success').html(context.message).show();
+                $('.alert-success').show();
+                ResetModalControls();
+            }
+            else {
+                $('.has-error').html(context.message).show();
+                $('.alert-danger').show();
+            }
+
+            $('.modal-footer').show();
+            $('.busy').hide();
+        }
+
+        function onSuccess(context) {
+            if (context.status == "success") {
+                $('.has-success').html(context.message).show();
+                $('.alert-success').show();
+            } else {
+                $('.has-error').html(context.message).show();
+                $('.alert-danger').show();
+            }
+
+            $('.modal-footer').show();
+            $('.busy').hide();
+        }
+
+        function onFailure(context) {
+            $('.has-error').html(context.message).show();
+            $('.alert-danger').show();
+            $('.modal-footer').show();
+            $('.busy').hide();
+        }
+
+        function On_Success() {
+
+            toastr.options = {
+                "closeButton": true,
+                "debug": false,
+                "progressBar": false,
+                "positionClass": "toast-top-right",
+                "showDuration": "400",
+                "hideDuration": "1000",
+                "timeOut": "7000",
+                "extendedTimeOut": "5000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+
+            toastr.success('Completed', 'Success!');
+        }
+
+        function On_Failure() {
+            toastr.options = {
+                "closeButton": true,
+                "debug": false,
+                "progressBar": false,
+                "positionClass": "toast-top-right",
+                "showDuration": "400",
+                "hideDuration": "1000",
+                "timeOut": "7000",
+                "extendedTimeOut": "5000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+
+            toastr.error('Not completed', 'Error!');
+        }
+
+        function StatusAlert(msg, status) {
+
+            toastr.options = {
+                "closeButton": true,
+                "debug": false,
+                "progressBar": false,
+                "positionClass": "toast-top-right",
+                "showDuration": "300",
+                "hideDuration": "500",
+                "timeOut": "3000",
+                "extendedTimeOut": "5000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+
+            if (status == "success") {
+                toastr.success('' + msg + '');
+            }
+            else if (status == "warning") {
+                toastr.warning('' + msg + '');
+            }
+            else {
+                toastr.error('' + msg + '');
+            }
+        }
+
+        //To Allo Date Format Validation
+        jQuery.validator.methods.date = function (value, element) {
+            return this.optional(element) || moment(value, "DD/MM/YYYY");
+        };
+
+        //To Allow MVC Unobtrusive Validation On Chosen Controls.
+        $.validator.setDefaults({
+            ignore: []
+        });
+
+        $(function () {
+
+            if (window.location.href.indexOf("Administration/Settings") > -1 && window.location.href.indexOf("Administration/Settings/SystemSettings") == -1) {
+                makeSettingsDropdown();
+            }
+
+        });
+
+        function makeSettingsDropdown() {
+
+            var selectedValue = window.location.href.substr(window.location.href.indexOf("Settings") + 9);
+
+            $.ajax({
+
+                url: '@Url.Content("~/Administration/Settings/GetSettingsDropdown")',
+                data: { "selected": selectedValue },
+                type: "GET",
+                cache: false,
+                error: function (error) {
+                    window.location.href = '@Url.Content("~/Error/Index")';
+                },
+                success: function (data) {
+
+                    
+                    $('.breadcrumb').parent().next().removeClass('col-lg-2').addClass('col-lg-3');
+                    $('.breadcrumb').parent().next().append('<div id="divsettingsDropdown" style="margin-top: 30px; margin-bottom: 10px;"></div>');
+                    $('#divsettingsDropdown').html(data);
+
+                }
+
+            });
+
+            return;
+        }
+
+    </script>
+</body>
+</html>

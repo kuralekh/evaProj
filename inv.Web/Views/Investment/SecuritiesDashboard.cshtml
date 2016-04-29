@@ -1,0 +1,641 @@
+﻿@model IEnumerable<Invest.ViewModel.Models.SecurityModel>
+
+@{
+    ViewBag.Title = "Securities";
+}
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-9">
+        <h2>@ViewBag.Title</h2>
+        <ol class="breadcrumb">
+            <li>Investment</li>
+            <li class="active">
+                <strong>@ViewBag.Title</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins" id="dvIncomeList">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Load these page level functions-->
+@section Styles {
+    @Styles.Render("~/Content/plugins/priceSlider")
+    @Styles.Render("~/plugins/dateRangeStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/Content/plugins/chosen/chosenStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/Content/plugins/select2/select2Styles")
+    @Styles.Render("~/Content/plugins/sliderStyle")
+    @Styles.Render("~/Content/plugins/chartStyles")
+    @Styles.Render("~/Content/dashbord")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/dateRange")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/chosen")
+    @Scripts.Render("~/plugins/select2")
+    @Scripts.Render("~/plugins/popupInfo")
+    @Scripts.Render("~/plugins/charts")
+    @Scripts.Render("~/plugins/slider/js")
+    @Scripts.Render("~/plugins/priceSlider")
+
+    <script src="~/Scripts/plugins/charts/Chartjs/Chart.js"></script>
+    <script src="~/Scripts/plugins/charts/Chartjs/src/Chart.Bar.js"></script>
+    <script src="~/Scripts/plugins/charts/Chartjs/src/Chart.Core.js"></script>
+    <script src="~/Scripts/plugins/charts/Chartjs/src/Chart.Doughnut.js"></script>
+    <script src="~/Scripts/plugins/charts/Chartjs/src/Chart.Line.js"></script>
+    <script src="~/Scripts/plugins/charts/Chartjs/src/Chart.PolarArea.js"></script>
+    <script src="~/Scripts/plugins/charts/Chartjs/src/Chart.Radar.js"></script>
+    <script src="~/Scripts/plugins/charts/drawChart.js"></script>
+    <script src="~/Scripts/plugins/slider/js/simple-slider.min.js"></script>
+    <script src="~/Scripts/plugins/charts/Chartjs/Chart.js"></script>
+    <script src="~/Scripts/plugins/charts/mainBar.js"></script>
+    <script src="~/Scripts/plugins/priceSlider/nouislider.js"></script>
+
+    <script type="text/javascript">
+        var config;
+        var incomeTable;
+        var fromdate;
+        var todate;
+        var spDate;
+        var slider = $('.summarySlider')[0];
+        var headerTabs = $('.headerTab');
+        var contentTabs = $('.contentTab');
+        var windowObj = $(window);
+        var activeContent = $('.activeContent');
+        var priceSlider = $('.priceSlider')[0];
+        var priceSliderRange = $('.priceSliderWrapper span');
+        var dataJSON;
+        var config;
+        var target;
+        var priceTable;
+        var fromdate;
+        var todate;
+        var spDate;
+        var pricePeriods = $('.pricePeriod');
+        var bigChartBase, summaryChart, priceChart, performanceChart;
+        var dataPeriods = new Array(6);
+        for (var i = 0; i < 6; i++) {
+            dataPeriods[i] = new Object();
+        }
+        var firstPerformanceLine = "#3FBFA5";
+        var secondPerformanceLine = "#1E85C6";
+        var mainGreenColor = "rgb(26,179,148)";
+        var mainGreenFillColor = "rgba(26,179,148, 0.3)";
+        var thirdPerformanceLine = "rgb(155, 52, 156)";
+        var transparentColor = "transparent";
+        var lineColor = $('.lineColor');
+        var priceDataset = {};
+        var help = $('.homeAbout');
+        var infoMessage = $('.infoTooltip');
+        var summaryDataset, performanceDataset;
+        var infoOpened = false;
+        var helpMessages = [
+            "Click anywhere to close this popup"
+        ]
+        var performanceData = {
+            labels: [],
+            datasets: [
+                {
+                    label: "First Line",
+                    data: [],
+                    strokeColor: mainGreenColor,
+                    fillColor: mainGreenFillColor// "rgba(255, 0, 0, 0.1)"
+                },
+                {
+                    label: "Coming soon...",
+                    data: [],
+                    strokeColor: secondPerformanceLine,
+                    fillColor: "rgba(30,130,198,0.3)" //"rgba(0, 0, 255, 0.1)"
+                },
+                {
+                    label: "Yellow line",
+                    data: [],
+                    strokeColor: thirdPerformanceLine,
+                    fillColor: "rgba(155,52,156,0.3)"
+                }
+            ]
+        }
+        var modelData = {
+            first: [
+                 {
+                     "a": "5.2%",
+                     "b": "q1q1q1q1q1q",
+                     "c": "AHU",
+                     "d": "3.7%"
+                 },
+                 {
+                     "a": "3.5%",
+                     "b": "qpwokdpqwokdpqow",
+                     "c": "DLW",
+                     "d": "4.2%"
+                 },
+                 {
+                     "a": "7.2%",
+                     "b": "dq;,wd;lq,w;dl,qw",
+                     "c": "LFK",
+                     "d": "1.4%"
+                 },
+                 {
+                     "a": "9.3%",
+                     "b": "qwdq;l,w;dlq,w",
+                     "c": "PFV",
+                     "d": "3.7%"
+                 },
+                 {
+                     "a": "12.2%",
+                     "b": "dq,wpodqwm,pdoqmwdoq",
+                     "c": "FFF",
+                     "d": "6.2%"
+                 }
+            ],
+            second: [
+                 {
+                     "a": "5.2%",
+                     "b": "q1q1q1q1q1q",
+                     "c": "AHU",
+                     "d": "3.7%"
+                 },
+                 {
+                     "a": "3.5%",
+                     "b": "qpwokdpqwokdpqow",
+                     "c": "DLW",
+                     "d": "4.2%"
+                 },
+                 {
+                     "a": "7.2%",
+                     "b": "dq;,wd;lq,w;dl,qw",
+                     "c": "LFK",
+                     "d": "1.4%"
+                 },
+                 {
+                     "a": "9.3%",
+                     "b": "qwdq;l,w;dlq,w",
+                     "c": "PFV",
+                     "d": "3.7%"
+                 },
+                 {
+                     "a": "12.2%",
+                     "b": "dq,wpodqwm,pdoqmwdoq",
+                     "c": "FFF",
+                     "d": "6.2%"
+                 }
+
+
+            ]
+        }
+
+        var priceData = {
+            labels: [],
+            datasets: [{
+                fillColor: mainGreenFillColor,
+                // fillColor: "rgba(30,130,198,0.3)",
+                strokeColor: mainGreenColor,
+                pointColor: mainGreenColor,
+                pointStrokeColor: "rgba(255,255,255,0.8)",
+                //   width: 1000,
+                //   height: 625,
+                data: []
+            }]
+        }
+        var options = {
+            maintainAspectRatio: true,
+            responsive: false
+        };
+
+        var barChartData = {
+            labels: [],
+            datasets: [{
+                fillColor: mainGreenColor,
+                highlightFill: mainGreenFillColor,
+                data: []
+            }]
+        };
+        Chart.types.Bar.extend({
+            name: "BarAlt",
+            draw: function () {
+                Chart.types.Bar.prototype.draw.apply(this, arguments);
+            }
+
+        });
+
+        $(function () {
+            //When Model hides
+            $('#incomeModal').on('hidden.bs.modal', function () {
+                if (incomeTable != undefined)
+                    incomeTable.fnDraw();
+            });
+
+            GetSecurityDashboardDetail();
+
+            config = {
+                '.chosen-select': {},
+                '.chosen-select-deselect': { allow_single_deselect: true, search_contains: true },
+                '.chosen-select-no-single': { disable_search_threshold: 10 },
+                '.chosen-select-no-results': { no_results_text: 'Oops, nothing found!' },
+                '.chosen-select-width': { width: "95%" }
+            };
+            //to set focus on select2 Search input in case of modal cuts on screen on Firefox.
+            if (typeof InstallTrigger !== 'undefined') {
+                $.fn.modal.Constructor.prototype.enforceFocus = function () { };
+            }
+        });
+
+        $.fn.dataTable.TableTools.buttons.download = $.extend(true, {}, $.fn.dataTable.TableTools.buttonBase,
+        {
+            "sButtonText": "Download",
+            "sUrl": "",
+            "sType": "Get",
+            "fnData": false,
+            "fnClick": function (button, config) {
+                var dt = new $.fn.dataTable.Api(this.s.dt);
+                var data = dt.ajax.params() || {};
+
+                // Optional static additional parameters
+                // data.customParameter = ...;
+                data.Id = $("#select2_Security").val();
+                data.FromDate = fromdate;
+                data.ToDate = todate;
+
+                if (config.fnData) {
+                    config.fnData(data);
+                }
+
+                var iframe = $('<iframe/>', {
+                    id: "RemotingIFrame"
+                }).css({
+                    border: 'none',
+                    width: 0,
+                    height: 0
+                })
+                    .appendTo('body');
+
+                var contentWindow = iframe[0].contentWindow;
+                contentWindow.document.open();
+                contentWindow.document.close();
+
+                var form = contentWindow.document.createElement('form');
+                form.setAttribute('method', config.sType);
+                form.setAttribute('action', config.sUrl);
+
+                var input = contentWindow.document.createElement('input');
+                input.name = 'json';
+                input.value = JSON.stringify(data);
+
+                form.appendChild(input);
+                contentWindow.document.body.appendChild(form);
+                form.submit();
+            }
+        });
+
+        function GetSecurityDashboardDetail() {
+            var sucurityCode = "";
+            $.ajax({
+                url: '@Url.Content("~/Investment/GetSecurityDashboardDetail")',
+                data: {},
+                type: "GET",
+                cache: false,
+                error: function (error) {
+                    window.location.href = '@Url.Content("~/Error/Index")';
+                },
+                success: function (data) {
+                    $('#dvIncomeList').html(data);
+                    for (var selector in config) {
+                        $(selector).chosen(config[selector]);
+                    }
+                    $('input[name="daterange"]').daterangepicker();
+                    FillFilteredSecurities("select1_Security");
+                    FillFilteredSecurities("select2_Security");
+
+                    FillSecurityTable();
+                }
+            });
+            return;
+        }
+
+
+
+        function GetIncomeDetailByFilter() {
+            var id = $("#select2_Security").val();
+            var filterType  = $("#filterTypeId").val();
+            var filterValue = $('#' + $("#filterTypeId").val()).val();
+
+            var daterange = $("#TxtDateRange").val();
+            fromdate = null;
+            todate = null;
+            if (daterange != null && daterange != "") {
+                spDate = daterange.split("-");
+                //Convert dd/mm/yyyy to mm/dd/yyyy
+                fromdate = dateManager.convert(spDate[0].trim());
+                todate = dateManager.convert(spDate[1].trim());
+            }
+
+            var url = '@Url.Content("~/Investment/GetSecurityDashboardData")' + '?filterType=' + filterType + '&filterValue=' + filterValue + '&securityId=' + id + '&fromdate=' + fromdate + '&todate=' + todate;
+            var csvUrl = '@Url.Content("~/Investment/DownloadSecurityIncomeCsv")';
+            incomeTable = $('#example').dataTable({
+                initComplete: function () {
+                    // Setup - add a text input to each header cell - Apply the filter
+                    $('#example thead tr#headerFilter th').each(function () {
+                        if (!($(this).hasClass("editSearch"))) {
+                            $('<input type="text" placeholder="Search" />').appendTo($(this).empty())
+                                .on('keyup', function () {
+                                    incomeTable.api().columns($(this).parent().index() + ':visible').search(this.value).draw();
+                                });
+                        }
+                    });
+                },
+                "orderCellsTop": true,
+                "destroy": true,
+                "bServerSide": true,
+                "sAjaxSource": url,
+                "bProcessing": true,
+                "columns": [
+                    {
+                        "data": "Code",
+                        "render": function (oObj) {
+                            sucurityCode = oObj;
+                            return '<a href=' + encodeURI('@Url.Content("~/Investment/AnalyticHome?code=")' + oObj + '&type=Security')+'>' + oObj + '</a>';
+                        }
+                    },
+                    {
+                        "data": "Name",
+                        "render": function (oObj) {
+                            return '<a href=' + encodeURI('@Url.Content("~/Investment/AnalyticHome?code=")' + sucurityCode + '&type=Security')+'>' + oObj + '</a>';
+                        }
+                    },
+                    { "data": "SecurityCategory" },
+                    { "data": "Market" },
+                    { "data": "TotalReturnYear" }
+                ],
+                "dom": 'T<"clear">lfrtip',
+                "tableTools": {
+                    "sSwfPath": "../scripts/plugins/dataTables/swf/copy_csv_xls_pdf.swf",
+                    "aButtons": [{ "sExtends": "download", "sButtonText": "CSV", "sUrl": csvUrl, "sToolTip": "Save as CSV" }]
+                }
+            });
+            incomeTable.api().on('draw.dt', function (e, settings, json, xhr) {
+                chartFunction('@Url.Content("~/Investment/TestAjax")',
+                              '@Url.Content("~/Error/Index")',
+                              '@Url.Content("~/Investment/AnalyticHome")');
+            });
+        }
+
+        function GetSecurityIncomelist(id) {
+            if (id == null)
+                id = "1";
+            $.ajax({
+                url: '@Url.Content("~/Investment/GetSecurityIncome")',
+                data: { Id: id },
+                type: "GET",
+                cache: false,
+                error: function (error) {
+                    window.location.href = '@Url.Content("~/Error/Index")';
+                },
+                success: function (data) {
+                    $('#dvIncome').html(data);
+                    FillFilteredSecurities("ddlSecurityId");
+                    $("#incomeModal").modal('show');
+                    $("#myModalLabel").html("Edit Income");
+                    jQuery.validator.unobtrusive.parse("#IncomeEditForm");
+                    $('.modal-footer').show();
+                    //on button click
+                    $('.btn-primary').click(function () {
+                        if ($('#IncomeEditForm').valid()) {
+                            $('#error').hide();
+                            $('.busy').show();
+                            $(".modal-footer").hide();
+                        }
+                    });
+                    $('.busy').hide();
+                    $('.alert').hide();
+                }
+            });
+            return;
+        }
+
+        function ResetModalControls() {
+            $('#txtBalanceDate').val('');
+            $('#txtExDividendDate').val('');
+            $('#txtRecordDate').val('');
+            $('#txtPaymentDate').val('');
+            $('#txtIncomeAmount').val('');
+
+            $("#ddlSecurityId").select2("val", "");
+            $('#ddlTransactionTypeId').val('');
+            $('#ddlTransactionTypeId').trigger("chosen:updated");
+            $('#ddlIncomeTypeId').val('');
+            $('#ddlIncomeTypeId').trigger("chosen:updated");
+
+            $('#ddlCurrencyId').val('5');
+            $('#ddlCurrencyId').trigger("chosen:updated");
+        }
+
+        function FillFilteredSecurities(ctrlId) {
+            $("#" + ctrlId).select2({
+                allowClear: true,
+                placeholder: "Select Security",
+                minimumInputLength: 1,
+                ajax: {
+                    url: '@Url.Content("~/Investment/GetFilteredSecurities")',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            code: params.term
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: $.map(data.data, function (item) {
+                                return { results: item, id: item.Id, text: item.Code + ' - ' + item.Name };
+                            })
+                        };
+                    },
+                    cache: true
+                }
+            });
+        }
+
+        function FillSecurityTable() {
+            $('input[type="radio"]').on('click', function(){
+                dataContainer = $('input[type="radio"]:checked').attr("class") === "oneYear" ? dataJSON.lastYearlyDividendList : dataJSON.yearlyDevid;
+                myBar.destroy();
+                buildBarChart();
+            })
+            var holdingTable = $('#topHoldings tbody tr');
+            var testHold = @Html.Raw(ViewBag.TopHoldinsJson);
+
+            var pieHoldingsData = [
+                {
+                    value: testHold[0].Item4*360,
+                    color:"#5B90BF",
+                    highlight: "#5B90BF",
+                    label: testHold[0].Item1 + ': '
+                },
+                {
+                    value: testHold[1].Item4*360,
+                    color: "#d08770",
+                    highlight: "#d09770",
+                    label: testHold[1].Item1 + ': '
+                },
+                {
+                    value: testHold[2].Item4*360,
+                    color: "#96b5b4",
+                    highlight: "#96b5b4",
+                    label: testHold[2].Item1 + ': '
+                },{
+                    value: testHold[3].Item4*360,
+                    color:"#b48ead",
+                    highlight: "#b48ead",
+                    label: testHold[3].Item1 + ': '
+                },
+                {
+                    value: testHold[4].Item4*360,
+                    color: "#ab7967",
+                    highlight: "#ab7967",
+                    label: testHold[4].Item1 + ': '
+                },
+                {
+                    value: 360*(1 - testHold[4].Item4 - testHold[3].Item4 - testHold[2].Item4 - testHold[1].Item4 - testHold[0].Item4),
+                    color: "#a3be8c",
+                    highlight: "#a3be8c",
+                    label: "Others: "
+                }
+            ]
+
+            var myPieChart = new Chart($("#pieHoldings").get(0).getContext("2d")).Pie(pieHoldingsData,{
+                responsive: false,
+                tooltipTemplate: "<%= label %><%= (value/3.6).toFixed(0) %>%"
+            });
+
+            for (var i = 0; i < testHold.length; i++) {
+                if(i <= 5)
+                {
+                    $('.legendHolder li p')[i].innerHTML = testHold[i].Item1 + "(" + parseFloat(testHold[i].Item4*100).toFixed(2) + "%)";
+                }
+
+                for (var j = 0; j < Object.keys(testHold[i]).length - 1; j++) {
+                    if(j == 2)
+                    {
+                        $(holdingTable[i]).find('td')[j].innerHTML = testHold[i][Object.keys(testHold[i])[j]];
+
+                    }
+                    else
+                    {
+                        $(holdingTable[i]).find('td').find('a')[j].setAttribute
+                            ('href', encodeURI('@Url.Content("~/Investment/AnalyticHome?code=")' + testHold[i][Object.keys(testHold[i])[0]]+'&type=Security'));
+                        $(holdingTable[i]).find('td').find('a')[j].innerHTML = testHold[i][Object.keys(testHold[i])[j]];
+                    }
+                }
+            }
+        }
+
+        function getFilter(val) {
+            $(".col-sm-5 .chosen-select-deselect + div").hide();
+            $("#" + $(val).val()).next("div").show();
+        }
+
+        function setTopHoldingsCount(val) {
+            //$('#topHoldings tbody tr').hide();
+            $('.showTop10').hide();
+            $('.showTop20').hide();
+            $("." + $(val).val()).show();
+        }
+
+
+        var myBar;
+        function buildBarChart(){
+            if(myBar) myBar.destroy();
+            barChartData.labels = [];
+            barChartData.datasets[0].data = [];
+
+            for (var i = 0; i < dataContainer.length - 1; i++) {
+                barChartData.labels.push(dataContainer[i].date);
+                if (dataContainer[i].Rate == "") dataContainer[i].Rate = 0;
+                barChartData.datasets[0].data.push(dataContainer[i].Rate);
+            };
+            var ctx = document.getElementById("canvas").getContext("2d");
+            myBar = new Chart(ctx).Bar(barChartData, {
+                responsive: true,
+                barValueSpacing: 10,               //Number - Spacing between each of the X value sets
+                scaleLineWidth: 0,
+                showTooltips: true,
+                barStrokeWidth: 0,                //width of conturline
+                scaleGridLineWidth: 1,            //Number - Width of the grid lines (contur)
+                scaleGridLineColor: "#ebeeef",    //String - Colour of the grid lines
+                scaleOverride: true,
+                scaleSteps: 5,                    //qty of lines
+                scaleBeginAtZero: true,
+                scaleShowGridLines: true,        //Boolean - Whether grid lines are shown across the chart
+                scaleShowHorizontalLines: true,   //Boolean - Whether to show horizontal lines (except X axis)
+                scaleFontColor: "#86888a",
+                scaleShowVerticalLines: true,     //Boolean - Whether to show vertical lines (except Y axis)
+                barShowStroke: true              //Boolean - If there is a stroke on each bar
+            });
+
+
+            for (i = 0; i < myBar.datasets[0].bars.length; i++) {
+                myBar.datasets[0].bars[i].highlightFill = mainGreenFillColor;//hexToRgb(myBar.datasets[0].bars[i].fillColor) + "0.8)";
+            }
+
+            var min = myBar.datasets[0].bars[0].value;
+            var max = parseFloat(myBar.datasets[0].bars[0].value);
+
+            for (var a = 0; a < myBar.datasets[0].bars.length; a++) {
+                if (myBar.datasets[0].bars[a].value < min) min = myBar.datasets[0].bars[a].value;
+                if (myBar.datasets[0].bars[a].value > max) max = myBar.datasets[0].bars[a].value;
+            }
+
+            myBar.scale.max = Math.floor(max) + 1;
+            myBar.scale.stepValue = myBar.scale.max / myBar.scale.steps;
+
+            myBar.update();
+        }
+
+        var dataContainer = [];
+        function getDevidendsChart(val) {
+            var securityId = $(val).val();
+
+            //alert($(val).val());
+            //alert($(val).text());
+
+            $.ajax({
+                url: '@Url.Content("~/Investment/GetSecurityDashboardIncome")',
+                data: { securityId: securityId },
+                type: "GET",
+                cache: false,
+                error: function (error) {
+                    window.location.href = '@Url.Content("~/Error/Index")';
+                },
+                success: function (data) {
+                    //alert(data);
+                    dataJSON = JSON.parse(data).Income;
+
+                    dataContainer = $('input[type="radio"]:checked').attr("class") === "oneYear" ? dataJSON.lastYearlyDividendList : dataJSON.yearlyDevid;
+
+
+
+
+                    buildBarChart();
+
+                }
+            });
+        }
+
+    </script>
+}

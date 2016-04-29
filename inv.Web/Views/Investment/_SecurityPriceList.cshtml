@@ -1,0 +1,63 @@
+﻿@model IEnumerable<Invest.ViewModel.Models.SecurityPriceModel>
+@{
+    var RateIndex = ViewBag.RateIndex;
+}
+
+<div class="ibox-title">
+    <button class="btn btn-primary btn-sm" onclick="Create();">
+        @(RateIndex?"Create Rate  Price":"Create Price")
+    </button>
+</div>
+<div class="ibox-content">
+    <div>
+        <div class="col-sm-5">
+            @Html.DropDownListFor(model => model.FirstOrDefault().SecurityId, new List<SelectListItem>(), new { @class = "select2-ajax", id = "select2_Security", @style = "width:100% !important" })
+        </div>
+        <div class="col-sm-5">
+            <input type="text" name="daterange" id="TxtDateRange" class="form-control" placeholder="DD/MM/YYYY - DD/MM/YYYY" />
+        </div>
+        <div class="col-sm-2">
+            <button class="btn btn-primary btn-sm" id="btnSearch" onclick="GetPriceDetailByFilter();">Search</button>
+        </div>
+    </div>
+    <div class="clearfix"></div>
+    <hr />
+    <table id="example" class="table table-striped table-bordered table-hover" style="width: 100%">
+        <thead>
+            <tr>
+                <th>Security Code</th>
+                <th>Security Name</th>
+                <th>Date</th>
+                @if (RateIndex)
+                {
+                    <th>Intrest Rate</th>
+                }
+                else
+                {
+                    <th>Unit Price</th>
+                    <th>Currency</th>
+                }
+
+                <th class="no-sort"></th>
+                <th class="no-sort"></th>
+            </tr>
+            <tr id="headerFilter" class="input-sm">
+                <th></th>
+                <th></th>
+                <th></th>
+                @if (RateIndex)
+                {
+                    <th></th>
+                }
+                else
+                {
+                    <th></th>
+                    <th></th>
+                }
+
+                <th class="editSearch"></th>
+                <th class="editSearch"></th>
+            </tr>
+        </thead>
+    </table>
+</div>

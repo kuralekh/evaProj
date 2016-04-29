@@ -1,0 +1,23 @@
+﻿@model Invest.ViewModel.Models.EntityCoreModel
+
+@Html.EditorFor(_ => _.Tfn, "SimpleInput")
+@Html.EditorFor(_ => _.Abn, "SimpleInput")
+@Html.EditorFor(_ => _.ClientId, "ReadOnlyInput")
+@Html.EditorFor(_ => _.IsResident, "Checkbox")
+
+
+<script>
+    $(document).ready(function () {
+    
+        $("#@Html.IdFor(_ => _.Tfn)").inputmask({
+            mask: '999 999 999'
+        });
+        $("#@Html.IdFor(_ => _.Abn)").inputmask({
+            mask: '99 999 999 999'
+        });
+
+        $("#@Html.IdFor(_ => _.Acn)").inputmask({
+            mask: '99 999 999 999'
+        });
+    });
+</script>

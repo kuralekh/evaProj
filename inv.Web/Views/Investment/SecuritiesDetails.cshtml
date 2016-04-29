@@ -1,0 +1,513 @@
+﻿@model IEnumerable<Invest.ViewModel.Models.SecurityModel>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Details";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-9">
+        <h2>@ViewBag.Title</h2>
+        <ol class="breadcrumb">
+            <li>Investment</li>
+            <li>Securities</li>
+            <li class="active">
+                <strong>@ViewBag.Title</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins" id="dvSecurityList">
+                <div class="ibox-title">
+                    <button class="btn btn-primary btn-sm" onclick="CreateSec();">
+                        Create Security
+                    </button>
+                    <div class="col-lg-3 pull-right">
+                        @Html.DropDownList("DisplayStatus", (IEnumerable<SelectListItem>)ViewData["StatusList"], new { @class = "chosen-select-deselect", id = "DdlDisplayStatus" })
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <table id="example" class="table table-striped table-bordered table-hover" style="width: 100%">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Security Category</th>
+                                <th>Market</th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                            <tr id="headerFilter" class="input-sm">
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th class="editSearch"></th>
+                                <th class="editSearch"></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Edit Modal -->
+<div class="modal inmodal fade" id="securityModal">
+    <div class="modal-dialog modal-lg" style="width: 90%" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Security</h4>
+            </div>
+            <div id="dvSecurity">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="popup">
+    <div class="popupArrow"></div>
+    <div class="popupHeader">
+        <!--<div class="arrowLeft"></div> -->
+        <!--<div class="securityCaption"> -->
+        Southern Copper Corp - <b>SCCO</b>
+
+    </div>
+    <div class="popupContent">
+        <div style="border: 1px solid #2f4050">
+            <div class="popupContentBlock">
+                <h4>Price</h4>
+                <p class="dayOfLastPrice"></p>
+                <p class="currentPrice">$27.13</p>
+                <p class="dayPriceChange">(0.00%)</p>
+                <h3>Return MTD</h3>
+                <p class="mtd"></p>
+            </div>
+            <div class="popupContentBlock">
+                <h4 class="weekCount">52 Week Range</h4>
+                <canvas id="niceChart" width="100" height="65"></canvas>
+                <span class="rangeLeft">$23.41</span><span class="rangeRight">$33.31</span>
+                <div class="popupSlider"></div>
+                <!--<input class="popupSlider" type="text" data-slider="true">  -->
+            </div>
+            <div class="popupContentBlock">
+                <h4>Returns</h4>
+                <p class="endOfPreMonth"></p>
+                <table>
+                    <tr><td class="MO">1MO</td><td><div class="arrowUp">&#x27A8;</div><span>5.55%</span></td></tr>
+                    <tr><td class="MO6">3MO</td><td><div class="arrowUp">&#x27A8;</div><span>4.20%</span></td></tr>
+                    <tr><td class="YR">1YR</td><td><div class="arrowUp">&#x27A8;</div><span>11.73%</span></td></tr>
+                </table>
+            </div>
+            <div style="clear: both"></div>
+        </div>
+        <p>SCC owns and operate mines, and produces copper molybdenum and precious metals</p>
+        <a href="@Url.Content("~/Investment/AnalyticHome")">See more details</a>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/Content/plugins/priceSlider")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/Content/plugins/chosen/chosenStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/Content/plugins/sliderStyle")
+    @Styles.Render("~/Content/plugins/chartStyles")
+    @Styles.Render("~/plugins/dateRangeStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/Content/plugins/select2/select2Styles")
+}
+
+<!--Load these page level functions-->
+@section Scripts {
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/dateRange")
+    @Scripts.Render("~/plugins/chosen")
+    @Scripts.Render("~/plugins/popupInfo")
+    @Scripts.Render("~/plugins/charts")
+    @Scripts.Render("~/plugins/slider/js")
+    @Scripts.Render("~/plugins/priceSlider")
+    @Scripts.Render("~/plugins/select2")
+    <script type="text/javascript">
+        var securityTable;
+        var status = true;
+        $(function() {
+            //When Model hides
+            $('#securityModal').on('hidden.bs.modal', function() {
+                securityTable.fnDraw();
+            });
+
+            if ($("#DdlDisplayStatus").val() == 0) {
+                status = false;
+            } else {
+                status = true;
+            }
+            GetSecurityDetail();
+
+            $("#DdlDisplayStatus").on("change", function () {
+                if ($("#DdlDisplayStatus").val() == 0) {
+                    status = false;
+                } else {
+                    status = true;
+                }
+                GetSecurityDetail();
+            });
+            var config = {
+                '.chosen-select': {},
+                '.chosen-select-deselect': { allow_single_deselect: true },
+                '.chosen-select-no-single': { disable_search_threshold: 10 },
+                '.chosen-select-no-results': { no_results_text: 'Oops, nothing found!' },
+                '.chosen-select-width': { width: "95%" }
+            };
+
+            for (var selector in config) {
+
+                $(selector).chosen(config[selector]);
+            }
+
+        });
+        //
+        $.fn.dataTable.TableTools.buttons.download = $.extend(true, {}, $.fn.dataTable.TableTools.buttonBase,
+        {
+            "sButtonText": "Download",
+            "sUrl": "",
+            "sType": "Get",
+            "fnData": false,
+            "fnClick": function(button, config) {
+                var dt = new $.fn.dataTable.Api(this.s.dt);
+                var data = dt.ajax.params() || {};
+
+                // Optional static additional parameters
+                // data.customParameter = ...;
+                data.RequestType = "NonOptionSecurities";
+                data.IsAll = status;
+
+                if (config.fnData) {
+                    config.fnData(data);
+                }
+
+                var iframe = $('<iframe/>', {
+                        id: "RemotingIFrame"
+                    }).css({
+                        border: 'none',
+                        width: 0,
+                        height: 0
+                    })
+                    .appendTo('body');
+
+                var contentWindow = iframe[0].contentWindow;
+                contentWindow.document.open();
+                contentWindow.document.close();
+
+                var form = contentWindow.document.createElement('form');
+                form.setAttribute('method', config.sType);
+                form.setAttribute('action', config.sUrl);
+
+                var input = contentWindow.document.createElement('input');
+                input.name = 'json';
+                //  input.value = JSON.stringify(data);
+                input.value = JSON.stringify(data);
+
+                form.appendChild(input);
+                contentWindow.document.body.appendChild(form);
+                form.submit();
+            }
+        });
+
+        //
+        function GetSecurityDetail() {
+            var sucurityCode = "";
+
+            securityTable = $('#example').dataTable({
+                initComplete: function() {
+                    // Setup - add a text input to each header cell - Apply the filter
+                    $('#example thead tr#headerFilter th').each(function() {
+                        if (!($(this).hasClass("editSearch"))) {
+                            $('<input type="text" placeholder="Search" />').appendTo($(this).empty())
+                                .on('keyup', function() {
+                                    securityTable.api().columns($(this).parent().index() + ':visible').search(this.value).draw();
+                                });
+                        }
+                    });
+                },
+                "orderCellsTop": true,
+                "destroy": true,
+                "bServerSide": true,
+                "sAjaxSource": '@Url.Content("~/Investment/GetSecurityPageData")' + '?requestType=NonOptionSecurities' + '&DisplayStatus=' + status,
+                "bProcessing": true,
+                "columns": [
+                    {
+                        "data": "Code",
+                        "render": function(oObj) {
+                            sucurityCode = oObj;
+                            return '<a href=' + encodeURI('@Url.Content("~/Investment/AnalyticHome?code=")' + oObj + '&type=Security')+'>' + oObj + '</a>';
+                        }
+                    },
+                    {
+                        "data": "Name",
+                        "render": function(oObj) {
+                            return '<a href=' + encodeURI('@Url.Content("~/Investment/AnalyticHome?code=")' + sucurityCode + '&type=Security')+'>' + oObj + '</a>';
+                        }
+                    },
+                    { "data": "SecurityCategory" },
+                    { "data": "Market" },
+                    {
+                        "data": "Id",
+                        "targets": 'no-sort',
+                        "orderable": false,
+                        "render": function(oObj) {
+                            return '<div class="text-center"><button class="btn-white btn btn-xs" onclick="GetSecuritylist(' + oObj + ')">Edit</button></div>';
+                        }
+                    },
+                    {
+                        "data": "Id",
+                        "targets": 'no-sort',
+                        "orderable": false,
+                        "render": function(oObj) {
+                            return '<div class="text-center"><button class="btn-white btn btn-xs" onclick="DeleteSecurity(' + oObj + ')">Delete</button></div>';
+                            //return '<div class="text-center"><a href="javascript:DeleteSecurity(' + oObj + ')"><i title="Delete" class="fa fa-trash"></i></a></div>';
+                        }
+                    }
+                ],
+                "dom": 'T<"clear">lfrtip',
+                "tableTools": {
+                    "sSwfPath": "../scripts/plugins/dataTables/swf/copy_csv_xls_pdf.swf",
+                    "aButtons": [{ "sExtends": "download", "sButtonText": "CSV", "sUrl": '@Url.Content("~/Investment/DownloadSecurityCsv")', "sToolTip": "Save as CSV" }]
+                },
+            });
+            securityTable.api().on('draw.dt', function(e, settings, json, xhr) {
+                chartFunction('@Url.Content("~/Investment/TestAjax")',
+                    '@Url.Content("~/Error/Index")',
+                    '@Url.Content("~/Investment/AnalyticHome")');
+            });
+        }
+
+        function CreateSec() {
+            $.ajax({
+                url: '@Url.Content("~/Investment/CreateSecurity")',
+                data: { RequestType: "NonOptionSecurities" },
+                type: "GET",
+                cache: false,
+                error: function(error) {
+
+                    window.location.href = '@Url.Content("~/Error/Index")';
+                },
+                success: function(data) {
+                    $('#dvSecurity').html(data);
+                    $("#securityModal").modal('show');
+                    $("#myModalLabel").html("Create Security");
+                    jQuery.validator.unobtrusive.parse("#SecurityCreateForm");
+                    $('.propertydiv').hide();
+                    $('.ratediv').hide();
+                    $('.modal-footer').show();
+                    securityCode = '';
+                    //on button click
+                    $('.btn-primary').click(function () {
+                        
+                      
+                        if ($('#SecurityCreateForm').valid()) {
+                            $("#txtCode").attr('disabled', false);
+                            $('#error').hide();
+                            $('.busy').show();
+                            $(".modal-footer").hide();
+                            securityCode = '';
+                            $(".ratediv").hide();
+                        } else {
+                            if ($('#ddlSecurityCategoryId').val()=="36") {
+                                $("#txtCode").attr('disabled', false);
+                            } else if ($('#ddlSecurityCategoryId').val() == "35" || $('#ddlSecurityCategoryId').val() == "22") {
+                                $("#txtCode").attr('disabled', true);
+                            } else {
+                                $("#txtCode").attr('disabled', false);
+                            }
+                        }
+                    });
+                    $('.busy').hide();
+                    $('.alert').hide();
+                }
+            });
+            return;
+        }
+
+        function GetSecuritylist(id) {
+            $.ajax({
+                url: '@Url.Content("~/Investment/GetSecurity")',
+                data: { Id: id, RequestType: "NonOptionSecurities" },
+                type: "GET",
+                cache: false,
+                error: function(error) {
+                    window.location.href = '@Url.Content("~/Error/Index")';
+                },
+                success: function (data) {
+                    
+                    $('#dvSecurity').html(data);
+                    $("#securityModal").modal('show');
+                    $("#myModalLabel").html("Edit Security");
+                    jQuery.validator.unobtrusive.parse("#SecurityEditForm");
+                    $('.modal-footer').show();
+                    securityCode = '';
+                    //on button click
+                    $('.btn-primary').click(function () {
+                      
+                        if ($('#SecurityEditForm').valid()) {
+                            $('#error').hide();
+                            $('.busy').show();
+                            $(".modal-footer").hide();
+                           
+                        } else {
+                            if ($('#ddlSecurityCategoryId').val() == "36") {
+                                $("#Code").attr('disabled', false);
+                            } else if ($('#ddlSecurityCategoryId').val() == "35" || $('#ddlSecurityCategoryId').val() == "22") {
+                                $("#Code").attr('disabled', true);
+                            } else {
+                                $("#Code").attr('disabled', false);
+                            }
+                        }
+                       
+                    });
+                    $('.busy').hide();
+                    $('.alert').hide();
+                    
+                   
+                    
+                }
+            });
+            return;
+        }
+
+        function DeleteSecurity(id) {
+            bootbox.confirm("Are you sure you want to delete?", function(result) {
+                if (result) {
+                    $.ajax({
+                        url: '@Url.Content("~/Investment/DeleteSecurity")',
+                        data: { Id: id },
+                        type: "POST",
+                        cache: false,
+                        error: function(error) {
+                            window.location.href = '@Url.Content("~/Error/Index")';
+                        },
+                        success: function(data) {
+                            securityTable.fnDraw();
+                            bootbox.alert("Record has deleted successfully!");
+                        }
+                    });
+                }
+            });
+        }
+
+        function ResetModalControls() {
+            $('#txtCode').val('');
+            $('#txtName').val('');
+            $("input[type=text]").val('');
+            $('#State').val('');
+            $('#State').trigger("chosen:updated");
+
+            $('#Country').val('');
+            $('#Country').trigger("chosen:updated");
+            $('#ddlSecurityCategoryId').val('');
+            $('#ddlSecurityCategoryId').trigger("chosen:updated");
+            $('#ddlSecurityTypeId').val('');
+            $('#ddlSecurityTypeId').trigger("chosen:updated");
+            $('#ddlUnitisedId').val('');
+            $('#ddlUnitisedId').trigger("chosen:updated");
+            $('#ddlMarketId').val('');
+            $('#ddlMarketId').trigger("chosen:updated");
+
+            $('#ddlAssetClassId').val('');
+            $('#ddlAssetClassId').trigger("chosen:updated");
+            $('#ddlSubAssetClassId').val('');
+            $('#ddlSubAssetClassId').trigger("chosen:updated");
+            $('#ddlRegionId').val('');
+            $('#ddlRegionId').trigger("chosen:updated");
+            $('#ddlGICSId').val('');
+            $('#ddlGICSId').trigger("chosen:updated");
+            $('#ddlGICSTypeId').val('');
+            $('#ddlGICSTypeId').trigger("chosen:updated");
+            $('#ddlRatingId').val('');
+            $('#ddlRatingId').trigger("chosen:updated");
+            $('#ddlSecurityStatusId').val('');
+            $('#ddlSecurityStatusId').trigger("chosen:updated");
+
+            $('#ddlPricingSourceId').val('');
+            $('#ddlPricingSourceId').trigger("chosen:updated");
+            $('#ddlDistributionTypeId').val('');
+            $('#ddlDistributionTypeId').trigger("chosen:updated");
+            $('#ddlDistributionFrequencyId').val('');
+            $('#ddlDistributionFrequencyId').trigger("chosen:updated");
+            $('#ddlPrimaryBenchmark').val('');
+            $('#ddlPrimaryBenchmark').trigger("chosen:updated");
+            $('#ddlSecondaryBenchmark').val('');
+            $('#ddlSecondaryBenchmark').trigger("chosen:updated");
+
+           
+            $('#ddlPriceType').val('');
+            $('#ddlPriceType').trigger("chosen:updated");
+          
+            $('#ddlSecondaryPriceType').val('');
+            $('#ddlSecondaryPriceType').trigger("chosen:updated");
+
+            $('#txtExpenseRatio').val('');
+            $('#txtLiquidity').val('');
+            $('#txtPropertyDetails').val('');
+            $('#txtAPIRCode').val('');
+            $('#txtISINCode').val('');
+            $('#txtUnitsHeld').val('');
+
+            $('#ddlCurrencyId').val('5');
+            $('#ddlCurrencyId').trigger("chosen:updated");
+
+            $('#TxtBusDate').val('');
+            $('#ddlOptionDetailMarketId').val('');
+            $('#ddlOptionDetailMarketId').trigger("chosen:updated");
+            $('#txtASXCode').val('');
+            $('#txtUnderlying').val('');
+            $('#ddlOptionType').val('');
+            $('#ddlOptionType').trigger("chosen:updated");
+            $('#TxtExpDate').val('');
+            $('#txtStrikePrice').val('');
+            $('#ddlOptionStyleId').val('');
+            $('#ddlOptionStyleId').trigger("chosen:updated");
+            $('#txtContractSize').val('');
+            $('#txtDerivativeProduct').val('');
+            $('#ddlOptionProductType').val('');
+            $('#ddlOptionProductType').trigger("chosen:updated");
+            $('#txtCategory').val('');
+            $('#txtDescription').val('');
+            $('#ddlUnderlyingType').val('');
+            $('#ddlUnderlyingType').trigger("chosen:updated");
+            $('#ddlUnderlying').select2("val", "");
+
+            $('#divOptions').slideUp("slow");
+            $('#ddlOptionProductType').attr('disabled', true).trigger("chosen:updated");
+            $('#ddlOptionDetailMarketId').attr('disabled', true).trigger("chosen:updated");
+            $('#ddlUnderlyingType').attr('disabled', true).trigger("chosen:updated");
+            //$('#ddlUnderlying').attr('disabled', true).trigger("chosen:updated");
+            $('#TxtBusDate').attr('disabled', true);
+            $('#TxtExpDate').attr('disabled', true);
+
+            $('#ddlInstitutionId').val('');
+            $('#ddlInstitutionId').trigger("chosen:updated");
+
+            $('#ddlTerm').val('');
+            $('#ddlTerm').trigger("chosen:updated");
+            $("#txtCode").attr('disabled', false);
+
+            $('#ddlClientTypeId').val('');
+            $('#ddlClientTypeId').trigger("chosen:updated");
+            
+            $("#Ddlbroker").val('');
+            $('#Ddlbroker').trigger("chosen:updated");
+        }
+        
+    </script>
+}

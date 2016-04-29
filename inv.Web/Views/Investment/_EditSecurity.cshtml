@@ -1,0 +1,984 @@
+﻿@model Invest.ViewModel.Models.SecurityModel
+<style>
+    .chosen-container-single .chosen-drop {
+        z-index: 99999 !important;
+    }
+
+    .chosen-container-multi .chosen-drop {
+        z-index: 999999 !important;
+    }
+</style>
+@using (Ajax.BeginForm("EditSecurity", new { controller = "Investment" }, new AjaxOptions { HttpMethod = "Post", OnSuccess = "onSuccess", OnFailure = "onFailure" }, new { id = "SecurityEditForm", @class = "form-horizontal" }))
+{
+    <div class="modal-body col-sm-12">
+        @Html.AntiForgeryToken()
+        <div class="form-horizontal">
+            @if (Model.UnitisedId == 1 && Model.SecurityCategoryId == 20)
+            {
+                @Html.HiddenFor(model=>model.AddressId)
+                @Html.HiddenFor(model=>model.NavSecurityPropertyDetailId)
+            }
+
+            @if (Model.UnitisedId == 3)
+            {
+                @Html.HiddenFor(model => model.TermDeposite.Id)
+            }
+            <div class="col-md-4">
+
+                @Html.ValidationSummary(true)
+                @Html.HiddenFor(model => model.Id)
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Code, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(model => model.Code, new { @class = "form-control", placeholder = "Code" })
+                        @Html.ValidationMessageFor(model => model.Code)
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Name, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(model => model.Name, new { @class = "form-control", placeholder = "Name" })
+                        @Html.ValidationMessageFor(model => model.Name)
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.UnitisedId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.UnitisedId, (IEnumerable<SelectListItem>)ViewData["unitisedList"], new { @class = "chosen-select-deselect", id = "ddlUnitisedId" })
+                        @*@Html.ValidationMessageFor(model => model.Password)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.SecurityCategoryId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.SecurityCategoryId, (IEnumerable<SelectListItem>)ViewData["securitycategorylist"], new { @class = "chosen-select-deselect", id = "ddlSecurityCategoryId" })
+                        @Html.ValidationMessageFor(model => model.SecurityCategoryId)
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.SecurityTypeId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.SecurityTypeId, (IEnumerable<SelectListItem>)ViewData["securitytypelist"], new { @class = "chosen-select-deselect", id = "ddlSecurityTypeId" })
+                        @*@Html.ValidationMessageFor(model => model.Password)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.MarketId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.MarketId, (IEnumerable<SelectListItem>)ViewData["marketlist"], new { @class = "chosen-select-deselect" })
+                        @*@Html.ValidationMessageFor(model => model.Password)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.CurrencyId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.CurrencyId, (IEnumerable<SelectListItem>)ViewData["currencylist"], new { @class = "chosen-select-deselect" })
+                        @*@Html.ValidationMessageFor(model => model.Password)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.AssetClassIds, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.AssetClassIds, (IEnumerable<SelectListItem>)ViewData["assetClassList"], new { @class = "chosen-select", id = "AssetClassId", multiple = "multiple" })
+                        @Html.ValidationMessageFor(model => model.AssetClassIds)
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.RatingId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.RatingId, (IEnumerable<SelectListItem>)ViewData["ratingList"], new { @class = "chosen-select-deselect" })
+                        @*@Html.ValidationMessageFor(model => model.Password)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.SecurityStatusId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.SecurityStatusId, (IEnumerable<SelectListItem>)ViewData["securityStatusList"], new { @class = "chosen-select-deselect" })
+                        @*@Html.ValidationMessageFor(model => model.Password)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.APIRCode, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(model => model.APIRCode, new { @class = "form-control", id = "APIRCode", placeholder = "AAA9999AA", maxlength = 9 })
+                        @Html.ValidationMessageFor(model => model.APIRCode)
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.ISINCode, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(model => model.ISINCode, new { @class = "form-control", maxlength = 12 })
+                        @Html.ValidationMessageFor(model => model.ISINCode)
+                    </div>
+                </div>
+
+            </div>
+            <div class="clearfix"></div>
+            <div id="divOptions" style="display: none;">
+                <div class="col-md-4">
+
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.OptionsDetail.ASXCode, new { @class = "control-label col-sm-5" })
+                        <div class="col-sm-7">
+                            @Html.TextBoxFor(model => model.OptionsDetail.ASXCode, new { @class = "form-control", placeholder = "ASXCode", id = "txtASXCode" })
+                            @*@Html.ValidationMessageFor(model => model.LastName)*@
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.OptionsDetail.OptionsTypeId, new { @class = "control-label col-sm-5" })
+                        <div class="col-sm-7">
+                            @Html.DropDownListFor(m => m.OptionsDetail.OptionsTypeId, (IEnumerable<SelectListItem>)ViewData["optionsTypeList"], new { @class = "chosen-select-deselect", id = "ddlOptionType" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.OptionsDetail.StrikePrice, new { @class = "control-label col-sm-5" })
+                        <div class="col-sm-7">
+                            @Html.TextBoxFor(model => model.OptionsDetail.StrikePrice, new { @class = "form-control", placeholder = "Strike Price", id = "txtStrikePrice" })
+                            @Html.ValidationMessageFor(model => model.OptionsDetail.StrikePrice)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.OptionsDetail.ContractSize, new { @class = "control-label col-sm-5" })
+                        <div class="col-sm-7">
+                            @Html.TextBoxFor(model => model.OptionsDetail.ContractSize, new { @class = "form-control", placeholder = "Contract Size", id = "txtContractSize" })
+                            @*@Html.ValidationMessageFor(model => model.Password)*@
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.OptionsDetail.MarketId, new { @class = "control-label col-sm-5" })
+                        <div class="col-sm-7">
+                            @Html.DropDownListFor(m => m.OptionsDetail.MarketId, (IEnumerable<SelectListItem>)ViewData["marketOptionsDetailList"], new { @class = "chosen-select-deselect", id = "ddlOptionDetailMarketId", disabled = "disabled" })
+                            @Html.ValidationMessageFor(model => model.OptionsDetail.MarketId)
+                        </div>
+                    </div>
+                 
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.OptionsDetail.Underlying, new { @class = "control-label col-sm-5" })
+                        <div class="col-sm-7">
+                            @Html.DropDownListFor(m => m.OptionsDetail.Underlying, (IEnumerable<SelectListItem>)ViewData["underlyingList"], new { @class = "select2 -ajax", id = "ddlUnderlying", @style = "width: 100% !important", disabled = "disabled" })
+                            @Html.ValidationMessageFor(model => model.OptionsDetail.Underlying)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.OptionsDetail.ExpDate, new { @class = "control-label col-sm-5" })
+                        <div class="col-sm-7">
+                            <div class="input-group date">
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                @Html.TextBoxFor(model => model.OptionsDetail.ExpDate, "{0:dd/MM/yyyy}", new { @class = "form-control", placeholder = "DD/MM/YYYY", id = "TxtExpDate", disabled = "disabled" })
+
+                            </div>@Html.ValidationMessageFor(model => model.OptionsDetail.ExpDate)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.OptionsDetail.OptionsProductTypeId, new { @class = "control-label col-sm-5" })
+                        <div class="col-sm-7">
+                            @Html.DropDownListFor(m => m.OptionsDetail.OptionsProductTypeId, (IEnumerable<SelectListItem>)ViewData["optionProductTypeList"], new { @class = "chosen-select-deselect", id = "ddlOptionProductType" })
+                            @Html.ValidationMessageFor(model => model.OptionsDetail.OptionsProductTypeId)
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.OptionsDetail.OptionsStyleId, new { @class = "control-label col-sm-5" })
+                        <div class="col-sm-7">
+                            @Html.DropDownListFor(m => m.OptionsDetail.OptionsStyleId, (IEnumerable<SelectListItem>)ViewData["optionStyleList"], new { @class = "chosen-select-deselect", id = "ddlOptionStyleId" })
+                            @*@Html.ValidationMessageFor(model => model.Password)*@
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.OptionsDetail.DerivativeProduct, new { @class = "control-label col-sm-5" })
+                        <div class="col-sm-7">
+                            @Html.TextBoxFor(model => model.OptionsDetail.DerivativeProduct, new { @class = "form-control", placeholder = "Derivative Product", id = "txtDerivativeProduct" })
+                            @*@Html.ValidationMessageFor(model => model.Password)*@
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.OptionsDetail.Category, new { @class = "control-label col-sm-5" })
+                        <div class="col-sm-7">
+                            @Html.TextBoxFor(model => model.OptionsDetail.Category, new { @class = "form-control", placeholder = "Category", id = "txtCategory" })
+                            @*@Html.ValidationMessageFor(model => model.Password)*@
+                        </div>
+                    </div>
+                    <div class="form-group" style="display: none;">
+                        @Html.LabelFor(model => model.OptionsDetail.UnderlyingType, new { @class = "control-label col-sm-5" })
+                        <div class="col-sm-7">
+                            @Html.DropDownListFor(m => m.OptionsDetail.UnderlyingType, (IEnumerable<SelectListItem>)ViewData["underlyingTypeList"], new { @class = "chosen-select-deselect", id = "ddlUnderlyingType", disabled = "disabled" })
+                            @Html.ValidationMessageFor(model => model.OptionsDetail.UnderlyingType)
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+
+            <div class="col-md-4">
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.SubAssetClassId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.SubAssetClassId, (IEnumerable<SelectListItem>)ViewData["subAssetClassList"], new { @class = "chosen-select-deselect" })
+                        @*@Html.ValidationMessageFor(model => model.Password)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.RegionId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.RegionId, (IEnumerable<SelectListItem>)ViewData["regionList"], new { @class = "chosen-select-deselect" })
+                        @*@Html.ValidationMessageFor(model => model.Password)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.GICSId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.GICSId, (IEnumerable<SelectListItem>)ViewData["gicsList"], new { @class = "chosen-select-deselect" })
+                        @*@Html.ValidationMessageFor(model => model.Password)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.GICSTypeId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.GICSTypeId, (IEnumerable<SelectListItem>)ViewData["gicsTypeList"], new { @class = "chosen-select-deselect" })
+                        @*@Html.ValidationMessageFor(model => model.Password)*@
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.UnitsHeld, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(model => model.UnitsHeld, new { @class = "form-control", disabled = "disabled" })
+                        @*@Html.ValidationMessageFor(model => model.LastName)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.PricingSourceId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.PricingSourceId, (IEnumerable<SelectListItem>)ViewData["pricingSourceList"], new { @class = "chosen-select-deselect" })
+                        @*@Html.ValidationMessageFor(model => model.Password)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.DistributionTypeId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.DistributionTypeId, (IEnumerable<SelectListItem>)ViewData["distributionTypeList"], new { @class = "chosen-select-deselect" })
+                        @*@Html.ValidationMessageFor(model => model.Password)*@
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.DistributionFrequencyId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.DistributionFrequencyId, (IEnumerable<SelectListItem>)ViewData["distributionFrequencyList"], new { @class = "chosen-select-deselect" })
+                        @*@Html.ValidationMessageFor(model => model.Password)*@
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.ExpenseRatio, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(model => model.ExpenseRatio, new { @class = "form-control", placeholder = "Basis Points" })
+                        @Html.ValidationMessageFor(model => model.ExpenseRatio)
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Liquidity, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(model => model.Liquidity, new { @class = "form-control", maxlength = 4, placeholder = "No. of Days" })
+                        @Html.ValidationMessageFor(model => model.Liquidity)
+                    </div>
+                </div>
+                <div class="form-group hidden">
+                    @Html.LabelFor(model => model.PropertyDetails, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(model => model.PropertyDetails, new { @class = "form-control" })
+                        @*@Html.ValidationMessageFor(model => model.LastName)*@
+                    </div>
+                </div>
+                <div class="form-group SecurityDiv">
+                    @Html.LabelFor(model => model.TerminationDate, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        <div class="input-group date">
+                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                            @Html.TextBoxFor(model => model.TerminationDate, "{0:dd/MM/yyyy}", new { @class = "form-control", placeholder = "DD/MM/YYYY", id = "TxtTerminationDate" })
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group SecurityDiv">
+                    @Html.LabelFor(model => model.InceptionDate, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        <div class="input-group date">
+                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                            @Html.TextBoxFor(model => model.InceptionDate, "{0:dd/MM/yyyy}", new { @class = "form-control", placeholder = "DD/MM/YYYY", id = "TxtInceptionDate" })
+                        </div>
+                    </div>
+                </div>
+                @*<div class="form-group hidden">
+                        @Html.LabelFor(model => model.MDAHoldingLimit, new { @class = "control-label col-sm-5" })
+                        <div class="col-sm-3">
+                            @Html.TextBoxFor(model => model.MDAHoldingLimit, new { @class = "form-control" })
+                        </div>
+                        <div class="col-sm-4">
+                            @Html.DisplayNameFor(model => model.MDAIsApproved)
+                            @Html.CheckBoxFor(model => model.MDAIsApproved)
+                        </div>
+                    </div>
+                    <div class="form-group hidden">
+                        @Html.LabelFor(model => model.SuperHoldingLimit, new { @class = "control-label col-sm-5" })
+                        <div class="col-sm-3">
+                            @Html.TextBoxFor(model => model.SuperHoldingLimit, new { @class = "form-control" })
+                        </div>
+                        <div class="col-sm-4">
+                            @Html.DisplayNameFor(model => model.SuperIsApproved)
+                            @Html.CheckBoxFor(model => model.SuperIsApproved)
+                        </div>
+                    </div>*@
+                @*<div class="form-group">
+                        <div class="col-sm-12">
+                            <table id="example" class="table table-striped" cellspacing="0" width="100%">
+                                <tr>
+                                    <td colspan="3">
+                                        <b>@Html.DisplayNameFor(model => model.MDAHoldingLimit)</b>
+                                    </td>
+                                    <td>
+                                        @Html.TextBoxFor(model => model.MDAHoldingLimit, new { @class = "control-label col-sm-4" })
+                                    </td>
+                                    <td>
+                                        <b>@Html.DisplayNameFor(model => model.MDAIsApproved)</b>
+                                    </td>
+                                    <td>
+                                        @Html.CheckBoxFor(model => model.MDAIsApproved)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3">
+                                        <b>@Html.DisplayNameFor(model => model.SuperHoldingLimit)</b>
+                                    </td>
+                                    <td>
+                                        @Html.TextBoxFor(model => model.SuperHoldingLimit, new { @class = "control-label col-sm-4" })
+                                    </td>
+                                    <td>
+                                        <b>@Html.DisplayNameFor(model => model.SuperIsApproved)</b>
+                                    </td>
+                                    <td>
+                                        @Html.CheckBoxFor(model => model.SuperIsApproved)
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>*@
+            </div>
+            <div class="clearfix"></div>
+            <div class="col-md-4">
+                <div class="form-group propertydiv">
+                    @Html.LabelFor(model => Model.StandardParcelIdentifier, new { @class = "control-label col-sm-5 " })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(m => m.StandardParcelIdentifier, new { @class = "form-control ", placeholder = "Standard Parcel Identifier", id = "txtStandardParcelIdentifier" })
+                    </div>
+                </div>
+                <div class="form-group propertydiv">
+                    @Html.LabelFor(model => Model.CrownAllotment, new { @class = "control-label col-sm-5 " })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(m => m.CrownAllotment, new { @class = "form-control ", placeholder = "Crown Allotment", id = "txtCrownAllotment" })
+                    </div>
+                </div>
+                <div class="form-group propertydiv">
+                    @Html.LabelFor(model => Model.VolumeNumber, new { @class = "control-label col-sm-5 " })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(m => m.VolumeNumber, new { @class = "form-control ", placeholder = "Volume Number", id = "txtVolumeNumber" })
+                    </div>
+                </div>
+                <div class="form-group propertydiv">
+                    @Html.LabelFor(model => Model.LineOne, new { @class = "control-label col-sm-5 " })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(m => m.LineOne, new { @class = "form-control ", placeholder = "Line One", id = "txtLineOne" })
+                        @Html.ValidationMessageFor(model => model.LineOne)
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="col-md-4">
+              
+                <div class="form-group propertydiv">
+                    @Html.LabelFor(model => Model.LotOnPlan, new { @class = "control-label col-sm-5 " })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(m => m.LotOnPlan, new { @class = "form-control ", placeholder = "Lot On Plan", id = "txtLotOnPlan" })
+                    </div>
+                </div>
+                <div class="form-group propertydiv">
+                    @Html.LabelFor(model => Model.CouncilPropertyNumber, new { @class = "control-label col-sm-5 " })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(m => m.CouncilPropertyNumber, new { @class = "form-control ", placeholder = "Council Property Number", id = "txtCouncilPropertyNumber" })
+                    </div>
+                </div>
+                <div class="propertydiv">
+                    @Html.EditorFor(model => model.City, "SimpleInput")
+                    @Html.EditorFor(model => model.LineTwo, "SimpleInput")
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="propertydiv">
+                    @Html.EditorFor(model => model.State, "DropDownListSearch", new { selectList = Model.StateAll })
+                    @Html.EditorFor(model => model.Country, "DropDownListSearch", new { selectList = Model.CountryAll })
+                    @Html.EditorFor(model => model.PostCode, "SimpleInput")
+                </div>
+            </div>
+
+            <div class="clearfix"></div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.PrimaryBenchmarkProductID, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.PrimaryBenchmarkProductID, (IEnumerable<SelectListItem>)ViewData["primaryBenchmarkList"], new { @class = "chosen-select-deselect", id = "ddlPrimaryBenchmark" })
+                        @*@Html.ValidationMessageFor(model => model.PrimaryBenchmarkProductID)*@
+                    </div>
+                </div>
+                <div class="form-group" id="DivSecondaryPriceType" style="display: none">
+                    @Html.LabelFor(model => model.SecondaryPriceTypeId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.SecondaryPriceTypeId, (IEnumerable<SelectListItem>)ViewData["priceTypeList"], new { @class = "chosen-select-deselect", id = "ddlSecondaryPriceType" })
+                        @Html.ValidationMessageFor(model => model.SecondaryPriceTypeId)
+                    </div>
+                </div>
+                <div class="form-group ratediv">
+                    @Html.LabelFor(model => model.TermDeposite.MinDeposite, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(model => model.TermDeposite.MinDeposite, new { @class = "form-control", placeholder = "Min Deposit",id="minDepositeId" })
+                        @Html.ValidationMessageFor(model => model.TermDeposite.MinDeposite)
+                    </div>
+                </div>
+                <div class="form-group ratediv">
+                    @Html.LabelFor(model => model.TermDeposite.MaxDeposite, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(model => model.TermDeposite.MaxDeposite, new { @class = "form-control", placeholder = "Max Deposit",id="maxDepositeId" })
+                        @Html.ValidationMessageFor(model=>model.TermDeposite.MaxDeposite)
+                    </div>
+                </div>
+                <div class="form-group ratediv clienttypediv">
+                    @Html.LabelFor(model => model.ClientAccountTypeId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.ClientAccountTypeId, (IEnumerable<SelectListItem>)ViewData["clientTypelist"], new { @class = "chosen-select-deselect", id = "ddlClientType" })
+                        @Html.ValidationMessageFor(model => model.ClientAccountTypeId)
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.SecondaryBenchmarkProductID, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.SecondaryBenchmarkProductID, (IEnumerable<SelectListItem>)ViewData["secondaryBenchmarkList"], new { @class = "chosen-select-deselect", id = "ddlSecondaryBenchmark" })
+                        @*@Html.ValidationMessageFor(model => model.SecondaryBenchmarkProductID)*@
+                    </div>
+                </div>
+                <div class="form-group ratediv">
+                    @Html.LabelFor(model => model.TermDeposite.ProviderSettlementType, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(model => model.TermDeposite.ProviderSettlementType, new { @class = "form-control", placeholder = "Provider Settlement Type"})
+                    </div>
+                </div>
+                <div class="form-group ratediv">
+                    @Html.LabelFor(model => model.TermDeposite.ProviderRateBrokerage, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.TextBoxFor(model => model.TermDeposite.ProviderRateBrokerage, new { @class = "form-control", placeholder = "Provider Rate Brokerage" })
+                        @Html.ValidationMessageFor(model => model.TermDeposite.ProviderRateBrokerage)
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group" id="DivPriceType" style="display: none">
+                    @Html.LabelFor(model => model.PriceTypeId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.PriceTypeId, (IEnumerable<SelectListItem>)ViewData["priceTypeList"], new { @class = "chosen-select-deselect", id = "ddlPriceType" })
+                        @Html.ValidationMessageFor(model => model.PriceTypeId)
+                    </div>
+                </div>
+                <div class="form-group ratediv">
+                    @Html.LabelFor(model => model.TermDeposite.InstitutionId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(model => model.TermDeposite.InstitutionId, (IEnumerable<SelectListItem>)ViewData["institutionIdList"], new { @class = "chosen-select-deselect",id="institutionId" })
+                        @Html.ValidationMessageFor(model => model.TermDeposite.InstitutionId)
+                    </div>
+                </div>
+                <div class="form-group ratediv">
+                    @Html.LabelFor(model => model.TermDeposite.Term, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(model => model.TermDeposite.Term, (IEnumerable<SelectListItem>)ViewData["termList"], new { @class = "chosen-select-deselect",id="termId" })
+                        @Html.ValidationMessageFor(model => model.TermDeposite.Term)
+                    </div>
+                </div>
+                <div class="form-group ratediv">
+                    @Html.LabelFor(model => model.TermDeposite.BrokerId, new { @class = "control-label col-sm-5" })
+                    <div class="col-sm-7">
+                        @Html.DropDownListFor(m => m.TermDeposite.BrokerId, (IEnumerable<SelectListItem>)ViewData["brokerlist"], new { @class = "chosen-select-deselect", id = "brokerId" })
+                        @Html.ValidationMessageFor(model => model.TermDeposite.BrokerId)
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <div class="col-md-12">
+                        @Html.LabelFor(model => model.Description, new { @class = "control-label" })
+                    </div>
+                    <div class="col-md-12">
+                        @Html.TextAreaFor(model => model.Description, new { @class = "form-control", placeholder = "Description", id = "txtDescription", @style = "resize: none;" })
+                        @Html.ValidationMessageFor(model => model.Description)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer col-sm-12">
+        <button id="btnClose" type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Update</button>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-12">
+            <div class="alert alert-success alert-dismissable">
+                <strong>Success! </strong><span class="has-success"></span>
+            </div>
+            <div id="error" class="alert alert-danger alert-dismissable" style="display: none;">
+                <strong>Error! </strong><span class="has-error"></span>
+            </div>
+            <div class="busy">
+                <img id="imgLoader" src="~/Images/Processing.gif" />
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    var securityCode;
+    $(document).ready(function () {
+        securityCode = $("#Code").val();
+        $.validator.setDefaults({ ignore: '.ignore' });
+        $('#APIRCode').inputmask({
+            mask: 'aaa9999aa'
+        });
+        var config = {
+            '.chosen-select': {},
+            '.chosen-select-deselect': { allow_single_deselect: true, search_contains: true },
+            '.chosen-select-no-single': { disable_search_threshold: 10 },
+            '.chosen-select-no-results': { no_results_text: 'Oops, nothing found!' },
+            '.chosen-select-width': { width: "95%" }
+        };
+        for (var selector in config) {
+            $(selector).chosen(config[selector]);
+        }
+
+        $('.input-group.date').datepicker({
+            todayBtn: "linked",
+            keyboardNavigation: false,
+            forceParse: false,
+            calendarWeeks: true,
+            autoclose: true,
+            format: "dd/mm/yyyy",
+            todayHighlight: true
+        });
+
+        $('#AssetClassId').val(@Html.Raw(Json.Encode(ViewData["assetClassIds"])));
+        $('#AssetClassId').trigger("chosen:updated");
+
+        onBenchMark();
+
+        $("#ddlPrimaryBenchmark").change(function() {
+            onBenchMark();
+        });
+
+        $("#ddlSecondaryBenchmark").change(function() {
+            onBenchMark();
+        });
+
+        var optionDetail = '@Model.OptionsDetail';
+        var securityType = '@Model.SecurityType';
+        if ((optionDetail != null && optionDetail != '') || (securityType.toLocaleLowerCase() == 'option')) {
+
+
+            $('#divOptions').show();
+            $('#ddlOptionProductType').attr('disabled', false).trigger("chosen:updated");
+            $('#ddlOptionDetailMarketId').attr('disabled', false).trigger("chosen:updated");
+            $('#ddlUnderlyingType').attr('disabled', false).trigger("chosen:updated");
+            //if ($('#ddlUnderlyingType').val() == "") {
+            //$('#ddlUnderlying').attr('disabled', true).trigger("chosen:updated");
+            //}
+            //else {
+            $('#ddlUnderlying').attr('disabled', false).trigger("chosen:updated");
+            //}
+            $('#TxtBusDate').attr('disabled', false);
+            $('#TxtExpDate').attr('disabled', false);
+        } else {
+
+
+            $('#divOptions').hide();
+            $('#ddlOptionProductType').attr('disabled', true).trigger("chosen:updated");
+            $('#ddlOptionDetailMarketId').attr('disabled', true).trigger("chosen:updated");
+            $('#ddlUnderlyingType').attr('disabled', true).trigger("chosen:updated");
+            //if ($('#ddlUnderlyingType').val() == "") {
+            //    $('#ddlUnderlying').attr('disabled', true).trigger("chosen:updated");
+            //}
+            //else {
+            //    $('#ddlUnderlying').attr('disabled', false).trigger("chosen:updated");
+            //}
+            $('#TxtBusDate').attr('disabled', true);
+            $('#TxtExpDate').attr('disabled', true);
+        }
+
+        //$('#ddlUnderlyingType').change(function () {
+        //    $('#ddlUnderlying').select2("val", "");
+        //    if ($(this).val() == "") {
+        //        $('#ddlUnderlying').attr('disabled', true).trigger("chosen:updated");
+        //    }
+        //    else {
+        //        $('#ddlUnderlying').attr('disabled', false).trigger("chosen:updated");
+        //    }
+        //});
+        $("#ddlUnitisedId, #ddlSecurityCategoryId").on("change", function() {
+            securityCode = $("#Code").val();
+            if ($("#ddlUnitisedId").val() == "1") {
+                $("#ddlSecurityCategoryId").addClass('ignore');
+                $("#Code").attr('disabled', false);
+                $("#Code").val(securityCode);
+                $("#ddlSecurityCategoryId option").attr('disabled', 'disabled').trigger("chosen:updated");
+                $("#ddlSecurityTypeId option").removeAttr('disabled').trigger("chosen:updated");
+                $("#ddlSecurityCategoryId option[value='6']").removeAttr('disabled').trigger("chosen:updated");
+                $("#ddlSecurityCategoryId option[value='20']").removeAttr('disabled').trigger("chosen:updated");
+                $("#ddlSecurityCategoryId option[value='34']").removeAttr('disabled').trigger("chosen:updated");
+                if ($("#ddlSecurityCategoryId").val() == '6' || $("#ddlSecurityCategoryId").val() == '20' || $("#ddlSecurityCategoryId").val() == '34') {
+
+                } else {
+                    $('#ddlSecurityCategoryId').val('');
+                    $('#ddlSecurityCategoryId').trigger("chosen:updated");
+                }
+
+            } else if ($("#ddlUnitisedId").val() == "2") {
+                $("#Code").val(securityCode);
+                $("#ddlSecurityCategoryId").addClass('ignore');
+                $("#Code").attr('disabled', false);
+                $("#ddlSecurityCategoryId option").removeAttr('disabled').trigger("chosen:updated");
+                $("#ddlSecurityTypeId option").removeAttr('disabled').trigger("chosen:updated");
+
+            } else {
+                if ($("#ddlUnitisedId").val() == "3") {
+                    $("#ddlSecurityCategoryId").removeClass('ignore');
+                    $("#Code").attr('disabled', true);
+                    $("#ddlSecurityTypeId option").attr('disabled', 'disabled').trigger("chosen:updated");
+                    $("#ddlSecurityTypeId option[value='6']").removeAttr('disabled').trigger("chosen:updated");
+                    $("#ddlSecurityTypeId option[value='32']").removeAttr('disabled').trigger("chosen:updated");
+
+                    $("#ddlSecurityCategoryId option").attr('disabled', 'disabled').trigger("chosen:updated");
+                    $("#ddlSecurityCategoryId option[value='22']").removeAttr('disabled').trigger("chosen:updated");
+                    $("#ddlSecurityCategoryId option[value='35']").removeAttr('disabled').trigger("chosen:updated");
+                    $("#ddlSecurityCategoryId option[value='36']").removeAttr('disabled').trigger("chosen:updated");
+                    if ($("#ddlSecurityCategoryId").val() == '22' || $("#ddlSecurityCategoryId").val() == '35' || $("#ddlSecurityCategoryId").val() == '36') {
+                        if ($("#ddlSecurityCategoryId").val() == '35') {
+                            $("#termId").val("").trigger("chosen:updated");
+                            $("#termId option").removeAttr('disabled').trigger("chosen:updated");
+                            $("#termId option").attr('disabled', 'disabled').trigger("chosen:updated");
+                            $("#termId option[value='AtCall']").removeAttr('disabled').trigger("chosen:updated");
+                        }
+                        else if ($("#ddlSecurityCategoryId").val() == '36') {
+                            $("#ddlSecurityTypeId option").attr('disabled', 'disabled').trigger("chosen:updated");
+                            $("#ddlSecurityTypeId option[value='32']").removeAttr('disabled').trigger("chosen:updated");
+                            $("#termId").val("").trigger("chosen:updated");
+                            $("#termId option").removeAttr('disabled').trigger("chosen:updated");
+                            $("#termId option").attr('disabled', 'disabled').trigger("chosen:updated");
+                            $("#termId option[value='CMA']").removeAttr('disabled').trigger("chosen:updated");
+                        }
+                        else {
+                            $("#termId").val("").trigger("chosen:updated");
+                            $("#termId option").removeAttr('disabled').trigger("chosen:updated");
+                            $("#termId option[value='AtCall']").attr('disabled', 'disabled').trigger("chosen:updated");
+                            $("#termId option[value='CMA']").attr('disabled', 'disabled').trigger("chosen:updated");
+                        }
+                    } else {
+                        $("#termId").val("").trigger("chosen:updated");
+                        $("#termId option").removeAttr('disabled').trigger("chosen:updated");
+                        $('#ddlSecurityCategoryId').val('');
+                        $('#ddlSecurityCategoryId').trigger("chosen:updated");
+                    }
+                    if ($("#ddlSecurityTypeId").val() == '6' || $("#ddlSecurityTypeId").val() == '32') {
+
+                    } else {
+                        $('#ddlSecurityTypeId').val('');
+                        $('#ddlSecurityTypeId').trigger("chosen:updated");
+                    }
+                    
+                    if ($("#ddlSecurityCategoryId").val() == '22' || $("#ddlSecurityCategoryId").val() == '35') {
+                        UpdateCode();
+                    } else {
+                        $("#Code").attr('disabled', false);
+                        if ($("#ddlSecurityCategoryId").val() != '36') {
+                            $("#Code").val(securityCode);
+                        }
+                        
+                    }
+                    
+                } else {
+                    $("#termId").val("").trigger("chosen:updated");
+                    $("#termId option").removeAttr('disabled').trigger("chosen:updated");
+                    $("#ddlSecurityCategoryId").addClass('ignore');
+                    $("#Code").attr('disabled', false);
+                    $("#Code").val(securityCode);
+                    $("#ddlSecurityCategoryId option").removeAttr('disabled').trigger("chosen:updated");
+                    $("#ddlSecurityTypeId option").removeAttr('disabled').trigger("chosen:updated");
+                }
+            }
+    
+            if ($("#ddlUnitisedId").val() == "1" && $("#ddlSecurityCategoryId").val() == "20") {
+                $.validator.setDefaults({ ignore: '.ignore' });
+                $('#txtLineOne').removeClass('ignore');
+                $(".propertydiv").show();
+                $('#institutionId,#minDepositeId,#maxDepositeId,#termId,#brokerId').removeClass('ignore');
+                $('#institutionId,#minDepositeId,#maxDepositeId,#termId,#brokerId').addClass('ignore');
+                $(".ratediv").hide();
+
+            } else {
+               
+                $.validator.setDefaults({ ignore: '.ignore' });
+                if ($("#ddlUnitisedId").val() == "3") {
+                    if ($("#ddlSecurityCategoryId").val() == "36") {
+                        $('#institutionId, #termId, #brokerId, #minDepositeId, #maxDepositeId').removeClass('ignore');
+                        $(' #minDepositeId, #maxDepositeId,#brokerId').addClass('ignore');
+                        $('#institutionId, #termId').removeClass('ignore');
+                    } else {
+                        $('#institutionId,#minDepositeId,#maxDepositeId,#termId,#brokerId').removeClass('ignore');
+                    }               
+                    $(".ratediv").show();
+                    
+                    if ($("#ddlSecurityCategoryId").val() == '35') {
+                        $(".clienttypediv").show();
+                    } else {
+                        $(".clienttypediv").hide();
+                    }
+                } else {
+                    $('#institutionId,#minDepositeId,#maxDepositeId,#termId,#brokerId').addClass('ignore');
+                    $('#institutionId,#minDepositeId,#maxDepositeId,#termId,#brokerId').addClass('ignore');
+                    $(".ratediv").hide();
+                }
+                $('#txtLineOne').addClass('ignore');
+                $(".propertydiv").hide();
+
+            }
+            ToggleOption();
+        });
+        $('#ddlUnderlying').change(function() {
+           
+            if ($('#ddlUnderlying option:selected').text().toLowerCase().indexOf("- security") > 0) {
+                $('#ddlUnderlyingType').val('Security');
+            }
+            if ($('#ddlUnderlying option:selected').text().toLowerCase().indexOf("- product") > 0) {
+                $('#ddlUnderlyingType').val('Index');
+            }
+        });
+        $("#Code").change(function() {
+            securityCode = $(this).val();
+        });
+        $("#ddlSecurityTypeId").change(function() {
+
+            ToggleOption();
+        });
+
+        // Numbers only
+        $("#txtContractSize, #txtStrikePrice").keydown(function(event) {
+            if (event.shiftKey == true) {
+                event.preventDefault();
+            }
+
+            if ((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105) || event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 37 || event.keyCode == 39 || event.keyCode == 46 || event.keyCode == 190 || event.keyCode == 110) {
+
+            } else {
+                event.preventDefault();
+            }
+
+            if ($(this).val().indexOf('.') !== -1 && (event.keyCode == 190 || event.keyCode == 110))
+                event.preventDefault();
+        });
+
+        $("#ddlUnderlying").select2({
+            allowClear: true,
+            placeholder: "Search Securities / Products of type Index",
+            minimumInputLength: 1,
+            ajax: {
+                url: '@Url.Content("~/Investment/GetFilteredUnderlyingList")',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        searchString: params.term,
+                        searchunderlyingType: $('#ddlUnderlyingType option:selected').text()
+                    };
+                },
+                processResults: function (data) {
+
+                    return {
+                        results: $.map(data.data.UnderlyingList, function (item) {
+                            return { results: item, id: item.Id, text: item.Name };
+                        })
+                    };
+                },
+                cache: true
+            }
+        });
+        $("#institutionId,#termId,#brokerId,#maxDepositeId").change(function () {
+            if ($("#ddlSecurityCategoryId").val() != "36") {
+                UpdateCode();
+            }
+        });
+        if ($("#ddlUnitisedId").val() == "1" && $("#ddlSecurityCategoryId").val() == "20") {
+            $('.propertydiv').show();
+           
+
+        } else {
+            $('#txtLineOne').addClass('ignore');
+            $('.propertydiv').hide();
+           
+        }
+        if ($("#ddlUnitisedId").val() == "1") {
+            $("#ddlSecurityCategoryId").addClass('ignore');
+            $("#Code").attr('disabled', false);
+            $("#ddlSecurityCategoryId option").attr('disabled', 'disabled').trigger("chosen:updated");
+            $("#ddlSecurityCategoryId option[value='6']").removeAttr('disabled').trigger("chosen:updated");
+            $("#ddlSecurityCategoryId option[value='20']").removeAttr('disabled').trigger("chosen:updated");
+            $("#ddlSecurityCategoryId option[value='34']").removeAttr('disabled').trigger("chosen:updated");
+            $('#institutionId,#minDepositeId,#maxDepositeId,#termId,#brokerId').removeClass('ignore');
+            $('#institutionId,#minDepositeId,#maxDepositeId,#termId,#brokerId').addClass('ignore');
+            $(".ratediv").hide();
+        }
+        else if ($("#ddlUnitisedId").val() == "2") {
+            $("#ddlSecurityCategoryId").addClass('ignore');
+            $("#Code").attr('disabled', false);
+            $("#ddlSecurityCategoryId option").removeAttr('disabled').trigger("chosen:updated");
+            $("#ddlSecurityTypeId option").removeAttr('disabled').trigger("chosen:updated");
+            $('#institutionId,#minDepositeId,#maxDepositeId,#termId,#brokerId').removeClass('ignore');
+            $('#institutionId,#minDepositeId,#maxDepositeId,#termId,#brokerId').addClass('ignore');
+            $(".ratediv").hide();
+
+        } else {
+            if ($("#ddlUnitisedId").val() == "3") {
+                $("#ddlSecurityCategoryId").removeClass('ignore');
+             
+                $("#Code").attr('disabled', true);
+                $("#ddlSecurityTypeId option").attr('disabled', 'disabled').trigger("chosen:updated");
+                $("#ddlSecurityTypeId option[value='6']").removeAttr('disabled').trigger("chosen:updated");
+                $("#ddlSecurityTypeId option[value='32']").removeAttr('disabled').trigger("chosen:updated");
+
+                $("#ddlSecurityCategoryId option").attr('disabled', 'disabled').trigger("chosen:updated");
+                $("#ddlSecurityCategoryId option[value='22']").removeAttr('disabled').trigger("chosen:updated");
+                $("#ddlSecurityCategoryId option[value='35']").removeAttr('disabled').trigger("chosen:updated");
+                $("#ddlSecurityCategoryId option[value='36']").removeAttr('disabled').trigger("chosen:updated");
+                $('#institutionId,#minDepositeId,#maxDepositeId,#termId,#brokerId').removeClass('ignore');
+                $(".ratediv").show();
+                if ($("#ddlSecurityCategoryId").val() == '35') {
+                   
+                    $("#termId option").removeAttr('disabled').trigger("chosen:updated");
+                    $("#termId option").attr('disabled', 'disabled').trigger("chosen:updated");
+                    $("#termId option[value='AtCall']").removeAttr('disabled').trigger("chosen:updated");
+                        $(".clienttypediv").show();
+                   
+                } else if ($("#ddlSecurityCategoryId").val() == '36') {
+                    $("#Code").attr('disabled', false);
+                    $("#ddlSecurityTypeId option").attr('disabled', 'disabled').trigger("chosen:updated");
+                    $("#ddlSecurityTypeId option[value='32']").removeAttr('disabled').trigger("chosen:updated");
+                    $('#institutionId,#minDepositeId,#maxDepositeId,#termId,#brokerId').removeClass('ignore');
+                    $('#minDepositeId,#maxDepositeId,#brokerId').addClass('ignore');
+                    $("#termId option").removeAttr('disabled').trigger("chosen:updated");
+                    $("#termId option").attr('disabled', 'disabled').trigger("chosen:updated");
+                    $("#termId option[value='CMA']").removeAttr('disabled').trigger("chosen:updated");
+                    $(".clienttypediv").hide();
+                }
+                else {
+                    $(".clienttypediv").hide();
+                    $("#termId option").removeAttr('disabled').trigger("chosen:updated");
+                    $("#termId option[value='AtCall']").attr('disabled', 'disabled').trigger("chosen:updated");
+                    $("#termId option[value='CMA']").attr('disabled', 'disabled').trigger("chosen:updated");
+                }
+            } else {
+                $("#ddlSecurityCategoryId").addClass('ignore');
+                $("#Code").attr('disabled', false);
+                $("#ddlSecurityCategoryId option").removeAttr('disabled').trigger("chosen:updated");
+                $("#ddlSecurityTypeId option").removeAttr('disabled').trigger("chosen:updated");
+                $('#institutionId,#minDepositeId,#maxDepositeId,#termId,#brokerId').addClass('ignore');
+                $(".ratediv").hide();
+            }
+        }
+        ToggleOption();
+    });
+    function UpdateCode() {
+        
+        if ($("#institutionId").val() != "" && $("#ddlSecurityCategoryId").val() != null && $("#termId").val() != '' && $("#brokerId").val() != '' && $("#maxDepositeId").val() != '') {
+            var termdeposit = $("#ddlSecurityCategoryId ").val();
+            if ($("#ddlSecurityCategoryId").val() == '35' ) {
+                code = ($("#institutionId").val() != "" ? $("#institutionId option:selected").text().split('|')[1].trim().split(' ').join('') + '_' : '') + ($("#ddlSecurityCategoryId").val() != null ? (termdeposit == '22' ? 'TD_' : 'AtCall_') : '')  + ($("#brokerId").val() != '' ? $("#brokerId option:selected").text().split('|')[0].trim() + '_' : '') + ($("#maxDepositeId").val() != '' ? Math.floor($("#maxDepositeId").val()) : '');
+            } else {
+                code = ($("#institutionId").val() != "" ? $("#institutionId option:selected").text().split('|')[1].trim().split(' ').join('') + '_' : '') + ($("#ddlSecurityCategoryId").val() != null ? (termdeposit == '22' ? 'TD_' : 'AtCall_') : '') + ($("#termId").val() != '' ? $("#termId").val().replace(' ', '') + '_' : '') + ($("#brokerId").val() != '' ? $("#brokerId option:selected").text().split('|')[0].trim() + '_' : '') + ($("#maxDepositeId").val() != '' ? Math.floor($("#maxDepositeId").val()) : '');
+
+            }
+
+            $("#Code").val(code);
+        } else {
+            $("#Code").val(securityCode);
+        }
+    }
+    function ToggleOption() {
+        if ($('#ddlSecurityTypeId option:selected').text().toLocaleLowerCase() == 'option') {
+            $('#divOptions').slideDown("slow");
+            $('#ddlOptionProductType').attr('disabled', false).trigger("chosen:updated");
+            $('#ddlOptionDetailMarketId').attr('disabled', false).trigger("chosen:updated");
+            $('#ddlUnderlyingType').attr('disabled', false).trigger("chosen:updated");
+            $('#ddlUnderlying').attr('disabled', false).trigger("chosen:updated");
+            $('#TxtBusDate').attr('disabled', false);
+            $('#TxtExpDate').attr('disabled', false);
+        }
+        else {
+
+            $('#divOptions').slideUp("slow");
+            $('#ddlOptionProductType').attr('disabled', true).trigger("chosen:updated");
+            $('#ddlOptionDetailMarketId').attr('disabled', true).trigger("chosen:updated");
+            $('#ddlUnderlyingType').attr('disabled', true).trigger("chosen:updated");
+            $('#ddlUnderlying').attr('disabled', true).trigger("chosen:updated");
+            $('#TxtBusDate').attr('disabled', true);
+            $('#TxtExpDate').attr('disabled', true);
+        }
+
+        $('#SecurityEditForm').find("[data-valmsg-replace]")
+            .removeClass("field-validation-error")
+            .addClass("field-validation-valid")
+            .empty();
+    }
+    function onBenchMark() {
+        if ($("#ddlPrimaryBenchmark").val() > 0) {
+            $("#DivPriceType").show();
+            $('#ddlPriceType').attr("disabled", false);
+            $("#ddlPriceType").trigger("chosen:updated");
+        } else {
+            $("#DivPriceType").hide();
+            $('#ddlPriceType').val('');
+            $('#ddlPriceType').trigger("chosen:updated");
+            $('#ddlPriceType').attr("disabled", true);
+            $("#ddlPriceType").trigger("chosen:updated");
+        }
+
+        if ($("#ddlSecondaryBenchmark").val() > 0) {
+            $("#DivSecondaryPriceType").show();
+            $('#ddlSecondaryPriceType').attr("disabled", false);
+            $("#ddlSecondaryPriceType").trigger("chosen:updated");
+        } else {
+            $("#DivSecondaryPriceType").hide();
+            $('#ddlSecondaryPriceType').val('');
+            $('#ddlSecondaryPriceType').trigger("chosen:updated");
+            $('#ddlSecondaryPriceType').attr("disabled", true);
+            $("#ddlSecondaryPriceType").trigger("chosen:updated");
+        }
+    }
+</script>
